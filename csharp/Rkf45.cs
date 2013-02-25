@@ -21,9 +21,11 @@ C++ version by John Burkardt.
 */
 
 /* 
+ 
    The coefficients used in this solver are from Fehlberg's 1969
    publication (NASA TR R-315) although many better coefficient sets have
    been found later.  See file rkfsolvers.txt.
+
 */
 
 
