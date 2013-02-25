@@ -21,11 +21,9 @@ C++ version by John Burkardt.
 */
 
 /* 
- 
    The coefficients used in this solver are from Fehlberg's 1969
    publication (NASA TR R-315) although many better coefficient sets have
    been found later.  See file rkfsolvers.txt.
-
 */
 
 
@@ -132,20 +130,35 @@ class Rkf45 {
        Output, double S[NEQN], the estimate of the solution at T+H.
        */
   {
+
+    /*
+     * TODO:
+     * A Description of what is going on with each variable. 
+     * Some Assertions?
+     * Simplification?
+     */
+
     double ch;
+
     ch = h / 4.0;
+    
     for (int i = 0; i < neqn; i++ )
       f5[i] = y[i] + ch * yp[i];
+    
     f ( t + ch, f5, f1 );
+
+   
 
     ch = 3.0 * h / 32.0;
     for (int i = 0; i < neqn; i++ )
       f5[i] = y[i] + ch * ( yp[i] + 3.0 * f1[i] );
+    
     f ( t + 3.0 * h / 8.0, f5, f2 );
 
     ch = h / 2197.0;
     for (int i = 0; i < neqn; i++ )
       f5[i] = y[i] + ch * ( 1932.0 * yp[i] + ( 7296.0 * f2[i] - 7200.0 * f1[i] ) );
+    
     f ( t + 12.0 * h / 13.0, f5, f3 );
 
     ch = h / 4104.0;
@@ -176,180 +189,14 @@ class Rkf45 {
 
   public int r8_rkf45(double[] y, ref double t, double tout, 
       ref double relerr, double abserr, int flag )
-
-    /******************************************************************************/
-    /*
-       Purpose:
-
-       R8_RKF45 carries out the Runge-Kutta-Fehlberg method.
-
-       Discussion:
-
-       This version of the routine uses DOUBLE real arithmetic.
-
-       This routine is primarily designed to solve non-stiff and mildly stiff
-       differential equations when derivative evaluations are inexpensive.
-       It should generally not be used when the user is demanding
-       high accuracy.
-
-       This routine integrates a system of NEQN first-order ordinary differential
-       equations of the form:
-
-       dY(i)/dT = F(T,Y(1),Y(2),...,Y(NEQN))
-
-       where the Y(1:NEQN) are given at T.
-
-       Typically the subroutine is used to integrate from T to TOUT but it
-       can be used as a one-step integrator to advance the solution a
-       single step in the direction of TOUT.  On return, the parameters in
-       the call list are set for continuing the integration.  The user has
-       only to call again (and perhaps define a new value for TOUT).
-
-       Before the first call, the user must 
-
-     * supply the subroutine F(T,Y,YP) to evaluate the right hand side;
-     and declare F in an EXTERNAL statement;
-
-     * initialize the parameters:
-     NEQN, Y(1:NEQN), T, TOUT, RELERR, ABSERR, FLAG.
-     In particular, T should initially be the starting point for integration,
-     Y should be the value of the initial conditions, and FLAG should 
-     normally be +1.
-
-     Normally, the user only sets the value of FLAG before the first call, and
-     thereafter, the program manages the value.  On the first call, FLAG should
-     normally be +1 (or -1 for single step mode.)  On normal return, FLAG will
-     have been reset by the program to the value of 2 (or -2 in single 
-     step mode), and the user can continue to call the routine with that 
-     value of FLAG.
-
-     (When the input magnitude of FLAG is 1, this indicates to the
-     program that it is necessary to do some initialization work.  An
-     input magnitude of 2 lets the program know that that
-     initialization can be skipped, and that useful information was
-     computed earlier.)  CHANGE: The setup implied by flag=1 should be
-     done by solver object construction (initialization).
-
-     The routine returns with all the information needed to continue
-     the integration.  If the integration reached TOUT, the user need only
-     define a new TOUT and call again.  In the one-step integrator
-     mode, returning with FLAG = -2, the user must keep in mind that 
-     each step taken is in the direction of the current TOUT.  Upon 
-     reaching TOUT, indicated by the output value of FLAG switching to 2,
-     the user must define a new TOUT and reset FLAG to -2 to continue 
-     in the one-step integrator mode.
-
-     In some cases, an error or difficulty occurs during a call.  In that case,
-     the output value of FLAG is used to indicate that there is a problem
-     that the user must address.  These values include:
-
-     * 3, integration was not completed because the input value of RELERR, the 
-     relative error tolerance, was too small.  RELERR has been increased 
-     appropriately for continuing.  If the user accepts the output value of
-     RELERR, then simply reset FLAG to 2 and continue.  CHANGE: Warning.
-
-     * 4, integration was not completed because more than MAXNFE derivative 
-    evaluations were needed.  This is approximately (MAXNFE/6) steps.
-    The user may continue by simply calling again.  The function counter 
-    will be reset to 0, and another MAXNFE function evaluations are allowed. 
-    CHANGE: Warning.
-
-    * 5, integration was not completed because the solution vanished, 
-    making a pure relative error test impossible.  The user must use 
-      a non-zero ABSERR to continue.  Using the one-step integration mode 
-      for one step is a good way to proceed.  CHANGE: Warning.
-
-        * 6, integration was not completed because the requested accuracy 
-          could not be achieved, even using the smallest allowable stepsize. 
-          The user must increase the error tolerances ABSERR or RELERR before
-          continuing.  It is also necessary to reset FLAG to 2 (or -2 when 
-              the one-step integration mode is being used).  The occurrence of 
-          FLAG = 6 indicates a trouble spot.  The solution is changing 
-          rapidly, or a singularity may be present.  It often is inadvisable 
-          to continue.  CHANGE: Exception.
-
-          * 7, it is likely that this routine is inefficient for solving
-          this problem.  Too much output is restricting the natural stepsize
-          choice.  The user should use the one-step integration mode with 
-          the stepsize determined by the code.  If the user insists upon 
-          continuing the integration, reset FLAG to 2 before calling 
-          again.  Otherwise, execution will be terminated.  
-
-          * 8, invalid input parameters, indicates one of the following:
-          NEQN <= 0;
-  T = TOUT and |FLAG| /= 1;
-  RELERR < 0 or ABSERR < 0;
-  FLAG == 0  or FLAG < -2 or 8 < FLAG.
-    CHANGE: Exception.
-
-    Licensing:
-
-    This code is distributed under the GNU LGPL license. 
-
-    Modified:
-
-    27 March 2004
-
-    Author:
-
-    Original FORTRAN77 version by Herman Watts, Lawrence Shampine.
-    C++ version by John Burkardt.
-
-    Reference:
-
-    Erwin Fehlberg,
-          Low-order Classical Runge-Kutta Formulas with Stepsize Control,
-          NASA Technical Report R-315, 1969.
-
-            Lawrence Shampine, Herman Watts, S Davenport,
-          Solving Non-stiff Ordinary Differential Equations - The State of the Art,
-          SIAM Review,
-          Volume 18, pages 376-411, 1976.
-
-            Parameters:
-
-            Input, external F, a user-supplied subroutine to evaluate the
-            derivatives Y'(T), of the form:
-
-            void f ( double t, double y[], double yp[] )
-
-            Input, int NEQN, the number of equations to be integrated.
-
-            Input/output, double Y[NEQN], the current solution vector at T.
-
-            Input/output, double YP[NEQN], the derivative of the current
-            solution vector at T.  The user should not set or alter this
-            information!  CHANGE: This looks like a candidate for being a
-            field, holding in-between-calls information, rather than an
-            input/output parameter.  DONE.
-
-            Input/output, ref double T, the current value of the independent
-            variable.  CHANGE: This should be a ref parameter.
-
-            Input, double TOUT, the output point at which solution is desired.  
-            TOUT = T is allowed on the first call only, in which case the routine
-            returns with FLAG = 2 if continuation is possible.
-
-            Input, ref double RELERR, double ABSERR, the relative and absolute error 
-            tolerances for the local error test.  At each step the code requires:
-            abs ( local error ) <= RELERR * abs ( Y ) + ABSERR
-            for each component of the local error and the solution vector Y.
-              RELERR cannot be "too small".  If the routine believes RELERR has been
-                set too small, it will reset RELERR to an acceptable value and return
-                immediately for user action.
-                CHANGE: The RELERR should be a ref parameter.
-
-                Input, int FLAG, indicator for status of integration. On the first
-                call, set FLAG to +1 for normal use, or to -1 for single step
-                mode.  On subsequent continuation steps, FLAG should be +2, or -2
-                for single step mode.  CHANGE: Keep this flag to begin with, but
-                  do not consider the initialization case (+1 and -1).
-
-                    Output, int RKF45_D, indicator for status of integration.  A value of 2 
-                      or -2 indicates normal progress, while any other value indicates a 
-                      problem that should be addressed.
-                      */
-{
+  {
+  /* TODO:
+   * Describe each variable. Delete some of them.
+   *
+   *
+   *
+   *
+   */
   double ae;
   double dt;
   double ee;
@@ -1001,60 +848,6 @@ class CalculationSpecifications {
 
   static double r(double t) { 
     return interestrate;    // Fixed interest rate
-    //return rFsa(t);            // Finanstilsynet's rate curve
-  }
-
-  // The Danish FSA yield curve (Finanstilsynets rentekurve).
-  // Data from 2011-11-16 
-  static readonly double[] 
-    ts = new double[] { 
-      0.25, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 
-        15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30 },
-       rs = new double[] { 
-         1.146677033, 1.146677033, 1.146677033, 1.340669678, 1.571952911, 1.803236144, 
-         2.034519377, 2.26580261, 2.497085843, 2.584085843, 2.710085843, 2.805085843, 
-         2.871485843, 2.937885843, 3.004285843, 3.070685843, 3.137085843, 3.136485843, 
-         3.135885843, 3.135285843, 3.134685843, 3.134085843, 3.113185843, 3.092285843, 
-         3.071385843, 3.050485843, 3.029585843, 3.008685843, 2.987785843, 2.966885843, 
-         2.945985843, 2.925085843
-       };
-
-  // Get discount rate at time t by linear interpolation into (ts,rs); then
-  // compute the instantaneous forward rate as described in 
-  // https://wiki.actulus.dk/Documentation-CalculationPlatform-YieldCurves.ashx
-
-  // This method uses binary search, which is needlessly slow because
-  // the t values are monotonically decreasing.  Hence it would be
-  // faster to keep the most recent index m into the ts/rs arrays and
-  // decrement m only when t < ts[m].  It would also be easier to get
-  // wrong, because it relies on many assumptions, so for now we stick
-  // to the binary search.
-
-  static double rFsa(double t) { 
-    // Requires ts non-empty and elements strictly increasing.
-    int last = ts.Length-1;
-    if (t <= ts[0])
-      return Math.Log(1 + rs[0]/100);
-    else if (t >= ts[last])
-      return Math.Log(1 + rs[last]/100);
-    else {
-      int a = 0, b = last;
-      // Now a < b (bcs. ts must have more than 1 element) and ts[a] < t < ts[b]
-      while (a+1 < b) {
-        // Now a < b and ts[a] <= t < ts[b]
-        int i = (a+b)/2;
-        if (ts[i] <= t)
-          a = i;
-        else // t < ts[i]
-          b = i;
-      }
-      // Now a+1>=b and ts[a] <= t < ts[b]; so a!=b and hence a+1 == b <= last
-      int m = a;
-      double tm = ts[m], tm1 = ts[m+1];
-      double rm = rs[m] / 100, rm1 = rs[m+1] / 100;
-      double Rt = (rm * (tm1 - t) + rm1 * (t - tm)) / (tm1 - tm);
-      return Math.Log(1 + Rt) + t / (tm1 - tm) * (rm1 - rm) / (1 + Rt);
-    }
   }
 
   // Payment stream in state 0 (alive)
@@ -1084,26 +877,7 @@ class CalculationSpecifications {
     return 0.0;
   }
 
-  // The dV0/dt function as used in Thiele:
-
-  static double dV0(double t, double V0) {
-    return r(t) * V0 - b_0(t) - mu_01(t) * (0 - V0 + bj_01(t));
-  }
-
-  static double dV0(double t, double V0, double V1) {
-    return r(t) * V0 - b_0(t) - mu_01(t) * (0 - V0 + bj_01(t));
-  }
-
-  static double dV1(double t, double V0, double V1) {
-    return 0.0;
-  }
-
-  static double[] dV(double t, double[] V) {
-    double dV0 = r(t) * V[0] - b_0(t) - mu_01(t) * (V[1] - V[0] + bj_01(t));
-    double dV1 = 0;
-    return new double[] { dV0, dV1 };
-  }
-
+  //Print
   static void Print(double[][] result) {
     for (int y=0; y<result.Length; y++) {
       Console.Write("{0,3}:", y);
