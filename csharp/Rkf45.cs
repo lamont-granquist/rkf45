@@ -18,24 +18,26 @@ class Rkf45 {
                                                          //f_swap : swap space,
                                                          //s1     : Solution
                                                          //s2     : Alternative solution
+
   private double relerr, abserr;                         //The relative and absolute error used in equations.
 
   public Rkf45(Action<double, double[], double[]> f, int neqn) {
     this.f = f;
     this.neqn = neqn;
+    this.s1 = new double[neqn];
+    this.yp = new double[neqn];
 
     allocate_equation_space();
   }
 
   private void allocate_equation_space() {
-    this.yp = new double[neqn];
+    //Disse er temp for solve metoden.
     this.f1 = new double[neqn];
     this.f2 = new double[neqn];
     this.f3 = new double[neqn];
     this.f4 = new double[neqn];
     this.f5 = new double[neqn];
     this.f_swap = new double[neqn];
-    this.s1 = new double[neqn];
     this.s2 = new double[neqn];
   }
 
@@ -45,11 +47,8 @@ class Rkf45 {
   private double solve (double[] y, double t, double h, double[] yp)
   {
 
-    /*
-     * TODO:
-     * A Description of what is going on with each variable. 
-     * ome Assertions?
-     * Simplification?
+    /* Preconditions:
+     * relerr og abserr skal være sat. yp skal være beregnet.
      *
      * yp og f1..5 er det samme som k2..5, dog uden at have ganget med h.
      * Altså:
@@ -125,26 +124,13 @@ class Rkf45 {
 
   /******************************************************************************/
 
-  // y is both used as start value, and the results are copied to there.
-  public void estimate_range(double[] y, ref double t, double tout)
+  public double h_startvalue(double[] y, double t, double dt)
   {
-    double dt;
-    bool hfaild;
-    double tol;
-    double ypk;
-
-    dt = tout - t;
-
-    // Init
-    if ( !init )
-    {
-      init = true;
-
-      f ( t, y, yp );
-
       //Calculate the start value of h
-      h = Math.Abs( dt );
+      double h = Math.Abs( dt );
 
+      double tol;
+      double ypk;
       for (int k = 0; k < neqn; k++ )
       {
         tol = relerr * Math.Abs( y[k] ) + abserr;
@@ -158,18 +144,34 @@ class Rkf45 {
         }
       }
 
-      h = Math.Max ( h, 26.0 * DoubleEpsilon * Math.Max ( Math.Abs( t ), Math.Abs( dt ) ) );
+      return  Math.Max ( h, 26.0 * DoubleEpsilon * Math.Max ( Math.Abs( t ), Math.Abs( dt ) ) );
+  }
+  
+  // y is both used as start value, and the results are copied to there.
+  public void estimate_range(double[] y, ref double t, double tout)
+  {
+
+    double dt = tout - t;
+
+    // Init
+    if ( !init )
+    {
+      init = true;
+
+      f ( t, y, yp ); //Beregn yp
+
+      h = h_startvalue(y,t,dt);
     } 
 
     //set h to -h if moving backwards.
     h = r8_sign ( dt ) * Math.Abs( h );
 
     bool startyear_reached = false;
-   
+
     //Step by step integration.
     while (!startyear_reached)
     {
-      hfaild = false;
+      bool hfaild = false;
 
       //dt used in calculations
       dt = tout - t;
@@ -192,24 +194,24 @@ class Rkf45 {
       double error;
 
       error = solve (y, t, h, yp);
-      
+
       double scale;
       //Integreate 1 step
       while(error > 1.0)
       {
-          hfaild = true;
-          startyear_reached = false;
+        hfaild = true;
+        startyear_reached = false;
 
-          if ( error < 59049.0 )
-            scale = 0.9 / Math.Pow( error, 0.2 );
-          else
-            scale = 0.1;
+        if ( error < 59049.0 )
+          scale = 0.9 / Math.Pow( error, 0.2 );
+        else
+          scale = 0.1;
 
-          h = scale * h;  //Scale down.
+        h = scale * h;  //Scale down.
 
-          error = solve (y, t, h, yp);
+        error = solve (y, t, h, yp);
       }
-      
+
       //Set the smallest allowable stepsize.
       double hmin = 26.0 * DoubleEpsilon * Math.Abs( t );
 
@@ -223,9 +225,9 @@ class Rkf45 {
       f ( t, y, yp ); //update yp
 
       //Error scale Calculations
-      if ( 0.0001889568 < error ) {
+      if ( 0.0001889568 < error )
         scale = 0.9 / Math.Pow( error, 0.2 );
-      }else
+      else
         scale = 5.0; 
 
       if ( hfaild )
