@@ -7,29 +7,41 @@ using System.Diagnostics;
 
 class Rkf45 {
 
-  static readonly double DoubleEpsilon = FindDoubleEpsilon();
-  const int MAXNFE = 3000;
+  static readonly double DoubleEpsilon = FindDoubleEpsilon(); //Const used for calculations
 
-  private readonly Action<double, double[], double[]> f; 
-  private readonly int neqn;
-
-  // These were C "static" variables in R8_RKF45:
-  private double h = -1.0;
-  private bool init = false;
-  // This was a parameter in R8_RKF45:
-  private readonly double[] yp;
+  private readonly Action<double, double[], double[]> f; //Differential equation(s).
+  private readonly int neqn;                             //Number of equations to solve.
+  private double h = -1.0;                               //Step size
+  private bool init = false;                             //TODO: Delete
+  private double[] yp,f1,f2,f3,f4,f5,f_swap,s1,s2;       //yp     : k1/h,
+                                                         //f1..5  : equations,
+                                                         //f_swap : swap space,
+                                                         //s1     : Solution
+                                                         //s2     : Alternative solution
 
   public Rkf45(Action<double, double[], double[]> f, int neqn) {
     this.f = f;
-    if ( neqn < 1 )
-      throw new Exception("There must be at least one equation >= 1");
     this.neqn = neqn;
-    this.yp = new double[neqn];
+
+    allocate_equation_space();
   }
+
+  private void allocate_equation_space() {
+    this.yp = new double[neqn];
+    this.f1 = new double[neqn];
+    this.f2 = new double[neqn];
+    this.f3 = new double[neqn];
+    this.f4 = new double[neqn];
+    this.f5 = new double[neqn];
+    this.f_swap = new double[neqn];
+    this.s1 = new double[neqn];
+    this.s2 = new double[neqn];
+  }
+
 
   /******************************************************************************/
 
-  private double solve (double[] y, double t, double h, double[] yp, double[] s,double relerr, double abserr)
+  private double solve (double[] y, double t, double h, double[] yp, double relerr, double abserr)
   {
 
     /*
@@ -48,55 +60,49 @@ class Rkf45 {
      */
 
     double ch;
-    double[] f1 = new double[neqn];
-    double[] f2 = new double[neqn];
-    double[] f3 = new double[neqn];
-    double[] f4 = new double[neqn];
-    double[] f5 = new double[neqn];
 
     ch = h / 4.0;
 
     //f1
     for (int i = 0; i < neqn; i++ )
-      f5[i] = y[i] + ch * yp[i];
-    f ( t + ch, f5, f1 );
+      f_swap[i] = y[i] + ch * yp[i];
+    f ( t + ch, f_swap, f1 );
 
     //f2
     ch = 3.0 * h / 32.0;
     for (int i = 0; i < neqn; i++ )
-      f5[i] = y[i] + ch * ( yp[i] + 3.0 * f1[i] );
-    f ( t + 3.0 * h / 8.0, f5, f2 );
+      f_swap[i] = y[i] + ch * ( yp[i] + 3.0 * f1[i] );
+    f ( t + 3.0 * h / 8.0, f_swap, f2 );
 
     //f3
     ch = h / 2197.0;
     for (int i = 0; i < neqn; i++ )
-      f5[i] = y[i] + ch * ( 1932.0 * yp[i] + ( 7296.0 * f2[i] - 7200.0 * f1[i] ) );
-    f ( t + 12.0 * h / 13.0, f5, f3 );
+      f_swap[i] = y[i] + ch * ( 1932.0 * yp[i] + ( 7296.0 * f2[i] - 7200.0 * f1[i] ) );
+    f ( t + 12.0 * h / 13.0, f_swap, f3 );
 
     //f4
     ch = h / 4104.0;
     for (int i = 0; i < neqn; i++ )
-      f5[i] = y[i] + ch * ( ( 8341.0 * yp[i] - 845.0 * f3[i] ) + 
+      f_swap[i] = y[i] + ch * ( ( 8341.0 * yp[i] - 845.0 * f3[i] ) + 
           ( 29440.0 * f2[i] - 32832.0 * f1[i] ) );
-    f ( t + h, f5, f4 );
+    f ( t + h, f_swap, f4 );
 
     //f5
     ch = h / 20520.0;
     for (int i = 0; i < neqn; i++ )
-      f1[i] = y[i] + ch * ( ( -6080.0 * yp[i] + 
+      f_swap[i] = y[i] + ch * ( ( -6080.0 * yp[i] + 
             ( 9295.0 * f3[i] - 5643.0 * f4[i] ) ) + ( 41040.0 * f1[i] - 28352.0 * f2[i] ) );
-    f ( t + h / 2.0, f1, f5 );
+    f ( t + h / 2.0, f_swap, f5 );
 
     //Calculate solution
     ch = h / 7618050.0;
     for (int i = 0; i < neqn; i++ )
-      s[i] = y[i] + ch * ( ( 902880.0 * yp[i] + 
+      s1[i] = y[i] + ch * ( ( 902880.0 * yp[i] + 
             ( 3855735.0 * f3[i] - 1371249.0 * f4[i] ) ) + ( 3953664.0 * f2[i] + 277020.0 * f5[i] ) );
 
     //Calculate alternative solution
-    double[] r = new double[neqn]; 
     for (int i = 0; i < neqn; i++ )
-      r[i] = ( -2090.0 * yp[i] + ( 21970.0 * f3[i] - 15048.0 * f4[i] ) ) + ( 22528.0 * f2[i] - 27360.0 * f5[i] );
+      s2[i] = ( -2090.0 * yp[i] + ( 21970.0 * f3[i] - 15048.0 * f4[i] ) ) + ( 22528.0 * f2[i] - 27360.0 * f5[i] );
 
     //Calculate the error.
     double biggest_difference = 0.0;
@@ -106,8 +112,8 @@ class Rkf45 {
     
     for (int i = 0; i < neqn; i++ )
     {
-      double et = Math.Abs( y[i] ) + Math.Abs( s[i] ) + ae; // zj+1
-      double ee = Math.Abs( r[i] );
+      double et = Math.Abs( y[i] ) + Math.Abs( s1[i] ) + ae;
+      double ee = Math.Abs( s2[i] );
 
       biggest_difference = Math.Max ( biggest_difference, ee / et );
     }
@@ -192,9 +198,8 @@ class Rkf45 {
       }
 
       double error;
-      double[] result = new double[neqn];
 
-      error = solve (y, t, h, yp, result,relerr, abserr);
+      error = solve (y, t, h, yp,relerr, abserr);
       
       //Integreate 1 step
       while(error > 1.0)
@@ -209,7 +214,7 @@ class Rkf45 {
 
           h = s * h;  //Scale down.
 
-          error = solve (y, t, h, yp, result,relerr, abserr);
+          error = solve (y, t, h, yp, relerr, abserr);
       }
       
       //Set the smallest allowable stepsize.
@@ -218,8 +223,9 @@ class Rkf45 {
       //1 step has been taken.
       t = t + h; //Advance in time
 
+      //apply solution
       for (int i = 0; i < neqn; i++ )
-        y[i] = result[i];
+        y[i] = s1[i];
 
       f ( t, y, yp ); //update yp
 
