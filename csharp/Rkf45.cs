@@ -18,6 +18,7 @@ class Rkf45 {
                                                          //f_swap : swap space,
                                                          //s1     : Solution
                                                          //s2     : Alternative solution
+  private double relerr, abserr;                         //The relative and absolute error used in equations.
 
   public Rkf45(Action<double, double[], double[]> f, int neqn) {
     this.f = f;
@@ -41,7 +42,7 @@ class Rkf45 {
 
   /******************************************************************************/
 
-  private double solve (double[] y, double t, double h, double[] yp, double relerr, double abserr)
+  private double solve (double[] y, double t, double h, double[] yp)
   {
 
     /*
@@ -124,19 +125,11 @@ class Rkf45 {
 
   /******************************************************************************/
 
-  // Main public function.
-
-  public int r8_rkf45(double[] y, ref double t, double tout, 
-      ref double relerr, double abserr, int flag )
+  // y is both used as start value, and the results are copied to there.
+  public void estimate_range(double[] y, ref double t, double tout)
   {
-    /* TODO:
-     * Describe each variable. Delete some of them.
-     *
-     */
     double dt;
     bool hfaild;
-    bool final_step;
-    double s;
     double tol;
     double ypk;
 
@@ -171,11 +164,10 @@ class Rkf45 {
     //set h to -h if moving backwards.
     h = r8_sign ( dt ) * Math.Abs( h );
 
-    //final_step
-    final_step = false;
+    bool startyear_reached = false;
    
     //Step by step integration.
-    for ( ; ; )
+    while (!startyear_reached)
     {
       hfaild = false;
 
@@ -188,7 +180,7 @@ class Rkf45 {
       {
         if ( Math.Abs( dt ) <= Math.Abs( h ) ) //Final step?
         {
-          final_step = true;    //Return output
+          startyear_reached = true;    //Return output
           h = dt;           //Let h hit output point
         }
         else
@@ -199,22 +191,23 @@ class Rkf45 {
 
       double error;
 
-      error = solve (y, t, h, yp,relerr, abserr);
+      error = solve (y, t, h, yp);
       
+      double scale;
       //Integreate 1 step
       while(error > 1.0)
       {
           hfaild = true;
-          final_step = false;
+          startyear_reached = false;
 
           if ( error < 59049.0 )
-            s = 0.9 / Math.Pow( error, 0.2 );
+            scale = 0.9 / Math.Pow( error, 0.2 );
           else
-            s = 0.1;
+            scale = 0.1;
 
-          h = s * h;  //Scale down.
+          h = scale * h;  //Scale down.
 
-          error = solve (y, t, h, yp, relerr, abserr);
+          error = solve (y, t, h, yp);
       }
       
       //Set the smallest allowable stepsize.
@@ -231,19 +224,15 @@ class Rkf45 {
 
       //Error scale Calculations
       if ( 0.0001889568 < error ) {
-        s = 0.9 / Math.Pow( error, 0.2 );
+        scale = 0.9 / Math.Pow( error, 0.2 );
       }else
-        s = 5.0; 
+        scale = 5.0; 
 
       if ( hfaild )
-        s = Math.Min ( s, 1.0 );
+        scale = Math.Min ( scale, 1.0 );
 
       //Apply scale.
-      h = r8_sign ( h ) * Math.Max ( s * Math.Abs( h ), hmin ); //Scale h
-
-      //Return
-      if ( final_step )
-        return 0;
+      h = r8_sign ( h ) * Math.Max ( scale * Math.Abs( h ), hmin ); //Scale h
     }
   }
 
@@ -277,9 +266,9 @@ class Rkf45 {
       result[y-b] = new double[n];
     Array.Copy(Va, result[a-b], Va.Length); // Insert start values
 
-    double relerr = err, abserr = err; // Set errors
-
-    Rkf45 solver = new Rkf45(dV, n); //Make solver
+    Rkf45 estimator = new Rkf45(dV, n); //Make estimator
+    estimator.relerr = err;
+    estimator.abserr = err;
 
     // Va = v
     double[] v = new double[n], tmp = new double[n];
@@ -291,8 +280,7 @@ class Rkf45 {
       saxpy(1, tmp, v, v);  
       double t = y;
       // Integrate over [y,y+1]
-      solver.r8_rkf45(v, ref t, t-1, ref relerr, abserr, 2);
-      //      Console.WriteLine(y + " " + flag + " " + v[0]);
+      estimator.estimate_range(v, ref t, t-1);
       Array.Copy(v, result[y-b-1], v.Length);
     }
     return result;
@@ -328,14 +316,14 @@ public class Timer {
 
 class TestRkf45 {
   public static void Main(String[] args) {
-    // Rkf45 solver = new Rkf45(DeferredTemporaryLifeAnnuity, 1);
+    // Rkf45 estimator = new Rkf45(DeferredTemporaryLifeAnnuity, 1);
     // double[] y = { 0.0 };
     // double relerr = 1E-10;
 
     // // Solve 
     // for (int year=50; year>=1; year-=1) {
     //   double t = year;
-    //   int flag = solver.r8_rkf45(y, ref t, t-1, ref relerr, 1E-15, 2);
+    //   int flag = estimator.estimate_range(y, ref t, t-1, ref relerr, 1E-15, 2);
     //   Console.WriteLine(year + " " + flag + " " + y[0]);
     // }
 
