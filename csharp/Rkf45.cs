@@ -20,6 +20,7 @@ class Rkf45 {
                                                          //s2     : Alternative solution
 
   private double relerr, abserr;                         //The relative and absolute error used in equations.
+  private double test_value = 0;                         //TODO: Delete
 
   public Rkf45(Action<double, double[], double[]> f, int neqn) {
     this.f = f;
@@ -48,8 +49,10 @@ class Rkf45 {
   {
 
     /* Preconditions:
-     * relerr og abserr skal være sat. yp skal være beregnet.
+     * relerr og abserr skal være sat. 
      *
+     *
+     * y er startværdi(erne)
      * yp og f1..5 er det samme som k2..5, dog uden at have ganget med h.
      * Altså:
      * k1 = yp * h
@@ -124,10 +127,10 @@ class Rkf45 {
 
   /******************************************************************************/
 
-  public double h_startvalue(double[] y, double t, double dt)
+  public double h_startvalue(double[] y, double t, double t_end)
   {
       //Calculate the start value of h
-      double h = Math.Abs( dt );
+      double h = Math.Abs( t_end - t );
 
       double tol;
       double ypk;
@@ -144,37 +147,33 @@ class Rkf45 {
         }
       }
 
-      return  Math.Max ( h, 26.0 * DoubleEpsilon * Math.Max ( Math.Abs( t ), Math.Abs( dt ) ) );
+      return  Math.Max ( h, 26.0 * DoubleEpsilon * Math.Max ( Math.Abs( t ), Math.Abs( t_end - t ) ) );
   }
   
   // y is both used as start value, and the results are copied to there.
-  public void estimate_range(double[] y, ref double t, double tout)
+  public void estimate_range(double[] y, ref double t, double t_end)
   {
-
-    double dt = tout - t;
-
     // Init
     if ( !init )
     {
       init = true;
 
-      f ( t, y, yp ); //Beregn yp
+      //Calculate yp
+      f ( t, y, yp );
 
-      h = h_startvalue(y,t,dt);
+      //Calculate stepsize
+      h = h_startvalue(y,t,t_end);
     } 
 
-    //set h to -h if moving backwards.
-    h = r8_sign ( dt ) * Math.Abs( h );
-
-    bool startyear_reached = false;
-
     //Step by step integration.
-    while (!startyear_reached)
-    {
-      bool hfaild = false;
+    bool end_reached = false;
 
-      //dt used in calculations
-      dt = tout - t;
+    while (!end_reached)
+    {
+      //Variables used in calculations
+      bool hfaild = false;
+      double dt = t_end - t;
+      double hmin = 26.0 * DoubleEpsilon * Math.Abs( t );
 
       //Reaction if h is going to the endpoint.
       //Look 2.0 steps ahead, so stepsize is not 'suddenly' decreased.
@@ -182,8 +181,8 @@ class Rkf45 {
       {
         if ( Math.Abs( dt ) <= Math.Abs( h ) ) //Final step?
         {
-          startyear_reached = true;    //Return output
-          h = dt;           //Let h hit output point
+          end_reached = true; //Return output
+          h = dt;                   //Let h hit output point
         }
         else
         {
@@ -191,52 +190,48 @@ class Rkf45 {
         }
       }
 
-      double error;
+      double error = solve (y, t, h, yp);
 
-      error = solve (y, t, h, yp);
-
-      double scale;
       //Integreate 1 step
       while(error > 1.0)
       {
         hfaild = true;
-        startyear_reached = false;
+        end_reached = false;
+        
+        //Scale down.
+        double s = Math.Max(0.1,0.9 / Math.Pow( error, 0.2 ));
+        h = s * h;  
 
-        if ( error < 59049.0 )
-          scale = 0.9 / Math.Pow( error, 0.2 );
-        else
-          scale = 0.1;
-
-        h = scale * h;  //Scale down.
-
+        //Try again.
         error = solve (y, t, h, yp);
       }
 
-      //Set the smallest allowable stepsize.
-      double hmin = 26.0 * DoubleEpsilon * Math.Abs( t );
+      //Advance in time
+      t = t + h; 
 
-      //1 step has been taken.
-      t = t + h; //Advance in time
-
-      //apply solution
+      //Apply solution
       for (int i = 0; i < neqn; i++ )
         y[i] = s1[i];
 
-      f ( t, y, yp ); //update yp
+      //Update yp
+      f ( t, y, yp );
 
-      //Error scale Calculations
-      if ( 0.0001889568 < error )
-        scale = 0.9 / Math.Pow( error, 0.2 );
-      else
-        scale = 5.0; 
-
-      if ( hfaild )
-        scale = Math.Min ( scale, 1.0 );
-
-      //Apply scale.
-      h = r8_sign ( h ) * Math.Max ( scale * Math.Abs( h ), hmin ); //Scale h
+      //Apply scale to stepsize
+      double scale = scale_from_error(error,hfaild);
+      h = r8_sign ( h ) * Math.Max ( scale * Math.Abs( h ), hmin );
     }
   }
+
+  //Error scale Calculations
+  public double scale_from_error(double error,bool hfailed) {
+    double scale = Math.Min(5.0,0.9 / Math.Pow( error, 0.2 ));
+
+    if (hfailed)
+      scale = Math.Min ( scale, 1.0 );
+
+    return scale;
+  }
+
 
   /******************************************************************************/
 
