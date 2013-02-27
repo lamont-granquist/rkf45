@@ -13,7 +13,8 @@ class Estimator {
   private readonly int neqn;                                //Number of equations to solve.
   private double h = -1.0;                                  //Step size
   private bool init = false;                                //Have the move function been initialized?
-  private double t;
+  
+  public double t;
   private double[] y,yp,f1,f2,f3,f4,f5,f_swap,solution,s2;  //yp     : k1/h,
                                                             //f1..5  : equations,
                                                             //f_swap : swap space,
@@ -505,6 +506,9 @@ class CalculationSpecifications {
       //Console.WriteLine("\n PureEndowment");
       //Print(new double[][] { new double[] { 0.14379469738 } });
       //Console.WriteLine();
+      Estimator.f = res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
+
+
       return Estimator.RKF45_n((double t, double[] V, double[] res) =>
           { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t)); },
           (double t, double[] res) => { res[0] = bj_00(t); },
