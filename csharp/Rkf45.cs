@@ -590,10 +590,12 @@ class CalculationSpecifications {
       //Console.WriteLine("\n DeferredTemporaryLifeAnnuity");
       //Print(new double[][] { new double[] { 1.0265607675 } });
       //Console.WriteLine();
-      return Estimator.RKF45_n((double t, double[] V, double[] res) =>
+      return test_values;
+      /*return Estimator.RKF45_n((double t, double[] V, double[] res) =>
           { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t)); },
           (double t, double[] res) => { res[0] = bj_00(t); },
           50, 0, err, new double[] { 0 },1);
+      */
     }
   }
 
@@ -676,10 +678,12 @@ class CalculationSpecifications {
       //Console.WriteLine("\n TemporaryLifeAnnuityPremium");
       //Print(new double[][] { new double[] { -15.971767666 } });
       //Console.WriteLine();
-      return Estimator.RKF45_n((double t, double[] V, double[] res) =>
+      /*  return Estimator.RKF45_n((double t, double[] V, double[] res) =>
           { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t)); },
           (double t, double[] res) => { res[0] = bj_00(t); },
           50, 0, err, new double[] { 0 },1);
+      */
+      return test_values;
     }
   }
 
@@ -762,10 +766,12 @@ class CalculationSpecifications {
       //Console.WriteLine("\n TermInsurance");
       //Print(new double[][] { new double[] { 0.057616919318 } });
       //Console.WriteLine();
-      return Estimator.RKF45_n((double t, double[] V, double[] res) =>
+      /*return Estimator.RKF45_n((double t, double[] V, double[] res) =>
           { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t)); },
           (double t, double[] res) => { res[0] = bj_00(t); },
           50, 0, err, new double[] { 0 },1);
+      */
+      return test_values;
     }
   }
 
@@ -887,12 +893,14 @@ class CalculationSpecifications {
       //Console.WriteLine("\n DisabilityAnnuity");
       //Print(new double[][] { new double[] { 0.55552610797, 15.971767666 } });
       //Console.WriteLine();
-      return Estimator.RKF45_n((double t, double[] V, double[] res) =>
+      /*return Estimator.RKF45_n((double t, double[] V, double[] res) =>
           { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (V[1] - V[0] + bj_01(t)) 
           - mu_02(t) * (0 - V[0] + bj_02(t));
           res[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t)); },
           (double t, double[] res) => { res[0] = bj_00(t); res[1] = bj_11(t); },
           50, 0, err, new double[] { 0, 0 },2);
+      */
+      return test_values;
     }
   }
 
@@ -1011,12 +1019,15 @@ class CalculationSpecifications {
       //Console.WriteLine("\n DisabilityTermInsurance");
       //Print(new double[][] { new double[] { 0.071418699003, 0.000000000 } });
       //Console.WriteLine();
+      return test_values;
+      /*
       return Estimator.RKF45_n((double t, double[] V, double[] res) =>
           { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (V[1] - V[0] + bj_01(t)) 
           - mu_02(t) * (0 - V[0] + bj_02(t));
           res[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t)); },
           (double t, double[] res) => { res[0] = bj_00(t); res[1] = bj_11(t); },
           50, 0, err, new double[] { 0, 0 },2);
+      */
     }
   }
 }
