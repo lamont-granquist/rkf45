@@ -9,8 +9,10 @@ class Estimator {
 
   static readonly double DoubleEpsilon = FindDoubleEpsilon(); //Const used for calculations
 
-  public Action<double, double[], double[]> dy;    //Differential equation(s).
+  public Action<double, double[], double[]> dy;   //Differential equation(s).
+  public Action<double,double[]> bj_ii;           //State-change benefits
   public int neqn;                                //Number of equations to solve.
+  
   private double h = -1.0;                                  //Step size
   private bool init = false;                                //Have the move function been initialized?
   
@@ -22,6 +24,7 @@ class Estimator {
                                                             //s2     : Alternative solution
 
   private double relerr, abserr;                            //The relative and absolute error used in equations.
+
 
   public Estimator(Action<double, double[], double[]> dy = null, int neqn = 1) {
     this.dy = dy;
@@ -259,9 +262,7 @@ class Estimator {
 
   /*************************** Estimator year solver  ***************************/
   public double[][] estimate(
-      Action<double, double[],double[]> dV, 
-      Action<double,double[]> bj_ii,
-      int a, int b, double err, double[] start_values,int neqn)
+      int a, int b, double err, double[] start_values)
   {
     //Allocate result array
     double[][] result = new double[a-b+1][];
@@ -274,9 +275,10 @@ class Estimator {
 
     //Make estimator
     Estimator estimator = new Estimator(); 
-    estimator.dy     = dV;
-    estimator.neqn   = neqn;
+    estimator.dy     = this.dy;
+    estimator.neqn   = this.neqn;
     estimator.relerr = err;
+    estimator.bj_ii  = this.bj_ii;
     estimator.abserr = err;
     estimator.t      = a;
     estimator.y      = start_values;
@@ -287,7 +289,7 @@ class Estimator {
     for (int year=a; year>b; year--) { 
 
       //calculate this years benefit
-      bj_ii(year, benefit); 
+      estimator.bj_ii(year, benefit); 
 
       //add benefit to position
       xpy(benefit, estimator.y,estimator.y); 
@@ -511,16 +513,17 @@ class CalculationSpecifications {
       //Console.WriteLine();
       Estimator estimator = new Estimator();
       estimator.neqn = 1;
+      estimator.bj_ii =
+          (double t, double[] res) =>
+          res[0] = bj_00(t);
       estimator.dy =
           (double t, double[] V, double[] res) =>
           res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
       
 
 
-      return estimator.estimate((double t, double[] V, double[] res) =>
-          { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t)); },
-          (double t, double[] res) => { res[0] = bj_00(t); },
-          40, 0, err, new double[] { 0 },1);
+      return estimator.estimate(
+          40, 0, err, new double[] { 0 });
     }
   }
 
