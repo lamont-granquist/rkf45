@@ -271,8 +271,10 @@ class Estimator {
     //Insert
     Array.Copy(start_values, result[a-b], start_values.Length); // Insert start values
 
+
     //Make estimator
-    Estimator estimator = new Estimator(dV); 
+    Estimator estimator = new Estimator(); 
+    estimator.dy     = dV;
     estimator.neqn   = neqn;
     estimator.relerr = err;
     estimator.abserr = err;
@@ -512,6 +514,7 @@ class CalculationSpecifications {
       estimator.dy =
           (double t, double[] V, double[] res) =>
           res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
+      
 
 
       return Estimator.RKF45_n((double t, double[] V, double[] res) =>
