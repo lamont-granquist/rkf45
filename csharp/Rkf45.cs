@@ -9,12 +9,12 @@ class Estimator {
 
   static readonly double DoubleEpsilon = FindDoubleEpsilon(); //Const used for calculations
 
-  private readonly Action<double, double[], double[]> f;    //Differential equation(s).
-  private readonly int neqn;                                //Number of equations to solve.
+  public Action<double, double[], double[]> dy;    //Differential equation(s).
+  public int neqn;                                //Number of equations to solve.
   private double h = -1.0;                                  //Step size
   private bool init = false;                                //Have the move function been initialized?
   
-  public double t;
+  private double t;
   private double[] y,yp,f1,f2,f3,f4,f5,f_swap,solution,s2;  //yp     : k1/h,
                                                             //f1..5  : equations,
                                                             //f_swap : swap space,
@@ -23,8 +23,8 @@ class Estimator {
 
   private double relerr, abserr;                            //The relative and absolute error used in equations.
 
-  public Estimator(Action<double, double[], double[]> f, int neqn) {
-    this.f = f;
+  public Estimator(Action<double, double[], double[]> dy = null, int neqn = 1) {
+    this.dy = dy;
     this.neqn = neqn;
     this.solution = new double[neqn];
     this.y = new double[neqn];
@@ -70,33 +70,33 @@ class Estimator {
     //f1
     for (int i = 0; i < neqn; i++ )
       f_swap[i] = y[i] + ch * yp[i];
-    f ( t + ch, f_swap, f1 );
+    dy ( t + ch, f_swap, f1 );
 
     //f2
     ch = 3.0 * h / 32.0;
     for (int i = 0; i < neqn; i++ )
       f_swap[i] = y[i] + ch * ( yp[i] + 3.0 * f1[i] );
-    f ( t + 3.0 * h / 8.0, f_swap, f2 );
+    dy ( t + 3.0 * h / 8.0, f_swap, f2 );
 
     //f3
     ch = h / 2197.0;
     for (int i = 0; i < neqn; i++ )
       f_swap[i] = y[i] + ch * ( 1932.0 * yp[i] + ( 7296.0 * f2[i] - 7200.0 * f1[i] ) );
-    f ( t + 12.0 * h / 13.0, f_swap, f3 );
+    dy ( t + 12.0 * h / 13.0, f_swap, f3 );
 
     //f4
     ch = h / 4104.0;
     for (int i = 0; i < neqn; i++ )
       f_swap[i] = y[i] + ch * ( ( 8341.0 * yp[i] - 845.0 * f3[i] ) + 
           ( 29440.0 * f2[i] - 32832.0 * f1[i] ) );
-    f ( t + h, f_swap, f4 );
+    dy ( t + h, f_swap, f4 );
 
     //f5
     ch = h / 20520.0;
     for (int i = 0; i < neqn; i++ )
       f_swap[i] = y[i] + ch * ( ( -6080.0 * yp[i] + 
             ( 9295.0 * f3[i] - 5643.0 * f4[i] ) ) + ( 41040.0 * f1[i] - 28352.0 * f2[i] ) );
-    f ( t + h / 2.0, f_swap, f5 );
+    dy ( t + h / 2.0, f_swap, f5 );
 
     //Calculate solution
     ch = h / 7618050.0;
@@ -136,7 +136,7 @@ class Estimator {
       init = true;
 
       //Calculate yp
-      f ( t, y, yp );
+      dy ( t, y, yp );
 
       //Calculate stepsize
       h = h_startvalue(t_end);
@@ -191,7 +191,7 @@ class Estimator {
         y[i] = solution[i];
 
       //Update yp
-      f ( t, y, yp );
+      dy ( t, y, yp );
 
       //Apply scale to stepsize
       double scale = scale_from_error(error,hfaild);
@@ -272,7 +272,8 @@ class Estimator {
     Array.Copy(start_values, result[a-b], start_values.Length); // Insert start values
 
     //Make estimator
-    Estimator estimator = new Estimator(dV, neqn); 
+    Estimator estimator = new Estimator(dV); 
+    estimator.neqn   = neqn;
     estimator.relerr = err;
     estimator.abserr = err;
     estimator.t      = a;
@@ -506,7 +507,11 @@ class CalculationSpecifications {
       //Console.WriteLine("\n PureEndowment");
       //Print(new double[][] { new double[] { 0.14379469738 } });
       //Console.WriteLine();
-      Estimator.f = res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
+      Estimator estimator = new Estimator();
+      estimator.neqn = 1;
+      estimator.dy =
+          (double t, double[] V, double[] res) =>
+          res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
 
 
       return Estimator.RKF45_n((double t, double[] V, double[] res) =>
