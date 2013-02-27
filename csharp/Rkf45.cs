@@ -12,16 +12,15 @@ class Rkf45 {
   private readonly Action<double, double[], double[]> f; //Differential equation(s).
   private readonly int neqn;                             //Number of equations to solve.
   private double h = -1.0;                               //Step size
-  private bool init = false;                             //TODO: Delete
+  private bool init = false;                             //Have the move function been initialized?
   private double t;
-  private double[] y,yp,f1,f2,f3,f4,f5,f_swap,solution,s2;       //yp     : k1/h,
+  private double[] y,yp,f1,f2,f3,f4,f5,f_swap,solution,s2;  //yp     : k1/h,
                                                          //f1..5  : equations,
                                                          //f_swap : swap space,
                                                          //s1     : Solution
                                                          //s2     : Alternative solution
 
   private double relerr, abserr;                         //The relative and absolute error used in equations.
-  private double test_value = 0;                         //TODO: Delete
 
   public Rkf45(Action<double, double[], double[]> f, int neqn) {
     this.f = f;
@@ -47,15 +46,20 @@ class Rkf45 {
 
   /******************************************************************************/
 
-  private double solve (double t, double h, double[] yp)
+  private double solve ()
   {
 
     /* Preconditions:
      * relerr og abserr skal være sat. 
+     * t
+     * h
+     * yp skal være sat
      *
+     * This will update the y to the current t with the stepsize h
+     * yp needs to be calculated before hand.
      *
      * y er startværdi(erne)
-     * yp og f1..5 er det samme som k2..5, dog uden at have ganget med h.
+     * yp er k1, og f1..5 er det samme som k2..5, dog uden at have ganget med h.
      * Altså:
      * k1 = yp * h
      * k2..5 = f2..5 * h
@@ -134,14 +138,12 @@ class Rkf45 {
       //Calculate the start value of h
       double h = Math.Abs( t_end - t );
 
-      double tol;
-      double ypk;
       for (int k = 0; k < neqn; k++ )
       {
-        tol = relerr * Math.Abs( y[k] ) + abserr;
+        double tol = relerr * Math.Abs( y[k] ) + abserr;
         if ( 0.0 < tol )
         {
-          ypk = Math.Abs( yp[k] ); //temp var
+          double ypk = Math.Abs( yp[k] );
           if ( tol < ypk * Math.Pow( h, 5 ) )
           {
             h = Math.Pow( ( tol / ypk ), 0.2 );
@@ -156,6 +158,7 @@ class Rkf45 {
   public void move(double t_end)
   {
     // Init
+    // Note: (we NEED initialization in the move function, the calculation of h depends on the t_end value)
     if ( !init )
     {
       init = true;
@@ -192,7 +195,7 @@ class Rkf45 {
         }
       }
 
-      double error = solve (t, h, yp);
+      double error = solve();
 
       //Integreate 1 step
       while(error > 1.0)
@@ -205,7 +208,7 @@ class Rkf45 {
         h = s * h;  
 
         //Try again.
-        error = solve (t, h, yp);
+        error = solve();
       }
 
       //Advance in time
