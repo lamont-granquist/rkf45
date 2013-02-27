@@ -43,21 +43,17 @@ class Rkf45 {
     this.s2 = new double[neqn];
   }
 
-
-  /******************************************************************************/
-
+  //Calculate the solution
   private double solve ()
   {
 
     /* Preconditions:
-     * relerr og abserr skal være sat. 
-     * t
-     * h
-     * yp skal være sat
+     * relerr, abserr, t and h needs to be set.
+     * yp must have been calculated.
+     * Update "solution" to the current time t with the stepsize h
+     * and return the error value
      *
-     * This will update the y to the current t with the stepsize h
-     * yp needs to be calculated before hand.
-     *
+     * Personal notes:
      * y er startværdi(erne)
      * yp er k1, og f1..5 er det samme som k2..5, dog uden at have ganget med h.
      * Altså:
@@ -68,9 +64,7 @@ class Rkf45 {
      * ch is the lowest diffential of h. Det er praktisk at man ikke skal gange med så store tal.
      */
 
-    double ch;
-
-    ch = h / 4.0;
+    double ch = h / 4.0;
 
     //f1
     for (int i = 0; i < neqn; i++ )
@@ -131,29 +125,8 @@ class Rkf45 {
     return Math.Abs( h ) * biggest_difference * scale / 752400.0;
   }
 
-  /******************************************************************************/
 
-  public double h_startvalue(double[] y, double t, double t_end)
-  {
-      //Calculate the start value of h
-      double h = Math.Abs( t_end - t );
-
-      for (int k = 0; k < neqn; k++ )
-      {
-        double tol = relerr * Math.Abs( y[k] ) + abserr;
-        if ( 0.0 < tol )
-        {
-          double ypk = Math.Abs( yp[k] );
-          if ( tol < ypk * Math.Pow( h, 5 ) )
-          {
-            h = Math.Pow( ( tol / ypk ), 0.2 );
-          }
-        }
-      }
-
-      return  Math.Max ( h, 26.0 * DoubleEpsilon * Math.Max ( Math.Abs( t ), Math.Abs( t_end - t ) ) );
-  }
-  
+    
   // y is both used as start value, and the results are copied to there.
   public void move(double t_end)
   {
@@ -167,7 +140,7 @@ class Rkf45 {
       f ( t, y, yp );
 
       //Calculate stepsize
-      h = h_startvalue(y,t,t_end);
+      h = h_startvalue(t_end);
     } 
 
     //Step by step integration.
@@ -226,8 +199,31 @@ class Rkf45 {
       h = r8_sign ( h ) * Math.Max ( scale * Math.Abs( h ), hmin );
     }
   }
+  /* HELP FUNCTIONS */
 
-  //Error scale Calculations
+  //Calculate h's startvalue
+  public double h_startvalue(double t_end)
+  {
+      //Calculate the start value of h
+      double h = Math.Abs( t_end - t );
+
+      for (int k = 0; k < neqn; k++ )
+      {
+        double tol = relerr * Math.Abs( y[k] ) + abserr;
+        if ( 0.0 < tol )
+        {
+          double ypk = Math.Abs( yp[k] );
+          if ( tol < ypk * Math.Pow( h, 5 ) )
+          {
+            h = Math.Pow( ( tol / ypk ), 0.2 );
+          }
+        }
+      }
+
+      return  Math.Max ( h, 26.0 * DoubleEpsilon * Math.Max ( Math.Abs( t ), Math.Abs( t_end - t ) ) );
+  }
+
+  //Scale from error calculations
   public double scale_from_error(double error,bool hfailed) {
     double scale = Math.Min(5.0,0.9 / Math.Pow( error, 0.2 ));
 
