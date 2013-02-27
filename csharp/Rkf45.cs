@@ -9,18 +9,18 @@ class Rkf45 {
 
   static readonly double DoubleEpsilon = FindDoubleEpsilon(); //Const used for calculations
 
-  private readonly Action<double, double[], double[]> f; //Differential equation(s).
-  private readonly int neqn;                             //Number of equations to solve.
-  private double h = -1.0;                               //Step size
-  private bool init = false;                             //Have the move function been initialized?
+  private readonly Action<double, double[], double[]> f;    //Differential equation(s).
+  private readonly int neqn;                                //Number of equations to solve.
+  private double h = -1.0;                                  //Step size
+  private bool init = false;                                //Have the move function been initialized?
   private double t;
   private double[] y,yp,f1,f2,f3,f4,f5,f_swap,solution,s2;  //yp     : k1/h,
-                                                         //f1..5  : equations,
-                                                         //f_swap : swap space,
-                                                         //s1     : Solution
-                                                         //s2     : Alternative solution
+                                                            //f1..5  : equations,
+                                                            //f_swap : swap space,
+                                                            //s1     : Solution
+                                                            //s2     : Alternative solution
 
-  private double relerr, abserr;                         //The relative and absolute error used in equations.
+  private double relerr, abserr;                            //The relative and absolute error used in equations.
 
   public Rkf45(Action<double, double[], double[]> f, int neqn) {
     this.f = f;
@@ -43,7 +43,7 @@ class Rkf45 {
     this.s2 = new double[neqn];
   }
 
-  //Calculate the solution
+  /* Calculate the solution */
   private double solve ()
   {
 
@@ -125,9 +125,7 @@ class Rkf45 {
     return Math.Abs( h ) * biggest_difference * scale / 752400.0;
   }
 
-
-    
-  // y is both used as start value, and the results are copied to there.
+  /* Move from current position to t_end, and update all values */
   public void move(double t_end)
   {
     // Init
@@ -199,9 +197,10 @@ class Rkf45 {
       h = r8_sign ( h ) * Math.Max ( scale * Math.Abs( h ), hmin );
     }
   }
-  /* HELP FUNCTIONS */
 
-  //Calculate h's startvalue
+  /******************* HELP FUNCTIONS *******************/
+
+  /* Calculate h's startvalue */
   public double h_startvalue(double t_end)
   {
       //Calculate the start value of h
@@ -223,7 +222,7 @@ class Rkf45 {
       return  Math.Max ( h, 26.0 * DoubleEpsilon * Math.Max ( Math.Abs( t ), Math.Abs( t_end - t ) ) );
   }
 
-  //Scale from error calculations
+  /* Scale from error calculations */
   public double scale_from_error(double error,bool hfailed) {
     double scale = Math.Min(5.0,0.9 / Math.Pow( error, 0.2 ));
 
@@ -233,10 +232,7 @@ class Rkf45 {
     return scale;
   }
 
-
-  /******************************************************************************/
-
-  /* Auxiliaries */
+  /*************************** Auxiliaries ***************************/
 
   static double r8_sign ( double x ) {
     return (double)(Math.Sign(x));
@@ -249,10 +245,18 @@ class Rkf45 {
     return 2.0 * r;
   }
 
-  /******************************************************************************/
+  // xpy =  x array plus y array, imperative version
+  static void xpy(double[] x, double[] y, double[] res) {
+    if (x.Length != y.Length)
+      throw new Exception("saxpy: lengths of x and y differ");
+    if (x.Length != res.Length)
+      throw new Exception("saxpy: lengths of x and res differ");
 
-  /* Main public solver functions for actuarial use */
+    for (int i=0; i<x.Length; i++)
+      res[i] = x[i] + y[i];
+  }
 
+  /*************************** Rkf45 year solver  ***************************/
   public static double[][] RKF45_n(
       Action<double, double[],double[]> dV, 
       Action<double,double[]> bj_ii,
@@ -293,17 +297,6 @@ class Rkf45 {
     return result;
   }
 
-  // xpy =  x array plus y array, imperative version
-  static void xpy(double[] x, double[] y, double[] res) {
-    if (x.Length != y.Length)
-      throw new Exception("saxpy: lengths of x and y differ");
-    if (x.Length != res.Length)
-      throw new Exception("saxpy: lengths of x and res differ");
-
-    for (int i=0; i<x.Length; i++)
-      res[i] = x[i] + y[i];
-  }
-
 }
 
 public class Timer {
@@ -322,62 +315,6 @@ public class Timer {
 
 /******************************************************************************/
 
-class TestRkf45 {
-  public static void Main(String[] args) {
-    // Rkf45 estimator = new Rkf45(DeferredTemporaryLifeAnnuity, 1);
-    // double[] y = { 0.0 };
-    // double relerr = 1E-10;
-
-    // // Solve 
-    // for (int year=50; year>=1; year-=1) {
-    //   double t = year;
-    //   int flag = estimator.estimate_range(y, ref t, t-1, ref relerr, 1E-15, 2);
-    //   Console.WriteLine(year + " " + flag + " " + y[0]);
-    // }
-
-    // Compute and print reserves
-    CalculationSpecifications.ComputeAll();
-  }
-
-  public static void Zero(double t, double[] yv, /* for output: */ double[] yvp) {
-    Debug.Assert(1 == yv.Length && yv.Length == yvp.Length);
-    yvp[0] = 0;
-  }
-
-  public static void Two(double t, double[] yv, /* for output: */ double[] yvp) {
-    Debug.Assert(1 == yv.Length && yv.Length == yvp.Length);
-    yvp[0] = 2;
-  }
-
-  public static void Logistic(double t, double[] yv, /* for output: */ double[] yvp) {
-    Debug.Assert(1 == yv.Length && yv.Length == yvp.Length);
-    yvp[0] = 10 * yv[0] * (1 - yv[0]);
-  }
-
-  public static void DeferredTemporaryLifeAnnuity(double t, double[] yv, 
-      /* for output: */ double[] yvp) {
-    Debug.Assert(1 == yv.Length && yv.Length == yvp.Length);
-    yvp[0] = r(t) * yv[0] - b_0(t) - GM(t) * (0 - yv[0]);
-  }
-
-  static double b_0(double t) {
-    return 1 * indicator(t > 35) * indicator(t < 35 + 10);
-  }
-
-  static double r(double t) { 
-    return 0.05; 
-  }
-
-  static double indicator(bool b) {
-    return b ? 1.0 : 0.0;
-  }
-
-  // Gompertz-Makeham mortality intensities for Danish women aged 30+t
-  static double GM(double t) {
-    return 0.0005 + Math.Pow(10, 5.728 - 10 + 0.038*(30 + t));
-  }
-}
-
 // The weird encapsulation style (classes PureEndowment and so on) is
 // motivated by the wish to stay relatively close to C, so no
 // inheritance.  Also, while the function argument dV could be
@@ -385,6 +322,11 @@ class TestRkf45 {
 // impossible or a bad idea on a GPU. 
 
 class CalculationSpecifications {
+
+  public static void Main(String[] args) {
+    TestAll();
+  }
+
   public static readonly double err = 1e-11;
 
   static readonly double age = 30,
@@ -414,20 +356,21 @@ class CalculationSpecifications {
     }
   }
 
-  public static void ComputeAll() {
-    // Compute and print reserves
+  public static void PrintAll() {
+    Print(PureEndowment.Compute());
+    Print(DeferredTemporaryLifeAnnuity.Compute());
+    Print(TemporaryLifeAnnuityPremium.Compute());
+    Print(TermInsurance.Compute());
+    Print(DisabilityAnnuity.Compute());
+    Print(DisabilityTermInsurance.Compute());
+  }
+  public static void TestAll() {
     Assert(IsEqual(PureEndowment.Compute(),PureEndowment.test_values),"PureEndowment failed");
     Assert(IsEqual(DeferredTemporaryLifeAnnuity.Compute(),DeferredTemporaryLifeAnnuity.test_values),"DeferredTemporaryLifeAnnuity failed");
     Assert(IsEqual(TemporaryLifeAnnuityPremium.Compute(),TemporaryLifeAnnuityPremium.test_values),"TempLifeAnnuPrem failed");
     Assert(IsEqual(TermInsurance.Compute(),TermInsurance.test_values),"TempInsurance failed");
     Assert(IsEqual(DisabilityAnnuity.Compute(),DisabilityAnnuity.test_values),"DisAnnu failed");
     Assert(IsEqual(DisabilityTermInsurance.Compute(),DisabilityTermInsurance.test_values),"DisabilityTermInsurance failed");
-    //Print(PureEndowment.Compute());
-    //Print(DeferredTemporaryLifeAnnuity.Compute());
-    //Print(TemporaryLifeAnnuityPremium.Compute());
-    //Print(TermInsurance.Compute());
-    //Print(DisabilityAnnuity.Compute());
-    //Print(DisabilityTermInsurance.Compute());
     Console.WriteLine("tests passed");
   }
 
