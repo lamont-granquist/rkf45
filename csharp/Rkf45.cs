@@ -5,7 +5,7 @@
 using System;
 using System.Diagnostics;
 
-class Rkf45 {
+class Estimator {
 
   static readonly double DoubleEpsilon = FindDoubleEpsilon(); //Const used for calculations
 
@@ -22,7 +22,7 @@ class Rkf45 {
 
   private double relerr, abserr;                            //The relative and absolute error used in equations.
 
-  public Rkf45(Action<double, double[], double[]> f, int neqn) {
+  public Estimator(Action<double, double[], double[]> f, int neqn) {
     this.f = f;
     this.neqn = neqn;
     this.solution = new double[neqn];
@@ -256,7 +256,7 @@ class Rkf45 {
       res[i] = x[i] + y[i];
   }
 
-  /*************************** Rkf45 year solver  ***************************/
+  /*************************** Estimator year solver  ***************************/
   public static double[][] RKF45_n(
       Action<double, double[],double[]> dV, 
       Action<double,double[]> bj_ii,
@@ -271,7 +271,7 @@ class Rkf45 {
     Array.Copy(start_values, result[a-b], start_values.Length); // Insert start values
 
     //Make estimator
-    Rkf45 estimator = new Rkf45(dV, neqn); 
+    Estimator estimator = new Estimator(dV, neqn); 
     estimator.relerr = err;
     estimator.abserr = err;
     estimator.t      = a;
@@ -505,7 +505,7 @@ class CalculationSpecifications {
       //Console.WriteLine("\n PureEndowment");
       //Print(new double[][] { new double[] { 0.14379469738 } });
       //Console.WriteLine();
-      return Rkf45.RKF45_n((double t, double[] V, double[] res) =>
+      return Estimator.RKF45_n((double t, double[] V, double[] res) =>
           { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t)); },
           (double t, double[] res) => { res[0] = bj_00(t); },
           40, 0, err, new double[] { 0 },1);
@@ -590,7 +590,7 @@ class CalculationSpecifications {
       //Console.WriteLine("\n DeferredTemporaryLifeAnnuity");
       //Print(new double[][] { new double[] { 1.0265607675 } });
       //Console.WriteLine();
-      return Rkf45.RKF45_n((double t, double[] V, double[] res) =>
+      return Estimator.RKF45_n((double t, double[] V, double[] res) =>
           { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t)); },
           (double t, double[] res) => { res[0] = bj_00(t); },
           50, 0, err, new double[] { 0 },1);
@@ -676,7 +676,7 @@ class CalculationSpecifications {
       //Console.WriteLine("\n TemporaryLifeAnnuityPremium");
       //Print(new double[][] { new double[] { -15.971767666 } });
       //Console.WriteLine();
-      return Rkf45.RKF45_n((double t, double[] V, double[] res) =>
+      return Estimator.RKF45_n((double t, double[] V, double[] res) =>
           { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t)); },
           (double t, double[] res) => { res[0] = bj_00(t); },
           50, 0, err, new double[] { 0 },1);
@@ -762,7 +762,7 @@ class CalculationSpecifications {
       //Console.WriteLine("\n TermInsurance");
       //Print(new double[][] { new double[] { 0.057616919318 } });
       //Console.WriteLine();
-      return Rkf45.RKF45_n((double t, double[] V, double[] res) =>
+      return Estimator.RKF45_n((double t, double[] V, double[] res) =>
           { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t)); },
           (double t, double[] res) => { res[0] = bj_00(t); },
           50, 0, err, new double[] { 0 },1);
@@ -887,7 +887,7 @@ class CalculationSpecifications {
       //Console.WriteLine("\n DisabilityAnnuity");
       //Print(new double[][] { new double[] { 0.55552610797, 15.971767666 } });
       //Console.WriteLine();
-      return Rkf45.RKF45_n((double t, double[] V, double[] res) =>
+      return Estimator.RKF45_n((double t, double[] V, double[] res) =>
           { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (V[1] - V[0] + bj_01(t)) 
           - mu_02(t) * (0 - V[0] + bj_02(t));
           res[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t)); },
@@ -1011,7 +1011,7 @@ class CalculationSpecifications {
       //Console.WriteLine("\n DisabilityTermInsurance");
       //Print(new double[][] { new double[] { 0.071418699003, 0.000000000 } });
       //Console.WriteLine();
-      return Rkf45.RKF45_n((double t, double[] V, double[] res) =>
+      return Estimator.RKF45_n((double t, double[] V, double[] res) =>
           { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (V[1] - V[0] + bj_01(t)) 
           - mu_02(t) * (0 - V[0] + bj_02(t));
           res[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t)); },
