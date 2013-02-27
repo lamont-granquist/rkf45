@@ -13,7 +13,8 @@ class Rkf45 {
   private readonly int neqn;                             //Number of equations to solve.
   private double h = -1.0;                               //Step size
   private bool init = false;                             //TODO: Delete
-  private double[] yp,f1,f2,f3,f4,f5,f_swap,s1,s2;       //yp     : k1/h,
+  private double t;
+  private double[] y,yp,f1,f2,f3,f4,f5,f_swap,solution,s2;       //yp     : k1/h,
                                                          //f1..5  : equations,
                                                          //f_swap : swap space,
                                                          //s1     : Solution
@@ -25,7 +26,8 @@ class Rkf45 {
   public Rkf45(Action<double, double[], double[]> f, int neqn) {
     this.f = f;
     this.neqn = neqn;
-    this.s1 = new double[neqn];
+    this.solution = new double[neqn];
+    this.y = new double[neqn];
     this.yp = new double[neqn];
 
     allocate_equation_space();
@@ -45,7 +47,7 @@ class Rkf45 {
 
   /******************************************************************************/
 
-  private double solve (double[] y, double t, double h, double[] yp)
+  private double solve (double t, double h, double[] yp)
   {
 
     /* Preconditions:
@@ -100,7 +102,7 @@ class Rkf45 {
     //Calculate solution
     ch = h / 7618050.0;
     for (int i = 0; i < neqn; i++ )
-      s1[i] = y[i] + ch * ( ( 902880.0 * yp[i] + 
+      solution[i] = y[i] + ch * ( ( 902880.0 * yp[i] + 
             ( 3855735.0 * f3[i] - 1371249.0 * f4[i] ) ) + ( 3953664.0 * f2[i] + 277020.0 * f5[i] ) );
 
     //Calculate alternative solution
@@ -115,7 +117,7 @@ class Rkf45 {
     
     for (int i = 0; i < neqn; i++ )
     {
-      double et = Math.Abs( y[i] ) + Math.Abs( s1[i] ) + ae;
+      double et = Math.Abs( y[i] ) + Math.Abs( solution[i] ) + ae;
       double ee = Math.Abs( s2[i] );
 
       biggest_difference = Math.Max ( biggest_difference, ee / et );
@@ -151,7 +153,7 @@ class Rkf45 {
   }
   
   // y is both used as start value, and the results are copied to there.
-  public void estimate_range(double[] y, ref double t, double t_end)
+  public void move(double t_end)
   {
     // Init
     if ( !init )
@@ -190,7 +192,7 @@ class Rkf45 {
         }
       }
 
-      double error = solve (y, t, h, yp);
+      double error = solve (t, h, yp);
 
       //Integreate 1 step
       while(error > 1.0)
@@ -203,7 +205,7 @@ class Rkf45 {
         h = s * h;  
 
         //Try again.
-        error = solve (y, t, h, yp);
+        error = solve (t, h, yp);
       }
 
       //Advance in time
@@ -211,7 +213,7 @@ class Rkf45 {
 
       //Apply solution
       for (int i = 0; i < neqn; i++ )
-        y[i] = s1[i];
+        y[i] = solution[i];
 
       //Update yp
       f ( t, y, yp );
@@ -252,45 +254,55 @@ class Rkf45 {
 
   /* Main public solver functions for actuarial use */
 
-  public static double[][] RKF45_n(Action<double, double[],double[]> dV, 
+  public static double[][] RKF45_n(
+      Action<double, double[],double[]> dV, 
       Action<double,double[]> bj_ii,
-      int a, int b, double err, double[] Va) {
-
-    //Make a n*[a-b+1] matrix
-    int n = Va.Length;
+      int a, int b, double err, double[] start_values,int neqn)
+  {
+    //Allocate result array
     double[][] result = new double[a-b+1][];
     for (int y=a; y>=b; y--) 
-      result[y-b] = new double[n];
-    Array.Copy(Va, result[a-b], Va.Length); // Insert start values
+      result[y-b] = new double[neqn];
 
-    Rkf45 estimator = new Rkf45(dV, n); //Make estimator
+    //Insert
+    Array.Copy(start_values, result[a-b], start_values.Length); // Insert start values
+
+    //Make estimator
+    Rkf45 estimator = new Rkf45(dV, neqn); 
     estimator.relerr = err;
     estimator.abserr = err;
+    estimator.t      = a;
+    estimator.y      = start_values;
 
-    // Va = v
-    double[] v = new double[n], tmp = new double[n];
-    Array.Copy(Va, v, Va.Length);
+    double[] benefit = new double[neqn];
 
     //Solve for one year at a time
-    for (int y=a; y>b; y--) { 
-      bj_ii(y, tmp);
-      saxpy(1, tmp, v, v);  
-      double t = y;
+    for (int year=a; year>b; year--) { 
+
+      //calculate this years benefit
+      bj_ii(year, benefit); 
+
+      //add benefit to position
+      xpy(benefit, estimator.y,estimator.y); 
+
       // Integrate over [y,y+1]
-      estimator.estimate_range(v, ref t, t-1);
-      Array.Copy(v, result[y-b-1], v.Length);
+      estimator.move(year-1);
+
+      //Copy v to results
+      Array.Copy(estimator.y, result[year-b-1], estimator.y.Length); 
     }
     return result;
   }
 
-  // saxpy = scalar a times x array plus y array, imperative version
-  static void saxpy(double a, double[] x, double[] y, double[] res) {
+  // xpy =  x array plus y array, imperative version
+  static void xpy(double[] x, double[] y, double[] res) {
     if (x.Length != y.Length)
       throw new Exception("saxpy: lengths of x and y differ");
     if (x.Length != res.Length)
       throw new Exception("saxpy: lengths of x and res differ");
+
     for (int i=0; i<x.Length; i++)
-      res[i] = a * x[i] + y[i];
+      res[i] = x[i] + y[i];
   }
 
 }
@@ -487,7 +499,7 @@ class CalculationSpecifications {
   public class PureEndowment {
 
     static public double[][] test_values = new double[][] {
-      new double[] {0.1437946974886250},
+          new double[] {0.1437946974886250},
           new double[] {0.1513594875720590},
           new double[] {0.1593334830357050},
           new double[] {0.1677404776222450},
@@ -554,14 +566,14 @@ class CalculationSpecifications {
       return Rkf45.RKF45_n((double t, double[] V, double[] res) =>
           { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t)); },
           (double t, double[] res) => { res[0] = bj_00(t); },
-          40, 0, err, new double[] { 0 });
+          40, 0, err, new double[] { 0 },1);
     }
   }
 
   public class DeferredTemporaryLifeAnnuity {
 
     static public double[][] test_values = new double[][] {
-      new double[] {    1.0265607676014400},
+          new double[] {    1.0265607676014400},
           new double[] {    1.0805663523022000},
           new double[] {    1.1374932838714300},
           new double[] {    1.1975114275626800},
@@ -639,14 +651,14 @@ class CalculationSpecifications {
       return Rkf45.RKF45_n((double t, double[] V, double[] res) =>
           { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t)); },
           (double t, double[] res) => { res[0] = bj_00(t); },
-          50, 0, err, new double[] { 0 });
+          50, 0, err, new double[] { 0 },1);
     }
   }
 
   public class TemporaryLifeAnnuityPremium {
 
     static public double[][] test_values = new double[][] {
-      new double[] {  -15.9717676660001000},
+          new double[] {  -15.9717676660001000},
           new double[] {  -15.7859295725898000},
           new double[] {  -15.5914495774420000},
           new double[] {  -15.3879467041606000},
@@ -725,14 +737,14 @@ class CalculationSpecifications {
       return Rkf45.RKF45_n((double t, double[] V, double[] res) =>
           { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t)); },
           (double t, double[] res) => { res[0] = bj_00(t); },
-          50, 0, err, new double[] { 0 });
+          50, 0, err, new double[] { 0 },1);
     }
   }
 
   public class TermInsurance {
 
     static public double[][] test_values = new double[][] {
-      new double[] {    0.0576169193132673},
+          new double[] {    0.0576169193132673},
           new double[] {    0.0593440338503396},
           new double[] {    0.0610940381466785},
           new double[] {    0.0628621872268886},
@@ -811,7 +823,7 @@ class CalculationSpecifications {
       return Rkf45.RKF45_n((double t, double[] V, double[] res) =>
           { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t)); },
           (double t, double[] res) => { res[0] = bj_00(t); },
-          50, 0, err, new double[] { 0 });
+          50, 0, err, new double[] { 0 },1);
     }
   }
 
@@ -821,7 +833,7 @@ class CalculationSpecifications {
   public class DisabilityAnnuity {
 
     static public double[][] test_values = new double[][] {
-      new double[] {    0.5555261079604120,   15.9717676673750000},
+          new double[] {    0.5555261079604120,   15.9717676673750000},
           new double[] {    0.5697939362470290,   15.7859295725873000},
           new double[] {    0.5842458860490700,   15.5914495774393000},
           new double[] {    0.5988112559939020,   15.3879467041578000},
@@ -938,14 +950,14 @@ class CalculationSpecifications {
           - mu_02(t) * (0 - V[0] + bj_02(t));
           res[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t)); },
           (double t, double[] res) => { res[0] = bj_00(t); res[1] = bj_11(t); },
-          50, 0, err, new double[] { 0, 0 });
+          50, 0, err, new double[] { 0, 0 },2);
     }
   }
 
   public class DisabilityTermInsurance {
 
     static public double[][] test_values = new double[][] {
-      new double[] {    0.0714186989824431,    0.0000000000000000},
+          new double[] {    0.0714186989824431,    0.0000000000000000},
           new double[] {    0.0742705084048387,    0.0000000000000000},
           new double[] {    0.0772312485352858,    0.0000000000000000},
           new double[] {    0.0803007388769112,    0.0000000000000000},
@@ -1062,7 +1074,7 @@ class CalculationSpecifications {
           - mu_02(t) * (0 - V[0] + bj_02(t));
           res[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t)); },
           (double t, double[] res) => { res[0] = bj_00(t); res[1] = bj_11(t); },
-          50, 0, err, new double[] { 0, 0 });
+          50, 0, err, new double[] { 0, 0 },2);
     }
   }
 }
