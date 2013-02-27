@@ -258,7 +258,7 @@ class Estimator {
   }
 
   /*************************** Estimator year solver  ***************************/
-  public static double[][] RKF45_n(
+  public double[][] estimate(
       Action<double, double[],double[]> dV, 
       Action<double,double[]> bj_ii,
       int a, int b, double err, double[] start_values,int neqn)
@@ -517,7 +517,7 @@ class CalculationSpecifications {
       
 
 
-      return Estimator.RKF45_n((double t, double[] V, double[] res) =>
+      return estimator.estimate((double t, double[] V, double[] res) =>
           { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t)); },
           (double t, double[] res) => { res[0] = bj_00(t); },
           40, 0, err, new double[] { 0 },1);
