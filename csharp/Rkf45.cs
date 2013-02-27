@@ -12,12 +12,13 @@ class Estimator {
   public Action<double, double[], double[]> dy;   //Differential equation(s).
   public Action<double,double[]> bj_ii;           //State-change benefits
   public int neqn;                                //Number of equations to solve.
+  public double[] y;
+  public double t;
   
   private double h = -1.0;                                  //Step size
   private bool init = false;                                //Have the move function been initialized?
   
-  private double t;
-  private double[] y,yp,f1,f2,f3,f4,f5,f_swap,solution,s2;  //yp     : k1/h,
+  private double[] yp,f1,f2,f3,f4,f5,f_swap,solution,s2;  //yp     : k1/h,
                                                             //f1..5  : equations,
                                                             //f_swap : swap space,
                                                             //s1     : Solution
@@ -261,18 +262,8 @@ class Estimator {
   }
 
   /*************************** Estimator year solver  ***************************/
-  public double[][] estimate(
-      int a, int b, double[] start_values)
+  public double[][] estimate(int start_year,int end_year)
   {
-    //Allocate result array
-    double[][] result = new double[a-b+1][];
-    for (int y=a; y>=b; y--) 
-      result[y-b] = new double[neqn];
-
-    //Insert
-    Array.Copy(start_values, result[a-b], start_values.Length); // Insert start values
-
-
     //Make estimator
     Estimator estimator = new Estimator(); 
     estimator.dy     = this.dy;
@@ -280,13 +271,22 @@ class Estimator {
     estimator.relerr = this.relerr;
     estimator.bj_ii  = this.bj_ii;
     estimator.abserr = this.abserr;
-    estimator.t      = a;
-    estimator.y      = start_values;
+    estimator.t      = (double) end_year;
+    estimator.y      = this.y; 
+
+
+    //Allocate result array
+    double[][] result = new double[end_year-start_year+1][];
+    for (int y=end_year; y>=start_year; y--) 
+      result[y-start_year] = new double[neqn];
+
+    //Insert
+    Array.Copy(estimator.y, result[end_year-start_year], estimator.y.Length); // Insert start values
 
     double[] benefit = new double[neqn];
 
     //Solve for one year at a time
-    for (int year=a; year>b; year--) { 
+    for (int year=end_year; year>start_year; year--) { 
 
       //calculate this years benefit
       estimator.bj_ii(year, benefit); 
@@ -298,7 +298,7 @@ class Estimator {
       estimator.move(year-1);
 
       //Copy v to results
-      Array.Copy(estimator.y, result[year-b-1], estimator.y.Length); 
+      Array.Copy(estimator.y, result[year-start_year-1], estimator.y.Length); 
     }
     return result;
   }
@@ -515,6 +515,8 @@ class CalculationSpecifications {
       estimator.neqn = 1;
       estimator.relerr = err;
       estimator.abserr = err;
+      estimator.y = new double[] { 0 };
+      estimator.t = 40;
       estimator.bj_ii =
           (double t, double[] res) =>
           res[0] = bj_00(t);
@@ -524,8 +526,7 @@ class CalculationSpecifications {
       
 
 
-      return estimator.estimate(
-          40, 0, new double[] { 0 });
+      return estimator.estimate(0,40);
     }
   }
 
