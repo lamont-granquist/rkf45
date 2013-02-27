@@ -23,7 +23,7 @@ class Estimator {
                                                             //s1     : Solution
                                                             //s2     : Alternative solution
 
-  private double relerr, abserr;                            //The relative and absolute error used in equations.
+  public double relerr, abserr;                            //The relative and absolute error used in equations.
 
 
   public Estimator(Action<double, double[], double[]> dy = null, int neqn = 1) {
@@ -262,7 +262,7 @@ class Estimator {
 
   /*************************** Estimator year solver  ***************************/
   public double[][] estimate(
-      int a, int b, double err, double[] start_values)
+      int a, int b, double[] start_values)
   {
     //Allocate result array
     double[][] result = new double[a-b+1][];
@@ -277,9 +277,9 @@ class Estimator {
     Estimator estimator = new Estimator(); 
     estimator.dy     = this.dy;
     estimator.neqn   = this.neqn;
-    estimator.relerr = err;
+    estimator.relerr = this.relerr;
     estimator.bj_ii  = this.bj_ii;
-    estimator.abserr = err;
+    estimator.abserr = this.abserr;
     estimator.t      = a;
     estimator.y      = start_values;
 
@@ -513,6 +513,8 @@ class CalculationSpecifications {
       //Console.WriteLine();
       Estimator estimator = new Estimator();
       estimator.neqn = 1;
+      estimator.relerr = err;
+      estimator.abserr = err;
       estimator.bj_ii =
           (double t, double[] res) =>
           res[0] = bj_00(t);
@@ -523,7 +525,7 @@ class CalculationSpecifications {
 
 
       return estimator.estimate(
-          40, 0, err, new double[] { 0 });
+          40, 0, new double[] { 0 });
     }
   }
 
