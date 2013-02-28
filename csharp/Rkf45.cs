@@ -50,6 +50,18 @@ class Estimator {
 
   /************************** Solve ***********************/
 
+  /* test function */
+  private int TEST_MAX = 50;
+  private int test_values = 1;
+  
+  public void test_add() {
+    test_values++;
+    if (test_values > TEST_MAX) {
+      Environment.Exit(0);
+    }
+  }
+
+
   /* Calculate the solution */
   private double solve ()
   {
@@ -77,6 +89,9 @@ class Estimator {
     for (int i = 0; i < neqn; i++ )
       f_swap[i] = y[i] + ch * yp[i];
     dy ( t + ch, f_swap, f1 );
+
+    Console.WriteLine(f1[0]);
+    test_add();
 
     //f2
     ch = 3.0 * h / 32.0;
@@ -198,12 +213,14 @@ class Estimator {
       for (int i = 0; i < neqn; i++ )
         y[i] = y_plus_one[i];
 
+      /* print test values
       if (y[0] != 0) {
         Console.WriteLine("t: " + t);
         Console.WriteLine("h: " + h);
         Console.WriteLine("y[0]: " + y[0]);
         System.Threading.Thread.Sleep(1000);
       }
+      */
 
       //Update yp
       dy ( t, y, yp );
@@ -354,8 +371,6 @@ class CalculationSpecifications {
 
   static bool IsEqual(double[][] a,double [][] b) {
     for (int i=0; i<a.Length; i++) {
-      //Console.WriteLine(a[i].Length);  
-      //Console.WriteLine(b[i].Length);  
       for (int j=0; j<a[i].Length; j++) {
         if (Math.Abs(a[i][j] - b[i][j]) > err)
           return false;

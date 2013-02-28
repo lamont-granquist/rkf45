@@ -95,15 +95,30 @@ void construct(int n) {
   y_plus_one_alternative = malloc(sizeof(double)*neqn);
 }
 
+/* test function */
+int TEST_MAX = 50;
+static int test_values = 1;
+
+void test_add() {
+  test_values++;
+  if (test_values > TEST_MAX)
+    exit(0);
+}
+
 /* Solve */
 double solve() {
 
     double ch = h / 4.0;
+    
 
     //f1
     for (int i = 0; i < neqn; i++ )
       f_swap[i] = y[i] + ch * yp[i];
     dy ( t + ch, f_swap, f1 );
+
+
+    printf("%.16lf\n",f1[0]);
+    test_add();
 
     //f2
     ch = 3.0 * h / 32.0;
@@ -197,8 +212,6 @@ void move(double t_end) {
     }
 
     double error = solve();
-    printf("error: %.20lf\n",error);
-
 
     //Integreate 1 step
     while(error > 1.0)
@@ -221,13 +234,13 @@ void move(double t_end) {
     for (int i = 0; i < neqn; i++ )
       y[i] = y_plus_one[i];
 
-    //Print test data
+    /*Print test data
     if (y[0] != 0) {
       printf("t: %.20lf\n",t);
       printf("h: %.20lf\n",h);
       printf("y[0]: %.20lf\n",y[0]);
       sleep(1);
-    }
+    }*/
 
     //Update yp
     dy ( t, y, yp );
