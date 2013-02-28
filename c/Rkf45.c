@@ -3,6 +3,10 @@
 #include "Policy_Distributor.h" 
 #include <assert.h>
 #include <stdbool.h>
+#include <math.h>
+
+//Max function
+#define max(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b);_a > _b ? _a : _b; })
 
 //Declare functions
 void construct();
@@ -78,6 +82,7 @@ void construct(int n) {
 
 /* Solve */
 double solve() {
+
     double ch = h / 4.0;
 
     //f1
@@ -117,13 +122,31 @@ double solve() {
       y_plus_one[i] = y[i] + ch * ( ( 902880.0 * yp[i] + 
             ( 3855735.0 * f3[i] - 1371249.0 * f4[i] ) ) + ( 3953664.0 * f2[i] + 277020.0 * f5[i] ) );
 
-    return 0.0;
+    //Calculate alternative solution
+    for (int i = 0; i < neqn; i++ )
+      y_plus_one_alternative[i] = ( -2090.0 * yp[i] + ( 21970.0 * f3[i] - 15048.0 * f4[i] ) ) + ( 22528.0 * f2[i] - 27360.0 * f5[i] );
 
+    //Calculate the error.
+    double biggest_difference = 0.0;
+
+    double scale = 2.0 / relerr; //scale
+    double ae = scale * abserr;  //absolute error
+    
+    for (int i = 0; i < neqn; i++ )
+    {
+      double et = abs( y[i] ) + abs( y_plus_one[i] ) + ae;
+      double ee = abs( y_plus_one_alternative[i] );
+
+      biggest_difference = max ( biggest_difference, ee / et );
+    }
+
+    //Return the err
+    return abs( h ) * biggest_difference * scale / 752400.0;
 }
 
 /* Move */
 void move(double t_end) {
-
+  solve();
 }
 
 /* Estimate range */
@@ -169,6 +192,13 @@ void test() {
 
   for(int i=0;i<5;i++)
     assert(a[i]==6);
+
+  //Test abs
+  assert(abs(-100)==100);
+  
+  //Test max
+  assert(max(10,5)==10);
+  assert(max(-10,5)==5);
 }
 
 /* Addtion of all elements in array b to array a */
