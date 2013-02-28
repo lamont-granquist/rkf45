@@ -4,6 +4,8 @@
 #include <assert.h>
 #include <math.h>
 
+#include <unistd.h> //only for sleep?
+
 //Boolean values
 typedef int bool;
 #define false 0
@@ -69,9 +71,9 @@ int main(int argc, char const *argv[]) {
   test();
 
   //Start estimator
-  estimate(0,40);
+  estimate(0,50);
   //Print result:
-  //print_matrix(40,1,estimate(0,40));
+  //print_matrix(50,1,estimate(0,50));
 
   printf("test succesful\n");
   return 0;
@@ -195,6 +197,8 @@ void move(double t_end) {
     }
 
     double error = solve();
+    printf("error: %.20lf\n",error);
+
 
     //Integreate 1 step
     while(error > 1.0)
@@ -217,6 +221,14 @@ void move(double t_end) {
     for (int i = 0; i < neqn; i++ )
       y[i] = y_plus_one[i];
 
+    //Print test data
+    if (y[0] != 0) {
+      printf("t: %.20lf\n",t);
+      printf("h: %.20lf\n",h);
+      printf("y[0]: %.20lf\n",y[0]);
+      sleep(1);
+    }
+
     //Update yp
     dy ( t, y, yp );
 
@@ -224,8 +236,6 @@ void move(double t_end) {
     double scale = scale_from_error(error,hfaild);
     h = sign ( h ) * max ( scale * abs( h ), hmin );
   }
-
-  solve();
 }
 
 /**************** Move help functions ****************/
