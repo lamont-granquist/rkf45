@@ -116,15 +116,14 @@ double solve() {
       f_swap[i] = y[i] + ch * yp[i];
     dy ( t + ch, f_swap, f1 );
 
-
-    printf("%.16lf\n",f1[0]);
-    test_add();
-
     //f2
     ch = 3.0 * h / 32.0;
     for (int i = 0; i < neqn; i++ )
       f_swap[i] = y[i] + ch * ( yp[i] + 3.0 * f1[i] );
     dy ( t + 3.0 * h / 8.0, f_swap, f2 );
+
+    if (test_values == 16)
+      printf("%.17lf\n",t + 3.0 * h / 8.0);
 
     //f3
     ch = h / 2197.0;
@@ -145,6 +144,15 @@ double solve() {
       f_swap[i] = y[i] + ch * ( ( -6080.0 * yp[i] + 
             ( 9295.0 * f3[i] - 5643.0 * f4[i] ) ) + ( 41040.0 * f1[i] - 28352.0 * f2[i] ) );
     dy ( t + h / 2.0, f_swap, f5 );
+
+    if (test_values == 16) {
+      printf("%.16lf\n",f1[0]);
+      printf("%.16lf\n",f2[0]);
+      printf("%.16lf\n",f3[0]);
+      printf("%.16lf\n",f4[0]);
+      printf("%.16lf\n",f5[0]);
+    }
+    test_add();
 
     //Calculate solution
     ch = h / 7618050.0;
