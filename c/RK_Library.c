@@ -10,7 +10,6 @@
 #include "RK_Library.h"
 #include <math.h>
 
-
 double age = 30;
 double interestrate = 0.05;
 double bpension = 1;
