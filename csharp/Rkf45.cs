@@ -1,5 +1,5 @@
 /*
- * Simple RKf45. Made by stripping Sestofts code
+ * Modern Rkf45. Made by simplification and refactoring of original code
  */
 
 using System;
@@ -16,7 +16,7 @@ class Estimator {
   public double t;
   
   private double h = -1.0;                                  //Step size
-  private bool init = false;                                //Have the move function been initialized?
+  private bool first_move = true;                           //Have the move function been initialized?
   
   private double[] yp,f1,f2,f3,f4,f5,f_swap,y_plus_one,y_plus_one_alternative;  //yp     : k1/h,
                                                             //f1..5  : equations,
@@ -26,6 +26,7 @@ class Estimator {
 
   public double relerr, abserr;                            //The relative and absolute error used in equations.
 
+  /************************** Constructor ***********************/
 
   public Estimator(int neqn) {
     this.neqn = neqn;
@@ -35,6 +36,8 @@ class Estimator {
 
     allocate_equation_space();
   }
+
+  /************************** Allocate ***********************/
 
   private void allocate_equation_space() {
     //Disse er temp for solve metoden.
@@ -46,6 +49,8 @@ class Estimator {
     this.f_swap = new double[neqn];
     this.y_plus_one_alternative = new double[neqn];
   }
+
+  /************************** Solve ***********************/
 
   /* Calculate the solution */
   private double solve ()
@@ -129,14 +134,16 @@ class Estimator {
     return Math.Abs( h ) * biggest_difference * scale / 752400.0;
   }
 
+  /******************* Move ***********************/
+
   /* Move from current position to t_end, and update all values */
   public void move(double t_end)
   {
     // Init
     // Note: (we NEED initialization in the move function, the calculation of h depends on the t_end value)
-    if ( !init )
+    if (first_move )
     {
-      init = true;
+      first_move = false;
 
       //Calculate yp
       dy ( t, y, yp );
@@ -202,7 +209,7 @@ class Estimator {
     }
   }
 
-  /******************* HELP FUNCTIONS *******************/
+  /******************* Move help functions  *******************/
 
   /* Calculate h's startvalue */
   public double h_startvalue(double t_end)
@@ -236,6 +243,39 @@ class Estimator {
     return scale;
   }
 
+  /*************************** Estimator year solver  ***************************/
+  public double[][] estimate(int start_year,int end_year)
+  {
+    //Start at the end year
+    t = (double) end_year;
+
+    //Allocate result array
+    double[][] result = new double[end_year-start_year+1][];
+    for (int year=end_year; year>=start_year; year--) 
+      result[year-start_year] = new double[neqn];
+
+    //Insert
+
+    double[] benefit = new double[neqn];
+
+    //Solve for one year at a time
+    for (int year=end_year; year>start_year; year--) { 
+
+      //calculate this years benefit
+      bj_ii(year, benefit); 
+
+      //add benefit to position
+      xpy(benefit, y,y); 
+
+      // Integrate over [t,t-1]
+      move(year-1);
+
+      //Copy v to results
+      Array.Copy(y, result[year-start_year-1], y.Length); 
+    }
+    return result;
+  }
+
   /*************************** Auxiliaries ***************************/
 
   static double r8_sign ( double x ) {
@@ -258,40 +298,6 @@ class Estimator {
 
     for (int i=0; i<x.Length; i++)
       res[i] = x[i] + y[i];
-  }
-
-  /*************************** Estimator year solver  ***************************/
-  public double[][] estimate(int start_year,int end_year)
-  {
-    //Start at the end year
-    t = (double) end_year;
-
-    //Allocate result array
-    double[][] result = new double[end_year-start_year+1][];
-    for (int year=end_year; year>=start_year; year--) 
-      result[year-start_year] = new double[neqn];
-
-    //Insert
-    Array.Copy(y, result[end_year-start_year], y.Length); // Insert start values
-
-    double[] benefit = new double[neqn];
-
-    //Solve for one year at a time
-    for (int year=end_year; year>start_year; year--) { 
-
-      //calculate this years benefit
-      bj_ii(year, benefit); 
-
-      //add benefit to position
-      xpy(benefit, y,y); 
-
-      // Integrate over [t,t-1]
-      move(year-1);
-
-      //Copy v to results
-      Array.Copy(y, result[year-start_year-1], y.Length); 
-    }
-    return result;
   }
 
 }
