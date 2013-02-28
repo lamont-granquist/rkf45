@@ -509,7 +509,6 @@ class CalculationSpecifications {
       estimator.relerr = err;
       estimator.abserr = err;
       estimator.y = new double[] { 0 };
-      estimator.t = 40;
       estimator.bj_ii =
           (double t, double[] res) =>
           res[0] = bj_00(t);
