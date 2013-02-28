@@ -36,7 +36,7 @@ void bj_ii_TermInsurance(double t, double* result) {
   result[0] = bj_00(t);
 }
 
-void dy_TermInsurance(double t, double* V,int m, int n, double** result)
+void dy_TermInsurance(double t, double* V,double* result)
 {
-    result[0][0] = 5.0; //r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
+    result[0] = 5.0; //r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
 }

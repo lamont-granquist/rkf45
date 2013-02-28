@@ -5,11 +5,11 @@
 
 int policy = 1;
 
-void dy(double t,double* V, int m, int n, double** result) {
+void dy(double t, double* V, double* result) {
   switch(policy)
   {
     case 1:
-      dy_TermInsurance(t,V,m,n,result);
+      dy_TermInsurance(t,V,result);
     break;
   };
 }
