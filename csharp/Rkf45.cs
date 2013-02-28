@@ -601,7 +601,6 @@ class CalculationSpecifications {
           res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
 
       return estimator.estimate(0,50);
-            
     }
   }
 
@@ -906,14 +905,11 @@ class CalculationSpecifications {
       estimator.y = new double[] { 0,0 };
       estimator.bj_ii =
           (double t, double[] res) => {res[0] = bj_00(t); res[1] = bj_11(t);};
-
-
       estimator.dy =
           (double t, double[] V, double[] res) => {
           res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (V[1] - V[0] + bj_01(t)) - mu_02(t) * (0 - V[0] + bj_02(t));
           res[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t)); 
           };
-
 
       return estimator.estimate(0,50);
     }
@@ -1037,7 +1033,6 @@ class CalculationSpecifications {
       estimator.y = new double[] { 0,0 };
       estimator.bj_ii =
           (double t, double[] res) => { res[0] = bj_00(t); res[1] = bj_11(t); };
-
       estimator.dy =
           (double t, double[] V, double[] res) => {
             res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (V[1] - V[0] + bj_01(t)) - mu_02(t) * (0 - V[0] + bj_02(t));
