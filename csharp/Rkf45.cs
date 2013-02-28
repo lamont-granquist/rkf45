@@ -13,7 +13,7 @@ class Estimator {
   public Action<double,double[]> bj_ii;           //State-change benefits
   public int neqn;                                //Number of equations to solve.
   public double[] y;
-  public double t;
+  private double t;
   
   private double h = -1.0;                                  //Step size
   private bool first_move = true;                           //Have the move function been initialized?
