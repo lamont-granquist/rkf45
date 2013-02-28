@@ -11,6 +11,8 @@ void test();
 double** allocate_double_matrix();
 void print_matrix();
 void xpy();
+double solve();
+void move();
 
 //Declare Estimator variables
 double const err = 1e-11;
@@ -55,6 +57,16 @@ void construct(int n) {
   yp = malloc(sizeof(double)*neqn);
 }
 
+/* Solve */
+double solve() {
+
+}
+
+/* Move */
+void move(double t_end) {
+
+}
+
 /* Estimate range */
 double** estimate(int start_year,int end_year) {
 
@@ -77,9 +89,11 @@ double** estimate(int start_year,int end_year) {
     xpy(y,benefit);
 
     //Integate
-    //TODO
+    move(year-1);
 
-    //Copy results
+    //Copy y to results
+    for(int i=0;i<neqn;i++)
+      result[year-start_year-1][i] = y[i];
   }
 
   //dy(0.0,y,result_length,neqn,result);

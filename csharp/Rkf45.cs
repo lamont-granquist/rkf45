@@ -267,7 +267,7 @@ class Estimator {
       // Integrate over [t,t-1]
       move(year-1);
 
-      //Copy v to results
+      //Copy y to results
       Array.Copy(y, result[year-start_year-1], y.Length); 
     }
     return result;

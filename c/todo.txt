@@ -3,3 +3,7 @@ Setup testing enviroment. With all policies.
 Add the algoritm while adding assertions to the C# code.
 
 Might want to split up estimator and testing, running of it?
+
+Vejleder hjælp:
+
+Testing af functioner?
