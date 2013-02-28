@@ -7,6 +7,7 @@
 
 //Max function
 #define max(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b);_a > _b ? _a : _b; })
+#define min(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b);_a < _b ? _a : _b; })
 
 //Declare functions
 void construct();
@@ -199,6 +200,11 @@ void test() {
   //Test max
   assert(max(10,5)==10);
   assert(max(-10,5)==5);
+
+  //Test max
+  assert(min(10,5)==5);
+  assert(min(-10,5)==-10);
+
 }
 
 /* Addtion of all elements in array b to array a */
