@@ -18,7 +18,7 @@ class Estimator {
   private double h = -1.0;                                  //Step size
   private bool init = false;                                //Have the move function been initialized?
   
-  private double[] yp,f1,f2,f3,f4,f5,f_swap,solution,s2;  //yp     : k1/h,
+  private double[] yp,f1,f2,f3,f4,f5,f_swap,y_plus_one,y_plus_one_alternative;  //yp     : k1/h,
                                                             //f1..5  : equations,
                                                             //f_swap : swap space,
                                                             //s1     : Solution
@@ -27,10 +27,9 @@ class Estimator {
   public double relerr, abserr;                            //The relative and absolute error used in equations.
 
 
-  public Estimator(Action<double, double[], double[]> dy = null, int neqn = 1) {
-    this.dy = dy;
+  public Estimator(int neqn) {
     this.neqn = neqn;
-    this.solution = new double[neqn];
+    this.y_plus_one = new double[neqn];
     this.y = new double[neqn];
     this.yp = new double[neqn];
 
@@ -45,7 +44,7 @@ class Estimator {
     this.f4 = new double[neqn];
     this.f5 = new double[neqn];
     this.f_swap = new double[neqn];
-    this.s2 = new double[neqn];
+    this.y_plus_one_alternative = new double[neqn];
   }
 
   /* Calculate the solution */
@@ -105,12 +104,12 @@ class Estimator {
     //Calculate solution
     ch = h / 7618050.0;
     for (int i = 0; i < neqn; i++ )
-      solution[i] = y[i] + ch * ( ( 902880.0 * yp[i] + 
+      y_plus_one[i] = y[i] + ch * ( ( 902880.0 * yp[i] + 
             ( 3855735.0 * f3[i] - 1371249.0 * f4[i] ) ) + ( 3953664.0 * f2[i] + 277020.0 * f5[i] ) );
 
     //Calculate alternative solution
     for (int i = 0; i < neqn; i++ )
-      s2[i] = ( -2090.0 * yp[i] + ( 21970.0 * f3[i] - 15048.0 * f4[i] ) ) + ( 22528.0 * f2[i] - 27360.0 * f5[i] );
+      y_plus_one_alternative[i] = ( -2090.0 * yp[i] + ( 21970.0 * f3[i] - 15048.0 * f4[i] ) ) + ( 22528.0 * f2[i] - 27360.0 * f5[i] );
 
     //Calculate the error.
     double biggest_difference = 0.0;
@@ -120,8 +119,8 @@ class Estimator {
     
     for (int i = 0; i < neqn; i++ )
     {
-      double et = Math.Abs( y[i] ) + Math.Abs( solution[i] ) + ae;
-      double ee = Math.Abs( s2[i] );
+      double et = Math.Abs( y[i] ) + Math.Abs( y_plus_one[i] ) + ae;
+      double ee = Math.Abs( y_plus_one_alternative[i] );
 
       biggest_difference = Math.Max ( biggest_difference, ee / et );
     }
@@ -192,7 +191,7 @@ class Estimator {
 
       //Apply solution
       for (int i = 0; i < neqn; i++ )
-        y[i] = solution[i];
+        y[i] = y_plus_one[i];
 
       //Update yp
       dy ( t, y, yp );
@@ -264,24 +263,16 @@ class Estimator {
   /*************************** Estimator year solver  ***************************/
   public double[][] estimate(int start_year,int end_year)
   {
-    //Make estimator
-    Estimator estimator = new Estimator(); 
-    estimator.dy     = this.dy;
-    estimator.neqn   = this.neqn;
-    estimator.relerr = this.relerr;
-    estimator.bj_ii  = this.bj_ii;
-    estimator.abserr = this.abserr;
-    estimator.t      = (double) end_year;
-    estimator.y      = this.y; 
-
+    //Start at the end year
+    t = (double) end_year;
 
     //Allocate result array
     double[][] result = new double[end_year-start_year+1][];
-    for (int y=end_year; y>=start_year; y--) 
-      result[y-start_year] = new double[neqn];
+    for (int year=end_year; year>=start_year; year--) 
+      result[year-start_year] = new double[neqn];
 
     //Insert
-    Array.Copy(estimator.y, result[end_year-start_year], estimator.y.Length); // Insert start values
+    Array.Copy(y, result[end_year-start_year], y.Length); // Insert start values
 
     double[] benefit = new double[neqn];
 
@@ -289,16 +280,16 @@ class Estimator {
     for (int year=end_year; year>start_year; year--) { 
 
       //calculate this years benefit
-      estimator.bj_ii(year, benefit); 
+      bj_ii(year, benefit); 
 
       //add benefit to position
-      xpy(benefit, estimator.y,estimator.y); 
+      xpy(benefit, y,y); 
 
-      // Integrate over [y,y+1]
-      estimator.move(year-1);
+      // Integrate over [t,t-1]
+      move(year-1);
 
       //Copy v to results
-      Array.Copy(estimator.y, result[year-start_year-1], estimator.y.Length); 
+      Array.Copy(y, result[year-start_year-1], y.Length); 
     }
     return result;
   }
@@ -508,11 +499,7 @@ class CalculationSpecifications {
     }
 
     public static double[][] Compute() {
-      //Console.WriteLine("\n PureEndowment");
-      //Print(new double[][] { new double[] { 0.14379469738 } });
-      //Console.WriteLine();
-      Estimator estimator = new Estimator();
-      estimator.neqn = 1;
+      Estimator estimator = new Estimator(1);
       estimator.relerr = err;
       estimator.abserr = err;
       estimator.y = new double[] { 0 };
@@ -523,8 +510,6 @@ class CalculationSpecifications {
       estimator.dy =
           (double t, double[] V, double[] res) =>
           res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
-      
-
 
       return estimator.estimate(0,40);
     }
@@ -605,15 +590,18 @@ class CalculationSpecifications {
     }
 
     public static double[][] Compute() {
-      //Console.WriteLine("\n DeferredTemporaryLifeAnnuity");
-      //Print(new double[][] { new double[] { 1.0265607675 } });
-      //Console.WriteLine();
-      return test_values;
-      /*return Estimator.RKF45_n((double t, double[] V, double[] res) =>
-          { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t)); },
-          (double t, double[] res) => { res[0] = bj_00(t); },
-          50, 0, err, new double[] { 0 },1);
-      */
+      Estimator estimator = new Estimator(1);
+      estimator.relerr = err;
+      estimator.abserr = err;
+      estimator.y = new double[] { 0 };
+      estimator.bj_ii =
+          (double t, double[] res) => res[0] = bj_00(t);
+      estimator.dy =
+          (double t, double[] V, double[] res) =>
+          res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
+
+      return estimator.estimate(0,50);
+            
     }
   }
 
@@ -693,15 +681,17 @@ class CalculationSpecifications {
     }
 
     public static double[][] Compute() {
-      //Console.WriteLine("\n TemporaryLifeAnnuityPremium");
-      //Print(new double[][] { new double[] { -15.971767666 } });
-      //Console.WriteLine();
-      /*  return Estimator.RKF45_n((double t, double[] V, double[] res) =>
-          { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t)); },
-          (double t, double[] res) => { res[0] = bj_00(t); },
-          50, 0, err, new double[] { 0 },1);
-      */
-      return test_values;
+      Estimator estimator = new Estimator(1);
+      estimator.relerr = err;
+      estimator.abserr = err;
+      estimator.y = new double[] { 0 };
+      estimator.bj_ii =
+          (double t, double[] res) => res[0] = bj_00(t);
+      estimator.dy =
+          (double t, double[] V, double[] res) =>
+          res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
+
+      return estimator.estimate(0,50);
     }
   }
 
@@ -781,15 +771,17 @@ class CalculationSpecifications {
     }
 
     public static double[][] Compute() {
-      //Console.WriteLine("\n TermInsurance");
-      //Print(new double[][] { new double[] { 0.057616919318 } });
-      //Console.WriteLine();
-      /*return Estimator.RKF45_n((double t, double[] V, double[] res) =>
-          { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t)); },
-          (double t, double[] res) => { res[0] = bj_00(t); },
-          50, 0, err, new double[] { 0 },1);
-      */
-      return test_values;
+      Estimator estimator = new Estimator(1);
+      estimator.relerr = err;
+      estimator.abserr = err;
+      estimator.y = new double[] { 0 };
+      estimator.bj_ii =
+          (double t, double[] res) => res[0] = bj_00(t);
+      estimator.dy =
+          (double t, double[] V, double[] res) =>
+          res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
+
+      return estimator.estimate(0,50);
     }
   }
 
@@ -908,17 +900,22 @@ class CalculationSpecifications {
     }
 
     public static double[][] Compute() {
-      //Console.WriteLine("\n DisabilityAnnuity");
-      //Print(new double[][] { new double[] { 0.55552610797, 15.971767666 } });
-      //Console.WriteLine();
-      /*return Estimator.RKF45_n((double t, double[] V, double[] res) =>
-          { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (V[1] - V[0] + bj_01(t)) 
-          - mu_02(t) * (0 - V[0] + bj_02(t));
-          res[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t)); },
-          (double t, double[] res) => { res[0] = bj_00(t); res[1] = bj_11(t); },
-          50, 0, err, new double[] { 0, 0 },2);
-      */
-      return test_values;
+      Estimator estimator = new Estimator(2);
+      estimator.relerr = err;
+      estimator.abserr = err;
+      estimator.y = new double[] { 0,0 };
+      estimator.bj_ii =
+          (double t, double[] res) => {res[0] = bj_00(t); res[1] = bj_11(t);};
+
+
+      estimator.dy =
+          (double t, double[] V, double[] res) => {
+          res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (V[1] - V[0] + bj_01(t)) - mu_02(t) * (0 - V[0] + bj_02(t));
+          res[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t)); 
+          };
+
+
+      return estimator.estimate(0,50);
     }
   }
 
@@ -1034,18 +1031,20 @@ class CalculationSpecifications {
     }
 
     public static double[][] Compute() {
-      //Console.WriteLine("\n DisabilityTermInsurance");
-      //Print(new double[][] { new double[] { 0.071418699003, 0.000000000 } });
-      //Console.WriteLine();
-      return test_values;
-      /*
-      return Estimator.RKF45_n((double t, double[] V, double[] res) =>
-          { res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (V[1] - V[0] + bj_01(t)) 
-          - mu_02(t) * (0 - V[0] + bj_02(t));
-          res[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t)); },
-          (double t, double[] res) => { res[0] = bj_00(t); res[1] = bj_11(t); },
-          50, 0, err, new double[] { 0, 0 },2);
-      */
+      Estimator estimator = new Estimator(2);
+      estimator.relerr = err;
+      estimator.abserr = err;
+      estimator.y = new double[] { 0,0 };
+      estimator.bj_ii =
+          (double t, double[] res) => { res[0] = bj_00(t); res[1] = bj_11(t); };
+
+      estimator.dy =
+          (double t, double[] V, double[] res) => {
+            res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (V[1] - V[0] + bj_01(t)) - mu_02(t) * (0 - V[0] + bj_02(t));
+            res[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t));
+          };
+          
+      return estimator.estimate(0,50);
     }
   }
 }
