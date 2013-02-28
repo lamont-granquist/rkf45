@@ -5,7 +5,7 @@
 
 int policy = 1;
 
-void dy(double t,double* V, int m, int n, double result[m][n]) {
+void dy(double t,double* V, int m, int n, double** result) {
   switch(policy)
   {
     case 1:

@@ -11,28 +11,26 @@ class Estimator {
 
   public Action<double, double[], double[]> dy;   //Differential equation(s).
   public Action<double,double[]> bj_ii;           //State-change benefits
-  public int neqn;                                //Number of equations to solve.
-  public double[] y;
-  private double t;
-  
-  private double h = -1.0;                                  //Step size
+
+  public int neqn;                               
+  private double t,h;
   private bool first_move = true;                           //Have the move function been initialized?
-  
   private double[] yp,f1,f2,f3,f4,f5,f_swap,y_plus_one,y_plus_one_alternative;  //yp     : k1/h,
                                                             //f1..5  : equations,
                                                             //f_swap : swap space,
                                                             //s1     : Solution
                                                             //s2     : Alternative solution
 
+  public double[] y;
   public double relerr, abserr;                            //The relative and absolute error used in equations.
 
   /************************** Constructor ***********************/
 
-  public Estimator(int neqn) {
-    this.neqn = neqn;
-    this.y_plus_one = new double[neqn];
-    this.y = new double[neqn];
-    this.yp = new double[neqn];
+  public Estimator(int n) {
+    neqn = n;
+    y_plus_one = new double[neqn];
+    y = new double[neqn];
+    yp = new double[neqn];
 
     allocate_equation_space();
   }
@@ -41,13 +39,13 @@ class Estimator {
 
   private void allocate_equation_space() {
     //Disse er temp for solve metoden.
-    this.f1 = new double[neqn];
-    this.f2 = new double[neqn];
-    this.f3 = new double[neqn];
-    this.f4 = new double[neqn];
-    this.f5 = new double[neqn];
-    this.f_swap = new double[neqn];
-    this.y_plus_one_alternative = new double[neqn];
+    f1 = new double[neqn];
+    f2 = new double[neqn];
+    f3 = new double[neqn];
+    f4 = new double[neqn];
+    f5 = new double[neqn];
+    f_swap = new double[neqn];
+    y_plus_one_alternative = new double[neqn];
   }
 
   /************************** Solve ***********************/
@@ -254,8 +252,7 @@ class Estimator {
     for (int year=end_year; year>=start_year; year--) 
       result[year-start_year] = new double[neqn];
 
-    //Insert
-
+    //Allocate benefit array
     double[] benefit = new double[neqn];
 
     //Solve for one year at a time
@@ -505,7 +502,11 @@ class CalculationSpecifications {
     }
 
     public static double[][] Compute() {
+      
+      //Construct the estimator
       Estimator estimator = new Estimator(1);
+
+      //Set estimator variables (Term insurrance)
       estimator.relerr = err;
       estimator.abserr = err;
       estimator.y = new double[] { 0 };
