@@ -9,9 +9,10 @@ typedef int bool;
 #define false 0
 #define true 1
 
-//Max function
+//Max,min,sign functions
 #define max(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b);_a > _b ? _a : _b; })
 #define min(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b);_a < _b ? _a : _b; })
+#define sign(x)  ((x > 0) - ( x < 0))
 
 //Declare functions
 void construct();
@@ -221,7 +222,7 @@ void move(double t_end) {
 
     //Apply scale to stepsize
     double scale = scale_from_error(error,hfaild);
-    h = r8_sign ( h ) * max ( scale * abs( h ), hmin );
+    h = sign ( h ) * max ( scale * abs( h ), hmin );
   }
 
   solve();
