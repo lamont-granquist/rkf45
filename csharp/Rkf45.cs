@@ -96,9 +96,6 @@ class Estimator {
       f_swap[i] = y[i] + ch * ( yp[i] + 3.0 * f1[i] );
     dy ( t + 3.0 * h / 8.0, f_swap, f2 );
 
-    if (test_values == 16) 
-      Console.WriteLine(t + 3.0 * h / 8.0);
-
     //f3
     ch = h / 2197.0;
     for (int i = 0; i < neqn; i++ )
@@ -119,6 +116,7 @@ class Estimator {
             ( 9295.0 * f3[i] - 5643.0 * f4[i] ) ) + ( 41040.0 * f1[i] - 28352.0 * f2[i] ) );
     dy ( t + h / 2.0, f_swap, f5 );
 
+    /*
     if (test_values == 16) {
       Console.WriteLine(f1[0]);
       Console.WriteLine(f2[0]);
@@ -126,7 +124,7 @@ class Estimator {
       Console.WriteLine(f4[0]);
       Console.WriteLine(f5[0]);
     }
-    test_add();
+    */
 
     //Calculate solution
     ch = h / 7618050.0;
@@ -137,6 +135,12 @@ class Estimator {
     //Calculate alternative solution
     for (int i = 0; i < neqn; i++ )
       y_plus_one_alternative[i] = ( -2090.0 * yp[i] + ( 21970.0 * f3[i] - 15048.0 * f4[i] ) ) + ( 22528.0 * f2[i] - 27360.0 * f5[i] );
+
+    /*
+    Console.WriteLine("yp:   "+ yp[0]);
+    Console.WriteLine("ypo:  "+ y_plus_one[0]);
+    Console.WriteLine("ypoa: "+ y_plus_one_alternative[0]);
+    */
 
     //Calculate the error.
     double biggest_difference = 0.0;
@@ -149,8 +153,20 @@ class Estimator {
       double et = Math.Abs( y[i] ) + Math.Abs( y_plus_one[i] ) + ae;
       double ee = Math.Abs( y_plus_one_alternative[i] );
 
+      /*
+      Console.WriteLine("et:   "+ et);
+      Console.WriteLine("ee:   "+ ee);
+      */
+
       biggest_difference = Math.Max ( biggest_difference, ee / et );
     }
+
+    /*
+    Console.WriteLine("bg:   "+ biggest_difference);
+    Console.WriteLine("yp1:  "+ y_plus_one[0]);
+    Console.WriteLine("yp1a: "+ y_plus_one_alternative[0]);
+    Console.WriteLine("err:  "+ Math.Abs( h ) * biggest_difference * scale / 752400.0);
+    */
 
     //Return the error 
     return Math.Abs( h ) * biggest_difference * scale / 752400.0;
