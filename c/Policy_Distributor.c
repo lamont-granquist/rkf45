@@ -5,12 +5,11 @@
 
 int policy = 1;
 
-void dV(double t,double* V, double* result) {
+void dV(double t,double* V, int m, int n, double result[m][n]) {
   switch(policy)
   {
     case 1:
-      //Test();
-      dV_TermInsurance(t,V,result);
+      dV_TermInsurance(t,V,m,n,result);
     break;
   };
 }
