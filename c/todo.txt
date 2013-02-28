@@ -1,0 +1,3 @@
+Setup testing enviroment. With all policies.
+
+Add the algoritm while adding assertions to the C# code.
