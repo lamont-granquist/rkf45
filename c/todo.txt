@@ -7,3 +7,5 @@ Might want to split up estimator and testing, running of it?
 Vejleder hjælp:
 
 Testing af functioner?
+
+Flere test case behøves.

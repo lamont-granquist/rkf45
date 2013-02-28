@@ -2,8 +2,12 @@
 #include <stdio.h>
 #include "Policy_Distributor.h" 
 #include <assert.h>
-#include <stdbool.h>
 #include <math.h>
+
+//Boolean values
+typedef int bool;
+#define false 0
+#define true 1
 
 //Max function
 #define max(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b);_a > _b ? _a : _b; })
@@ -18,6 +22,10 @@ void print_matrix();
 void xpy();
 double solve();
 void move();
+double h_startvalue();
+double scale_from_error();
+bool test_bool();
+double FindDoubleEpsilon();
 
 //Declare Estimator variables
 double const err = 1e-11;
@@ -36,6 +44,7 @@ static double* f5;
 static double* f_swap;
 static double* y_plus_one;
 static double* y_plus_one_alternative;
+static double DoubleEpsilon;
 
 //Public
 static double* y;
@@ -59,7 +68,9 @@ int main(int argc, char const *argv[]) {
   test();
 
   //Start estimator
-  print_matrix(10,1,estimate(0,10));
+  estimate(0,40);
+  //Print result:
+  //print_matrix(40,1,estimate(0,40));
 
   printf("test succesful\n");
   return 0;
@@ -68,7 +79,7 @@ int main(int argc, char const *argv[]) {
 /* Initiate estimator */
 void construct(int n) {
   neqn = n;
-
+  DoubleEpsilon = FindDoubleEpsilon();
   y                      = malloc(sizeof(double)*neqn);
   yp                     = malloc(sizeof(double)*neqn);
   f1                     = malloc(sizeof(double)*neqn);
@@ -147,7 +158,125 @@ double solve() {
 
 /* Move */
 void move(double t_end) {
+  
+  //Init
+  if (first_move) {
+    first_move = false;
+
+    dy( t, y, yp);
+
+    h = h_startvalue(t_end);
+  }
+
+  //Step by step integration.
+  bool end_reached = false;
+
+  while (!end_reached)
+  {
+    //Variables used in calculations
+    bool hfaild = false;
+    double dt = t_end - t;
+    double hmin = 26.0 * DoubleEpsilon * abs( t );
+
+    //Reaction if h is going to the endpoint.
+    //Look 2.0 steps ahead, so stepsize is not 'suddenly' decreased.
+    if ( 2.0 * abs( h ) > abs( dt ) )
+    {
+      if ( abs( dt ) <= abs( h ) ) //Final step?
+      {
+        end_reached = true; //Return output
+        h = dt;                   //Let h hit output point
+      }
+      else
+      {
+        h = 0.5 * dt; // If not final step, set h to be second final step. (evens out)
+      }
+    }
+
+    double error = solve();
+
+    //Integreate 1 step
+    while(error > 1.0)
+    {
+      hfaild = true;
+      end_reached = false;
+      
+      //Scale down.
+      double s = max(0.1,0.9 / pow( error, 0.2 ));
+      h = s * h;  
+
+      //Try again.
+      error = solve();
+    }
+
+    //Advance in time
+    t = t + h; 
+
+    //Apply solution
+    for (int i = 0; i < neqn; i++ )
+      y[i] = y_plus_one[i];
+
+    //Update yp
+    dy ( t, y, yp );
+
+    //Apply scale to stepsize
+    double scale = scale_from_error(error,hfaild);
+    h = r8_sign ( h ) * max ( scale * abs( h ), hmin );
+  }
+
   solve();
+}
+
+/**************** Move help functions ****************/
+
+/* Calculate h's startvalue */
+double h_startvalue(double t_end)
+{
+  //Calculate the start value of h
+  double h = abs( t_end - t );
+
+  for (int k = 0; k < neqn; k++ )
+  {
+    double tol = relerr * abs( y[k] ) + abserr;
+    if ( 0.0 < tol )
+    {
+      double ypk = abs( yp[k] );
+      if ( tol < ypk * pow( h, 5 ) )
+      {
+        h = pow( ( tol / ypk ), 0.2 );
+        printf("this should not happen.\n");
+      }
+        /* test startvalues
+        printf("abserr: %.40lf\n",abserr);
+        printf("tol: %.40lf\n",tol);
+        printf("ypk: %.40lf\n",ypk);
+        printf("y[k]: %.40lf\n",y[k]);
+        printf("yp[k]: %.40lf\n",yp[k]);
+        printf("h: %.40lf\n",h);
+        */
+    }
+  }
+
+  return  max( h, 26.0 * DoubleEpsilon * max( abs( t ), abs( t_end - t ) ) );
+}
+
+/* Scale from error calculations */
+double scale_from_error(double error,bool hfailed) {
+
+  double scale = min(5.0,0.9 / pow( error, 0.2 ));
+
+  if (hfailed)
+    scale = min( scale, 1.0 );
+
+  return scale;
+}
+
+/* Find double epsilon */
+double FindDoubleEpsilon() {
+  double r = 1.0;
+  while (1.0 < (1.0 + r))
+    r = r / 2.0;
+  return 2.0 * r;
 }
 
 /* Estimate range */
@@ -185,7 +314,7 @@ double** estimate(int start_year,int end_year) {
 /* Testing */
 void test() {
   assert(err < 0.00000001);
-  
+
   //Test xpy
   int a[5] = {1,2,3,4,5};
   int b[5] = {5,4,3,2,1};
@@ -196,7 +325,7 @@ void test() {
 
   //Test abs
   assert(abs(-100)==100);
-  
+
   //Test max
   assert(max(10,5)==10);
   assert(max(-10,5)==5);
@@ -204,7 +333,6 @@ void test() {
   //Test max
   assert(min(10,5)==5);
   assert(min(-10,5)==-10);
-
 }
 
 /* Addtion of all elements in array b to array a */

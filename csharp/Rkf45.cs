@@ -139,8 +139,7 @@ class Estimator {
   {
     // Init
     // Note: (we NEED initialization in the move function, the calculation of h depends on the t_end value)
-    if (first_move )
-    {
+    if (first_move) {
       first_move = false;
 
       //Calculate yp
@@ -148,6 +147,7 @@ class Estimator {
 
       //Calculate stepsize
       h = h_startvalue(t_end);
+
     } 
 
     //Step by step integration.
@@ -221,10 +221,18 @@ class Estimator {
         if ( 0.0 < tol )
         {
           double ypk = Math.Abs( yp[k] );
-          if ( tol < ypk * Math.Pow( h, 5 ) )
+          if ( tol < ypk * Math.Pow( h, 5 ) ) //We never really get in here...
           {
+            //Assert(false,"h_startvalue wrong");
             h = Math.Pow( ( tol / ypk ), 0.2 );
           }
+          /* Test start values
+          Console.WriteLine("tol: "+tol);
+          Console.WriteLine("ypk: "+ypk);
+          Console.WriteLine("y[k]: "+y[k]);
+          Console.WriteLine("yp[k]: "+yp[k]);
+          Console.WriteLine("h: "+h);
+          */
         }
       }
 
