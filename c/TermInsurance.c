@@ -32,7 +32,7 @@ static float bj_01(float t) {
     return bdeath * indicator(t > 0) * indicator(t < n);
 }
 
-void dV_TermInsurance(double t, double* V,int m, int n, double result[m][n])
+void dy_TermInsurance(double t, double* V,int m, int n, double result[m][n])
 {
     result[0][0] = 5.0; //r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
 }
