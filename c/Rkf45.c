@@ -6,9 +6,11 @@
 
 //Declare functions
 void construct();
-void estimate();
+double** estimate();
 void test();
 double** allocate_double_matrix();
+void print_matrix();
+void xpy();
 
 //Declare Estimator variables
 double const err = 1e-11;
@@ -28,7 +30,7 @@ static double abserr;
 int main(int argc, char const *argv[]) {
 
   //Construct the estimator
-  construct(neqn);
+  construct(1);
 
   //Set estimator variables (Term insurrance)
   relerr = err;
@@ -39,8 +41,9 @@ int main(int argc, char const *argv[]) {
   test();
 
   //Start estimator
-  estimate(0,10);
+  print_matrix(10,1,estimate(0,10));
 
+  printf("test succesful\n");
   return 0;
 }
 
@@ -50,6 +53,75 @@ void construct(int n) {
 
   y = malloc(sizeof(double)*neqn);
   yp = malloc(sizeof(double)*neqn);
+}
+
+/* Estimate range */
+double** estimate(int start_year,int end_year) {
+
+  //Start at the end year
+  t = (double) end_year;
+
+  //Allocate result matrix
+  int result_length = end_year-start_year+1;
+  double** result = allocate_double_matrix(result_length,neqn);
+
+  //Allocate benefit array
+  double* benefit = malloc(sizeof(double)*neqn);
+
+  //Solve for one year at a time
+  for (int year=end_year; year>start_year; year--) {
+    //calcuate this years benefit
+    bj_ii(year,benefit);
+
+    //add benefit
+    xpy(y,benefit);
+
+    //Integate
+    //TODO
+
+    //Copy results
+  }
+
+  //dy(0.0,y,result_length,neqn,result);
+
+  return result;
+}
+
+/* Testing */
+void test() {
+  assert(err < 0.00000001);
+  
+  //Test xpy
+  int a[5] = {1,2,3,4,5};
+  int b[5] = {5,4,3,2,1};
+  xpy(a,b,5);
+
+  for(int i=0;i<5;i++)
+    assert(a[i]==6);
+}
+
+/* Addtion of all elements in array b to array a */
+void xpy(double* x, double* y,int length) {
+  for (int i=0; i<length; i++)
+    x[i] = x[i]+y[i];
+}
+
+/*Allocate Matrix */
+double** allocate_double_matrix(int m, int n) {
+  /* Allocate memory for the elements */
+  double *mem = malloc(m * n * sizeof(double));
+  /* Allocate memory for the matrix array */
+  double **mat = malloc(m * sizeof(double *));
+  /* Setup array */
+  if (mem != NULL && mat != NULL) {
+    int i;
+    for (i = 0; i < m; ++i) {
+      mat[i] = &mem[i * n];
+    }
+  } else {
+    printf("Out of memory!\n"); exit(-1);
+  }
+  return mat;
 }
 
 /* Print Matrix */
@@ -62,43 +134,10 @@ void print_matrix(int m,int n,double** mat) {
   }
 }
 
-/* Estimate range */
-void estimate(int start_year,int end_year) {
-
-  t = (double) end_year;
-  int result_length = end_year-start_year+1;
-
-  construct(1);
-
-  double** result = allocate_double_matrix(result_length,neqn);
-
-  double V[10];
-
-  dy(0.0,V,result_length,neqn,result);
-
-  print_matrix(result_length,neqn,result);
-  printf("test succesful\n");
-}
-
-/* Testing */
-void test() {
-  assert(err < 0.00000001);
-}
-
-/*Help functions */
-double** allocate_double_matrix(int m, int n) {
-  /* Allocate memory for the elements */
-    double *mem = malloc(m * n * sizeof(double));
-    /* Allocate memory for the matrix array */
-    double **mat = malloc(m * sizeof(double *));
-    /* Setup array */
-    if (mem != NULL && mat != NULL) {
-      int i;
-        for (i = 0; i < m; ++i) {
-          mat[i] = &mem[i * n];
-        }
-    } else {
-      printf("Out of memory!\n"); exit(-1);
-    }
-  return mat;
+/* Free Matrix */
+void free_double_matrix(double **mat) {
+  /* Free elements */
+  free(*mat);
+  /* Free matrix */
+  free(mat);
 }

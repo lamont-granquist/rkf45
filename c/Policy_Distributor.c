@@ -13,3 +13,12 @@ void dy(double t,double* V, int m, int n, double** result) {
     break;
   };
 }
+
+void bj_ii(double t, double* result) {
+  switch(policy)
+  {
+    case 1:
+      bj_ii_TermInsurance(t,result);
+    break;
+  };
+}

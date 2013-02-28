@@ -14,22 +14,26 @@
 
 
 static int n = 35;
-static float bdeath = 1;
+static double bdeath = 1;
 
-static float b_0(float t) {
+static double b_0(double t) {
     return 0.0;
 }
 
-static float mu_01(float t) {
+static double mu_01(double t) {
     return GM(t);
 }
 
-static void bj_00(float t, float *result) {
-    result[0] = 0.0;
+static double bj_00(double t) {
+    return 0.0;
 }
 
-static float bj_01(float t) {
+static double bj_01(double t) {
     return bdeath * indicator(t > 0) * indicator(t < n);
+}
+
+void bj_ii_TermInsurance(double t, double* result) {
+  result[0] = bj_00(t);
 }
 
 void dy_TermInsurance(double t, double* V,int m, int n, double** result)

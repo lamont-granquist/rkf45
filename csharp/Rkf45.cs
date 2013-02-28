@@ -247,7 +247,7 @@ class Estimator {
     //Start at the end year
     t = (double) end_year;
 
-    //Allocate result array
+    //Allocate result matrix
     double[][] result = new double[end_year-start_year+1][];
     for (int year=end_year; year>=start_year; year--) 
       result[year-start_year] = new double[neqn];
@@ -261,7 +261,7 @@ class Estimator {
       //calculate this years benefit
       bj_ii(year, benefit); 
 
-      //add benefit to position
+      //add benefit
       xpy(benefit, y,y); 
 
       // Integrate over [t,t-1]
