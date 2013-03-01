@@ -22,3 +22,13 @@ void bj_ii(double t, double* result) {
     break;
   };
 }
+
+double** test_values() {
+  switch(policy)
+  {
+    case 1:
+      return tv_TermInsurance();
+    break;
+  }
+  return tv_TermInsurance();
+}

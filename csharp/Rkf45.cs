@@ -419,12 +419,12 @@ class CalculationSpecifications {
     Print(DisabilityTermInsurance.Compute());
   }
   public static void TestAll() {
-    //Assert(IsEqual(PureEndowment.Compute(),PureEndowment.test_values),"PureEndowment failed");
-    //Assert(IsEqual(DeferredTemporaryLifeAnnuity.Compute(),DeferredTemporaryLifeAnnuity.test_values),"DeferredTemporaryLifeAnnuity failed");
-    //Assert(IsEqual(TemporaryLifeAnnuityPremium.Compute(),TemporaryLifeAnnuityPremium.test_values),"TempLifeAnnuPrem failed");
+    Assert(IsEqual(PureEndowment.Compute(),PureEndowment.test_values),"PureEndowment failed");
+    Assert(IsEqual(DeferredTemporaryLifeAnnuity.Compute(),DeferredTemporaryLifeAnnuity.test_values),"DeferredTemporaryLifeAnnuity failed");
+    Assert(IsEqual(TemporaryLifeAnnuityPremium.Compute(),TemporaryLifeAnnuityPremium.test_values),"TempLifeAnnuPrem failed");
     Assert(IsEqual(TermInsurance.Compute(),TermInsurance.test_values),"TempInsurance failed");
-    //Assert(IsEqual(DisabilityAnnuity.Compute(),DisabilityAnnuity.test_values),"DisAnnu failed");
-    //Assert(IsEqual(DisabilityTermInsurance.Compute(),DisabilityTermInsurance.test_values),"DisabilityTermInsurance failed");
+    Assert(IsEqual(DisabilityAnnuity.Compute(),DisabilityAnnuity.test_values),"DisAnnu failed");
+    Assert(IsEqual(DisabilityTermInsurance.Compute(),DisabilityTermInsurance.test_values),"DisabilityTermInsurance failed");
     Console.WriteLine("tests passed");
   }
 
@@ -755,6 +755,7 @@ class CalculationSpecifications {
   }
 
   public class TermInsurance {
+
 
     static public double[][] test_values = new double[][] {
           new double[] {    0.0576169193132673},

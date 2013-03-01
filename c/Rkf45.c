@@ -16,7 +16,8 @@ typedef int bool;
 #define min(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b);_a < _b ? _a : _b; })
 #define sign(x)  ((x > 0) - ( x < 0))
 
-//Declare functions
+//Declare functions - TODO: make static
+static bool is_equal();
 void construct();
 double** estimate();
 void test();
@@ -73,11 +74,16 @@ int main(int argc, char const *argv[]) {
   //Start estimator
   //estimate(0,50);
   //Print result:
-  print_matrix(50,1,estimate(0,50));
+  //print_matrix(51,1,estimate(0,50));
 
+  //print_matrix(51,1,test_values());
+
+  assert(is_equal(test_values(),estimate(0,50),51,1));
   printf("test succesful\n");
+
   return 0;
 }
+
 
 /* Initiate estimator */
 void construct(int n) {
@@ -97,109 +103,109 @@ void construct(int n) {
 
 /* test function */
 int TEST_MAX = 50;
-static int test_values = 1;
+static int NO_tests = 1;
 
 void test_add() {
-  test_values++;
-  if (test_values > TEST_MAX)
+  NO_tests++;
+  if (NO_tests> TEST_MAX)
     exit(0);
 }
 
 /* Solve */
 double solve() {
 
-    double ch = h / 4.0;
-    
+  double ch = h / 4.0;
 
-    //f1
-    for (int i = 0; i < neqn; i++ )
-      f_swap[i] = y[i] + ch * yp[i];
-    dy ( t + ch, f_swap, f1 );
 
-    //f2
-    ch = 3.0 * h / 32.0;
-    for (int i = 0; i < neqn; i++ )
-      f_swap[i] = y[i] + ch * ( yp[i] + 3.0 * f1[i] );
-    dy ( t + 3.0 * h / 8.0, f_swap, f2 );
+  //f1
+  for (int i = 0; i < neqn; i++ )
+    f_swap[i] = y[i] + ch * yp[i];
+  dy ( t + ch, f_swap, f1 );
 
-    //f3
-    ch = h / 2197.0;
-    for (int i = 0; i < neqn; i++ )
-      f_swap[i] = y[i] + ch * ( 1932.0 * yp[i] + ( 7296.0 * f2[i] - 7200.0 * f1[i] ) );
-    dy ( t + 12.0 * h / 13.0, f_swap, f3 );
+  //f2
+  ch = 3.0 * h / 32.0;
+  for (int i = 0; i < neqn; i++ )
+    f_swap[i] = y[i] + ch * ( yp[i] + 3.0 * f1[i] );
+  dy ( t + 3.0 * h / 8.0, f_swap, f2 );
 
-    //f4
-    ch = h / 4104.0;
-    for (int i = 0; i < neqn; i++ )
-      f_swap[i] = y[i] + ch * ( ( 8341.0 * yp[i] - 845.0 * f3[i] ) + 
-          ( 29440.0 * f2[i] - 32832.0 * f1[i] ) );
-    dy ( t + h, f_swap, f4 );
+  //f3
+  ch = h / 2197.0;
+  for (int i = 0; i < neqn; i++ )
+    f_swap[i] = y[i] + ch * ( 1932.0 * yp[i] + ( 7296.0 * f2[i] - 7200.0 * f1[i] ) );
+  dy ( t + 12.0 * h / 13.0, f_swap, f3 );
 
-    //f5
-    ch = h / 20520.0;
-    for (int i = 0; i < neqn; i++ )
-      f_swap[i] = y[i] + ch * ( ( -6080.0 * yp[i] + 
-            ( 9295.0 * f3[i] - 5643.0 * f4[i] ) ) + ( 41040.0 * f1[i] - 28352.0 * f2[i] ) );
-    dy ( t + h / 2.0, f_swap, f5 );
+  //f4
+  ch = h / 4104.0;
+  for (int i = 0; i < neqn; i++ )
+    f_swap[i] = y[i] + ch * ( ( 8341.0 * yp[i] - 845.0 * f3[i] ) + 
+        ( 29440.0 * f2[i] - 32832.0 * f1[i] ) );
+  dy ( t + h, f_swap, f4 );
+
+  //f5
+  ch = h / 20520.0;
+  for (int i = 0; i < neqn; i++ )
+    f_swap[i] = y[i] + ch * ( ( -6080.0 * yp[i] + 
+          ( 9295.0 * f3[i] - 5643.0 * f4[i] ) ) + ( 41040.0 * f1[i] - 28352.0 * f2[i] ) );
+  dy ( t + h / 2.0, f_swap, f5 );
+
+  /*
+     if (test_values == 16) {
+     printf("%.16lf\n",f1[0]);
+     printf("%.16lf\n",f2[0]);
+     printf("%.16lf\n",f3[0]);
+     printf("%.16lf\n",f4[0]);
+     printf("%.16lf\n",f5[0]);
+     }
+     test_add();
+     */
+
+  //Calculate solution
+  ch = h / 7618050.0;
+  for (int i = 0; i < neqn; i++ )
+    y_plus_one[i] = y[i] + ch * ( ( 902880.0 * yp[i] + 
+          ( 3855735.0 * f3[i] - 1371249.0 * f4[i] ) ) + ( 3953664.0 * f2[i] + 277020.0 * f5[i] ) );
+
+  //Calculate alternative solution
+  for (int i = 0; i < neqn; i++ )
+    y_plus_one_alternative[i] = ( -2090.0 * yp[i] + ( 21970.0 * f3[i] - 15048.0 * f4[i] ) ) + ( 22528.0 * f2[i] - 27360.0 * f5[i] );
+
+  /*
+     printf("yp:   %.16lf\n",yp[0]);
+     printf("ypo:  %.16lf\n",y_plus_one[0]);
+     printf("ypoa: %.16lf\n",y_plus_one_alternative[0]);
+     */
+
+  //Calculate the error.
+  double biggest_difference = 0.0;
+
+  double scale = 2.0 / relerr; //scale
+  double ae = scale * abserr;  //absolute error
+
+  for (int i = 0; i < neqn; i++ )
+  {
+    double et = fabs( y[i] ) + fabs( y_plus_one[i] ) + ae;
+    double ee = fabs( y_plus_one_alternative[i] );
 
     /*
-    if (test_values == 16) {
-      printf("%.16lf\n",f1[0]);
-      printf("%.16lf\n",f2[0]);
-      printf("%.16lf\n",f3[0]);
-      printf("%.16lf\n",f4[0]);
-      printf("%.16lf\n",f5[0]);
-    }
-    test_add();
-    */
+       printf("et:   %.14lf\n",et);
+       printf("ee:   %.14lf\n",ee);
+       */
 
-    //Calculate solution
-    ch = h / 7618050.0;
-    for (int i = 0; i < neqn; i++ )
-      y_plus_one[i] = y[i] + ch * ( ( 902880.0 * yp[i] + 
-            ( 3855735.0 * f3[i] - 1371249.0 * f4[i] ) ) + ( 3953664.0 * f2[i] + 277020.0 * f5[i] ) );
+    biggest_difference = max ( biggest_difference, ee / et );
+  }
 
-    //Calculate alternative solution
-    for (int i = 0; i < neqn; i++ )
-      y_plus_one_alternative[i] = ( -2090.0 * yp[i] + ( 21970.0 * f3[i] - 15048.0 * f4[i] ) ) + ( 22528.0 * f2[i] - 27360.0 * f5[i] );
-
-    /*
-    printf("yp:   %.16lf\n",yp[0]);
-    printf("ypo:  %.16lf\n",y_plus_one[0]);
-    printf("ypoa: %.16lf\n",y_plus_one_alternative[0]);
-    */
-
-    //Calculate the error.
-    double biggest_difference = 0.0;
-
-    double scale = 2.0 / relerr; //scale
-    double ae = scale * abserr;  //absolute error
-    
-    for (int i = 0; i < neqn; i++ )
-    {
-      double et = fabs( y[i] ) + fabs( y_plus_one[i] ) + ae;
-      double ee = fabs( y_plus_one_alternative[i] );
-
-      /*
-      printf("et:   %.14lf\n",et);
-      printf("ee:   %.14lf\n",ee);
-      */
-
-      biggest_difference = max ( biggest_difference, ee / et );
-    }
-
-    /*printf("bg:   %.16lf\n",biggest_difference);
+  /*printf("bg:   %.16lf\n",biggest_difference);
     printf("yp1:  %.16lf\n",y_plus_one[0]);
     printf("yp1a: %.16lf\n",y_plus_one_alternative[0]);
     printf("err:  %.16lf\n",fabs( h ) * biggest_difference * scale / 752400.0);*/
 
-    //Return the err
-    return fabs( h ) * biggest_difference * scale / 752400.0;
+  //Return the err
+  return fabs( h ) * biggest_difference * scale / 752400.0;
 }
 
 /* Move */
 void move(double t_end) {
-  
+
   //Init
   if (first_move) {
     first_move = false;
@@ -241,7 +247,7 @@ void move(double t_end) {
     {
       hfaild = true;
       end_reached = false;
-      
+
       //Scale down.
       double s = max(0.1,0.9 / pow( error, 0.2 ));
       h = s * h;  
@@ -258,12 +264,12 @@ void move(double t_end) {
       y[i] = y_plus_one[i];
 
     /*Print test data
-    if (y[0] != 0) {
+      if (y[0] != 0) {
       printf("t: %.20lf\n",t);
       printf("h: %.20lf\n",h);
       printf("y[0]: %.20lf\n",y[0]);
       sleep(1);
-    }*/
+      }*/
 
     //Update yp
     dy ( t, y, yp );
@@ -293,14 +299,14 @@ double h_startvalue(double t_end)
         h = pow( ( tol / ypk ), 0.2 );
         printf("this should not happen.\n");
       }
-        /* test startvalues
-        printf("abserr: %.40lf\n",abserr);
-        printf("tol: %.40lf\n",tol);
-        printf("ypk: %.40lf\n",ypk);
-        printf("y[k]: %.40lf\n",y[k]);
-        printf("yp[k]: %.40lf\n",yp[k]);
-        printf("h: %.40lf\n",h);
-        */
+      /* test startvalues
+         printf("abserr: %.40lf\n",abserr);
+         printf("tol: %.40lf\n",tol);
+         printf("ypk: %.40lf\n",ypk);
+         printf("y[k]: %.40lf\n",y[k]);
+         printf("yp[k]: %.40lf\n",yp[k]);
+         printf("h: %.40lf\n",h);
+         */
     }
   }
 
@@ -309,7 +315,6 @@ double h_startvalue(double t_end)
 
 /* Scale from error calculations */
 double scale_from_error(double error,bool hfailed) {
-
   double scale = min(5.0,0.9 / pow( error, 0.2 ));
 
   if (hfailed)
@@ -357,6 +362,7 @@ double** estimate(int start_year,int end_year) {
 
   return result;
 }
+
 
 /* Testing */
 void test() {
@@ -414,6 +420,18 @@ void print_matrix(int m,int n,double** mat) {
     }
     printf("\n");
   }
+}
+
+/* IsEqual? (2 Matrixes) */
+static bool is_equal(double** a,double** b,int m,int n) {
+  for (int i = 0;i < m;i++) {
+    for (int j = 0;j < n;j++) {
+      //printf("%.16lf, ",a[i][j]);
+      if (fabs(a[i][j] - b[i][j]) > err)
+        return false;
+    }
+  }
+  return true;
 }
 
 /* Free Matrix */

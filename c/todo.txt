@@ -5,7 +5,20 @@ Add the algoritm while adding assertions to the C# code.
 Might want to split up estimator and testing, running of it?
 
 Vejleder hjælp:
-
+Se på opbygning, gode råd.
+Tids tagning.
+Lav RK4?
 Testing af functioner?
 
 Flere test case behøves.
+
+Iterm2 mouse copy fix
+Iterm2 remove mouse scaling
+Iterm2 remove Space hotkey
+
+shell script for comparison?
+
+write unit tests: of GM and dy
+
+Add test values
+Add all products
