@@ -16,23 +16,22 @@ typedef int bool;
 #define min(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b);_a < _b ? _a : _b; })
 #define sign(x)  ((x > 0) - ( x < 0))
 
-//Declare functions - TODO: make static
+//Declare functions
 static bool is_equal();
-void construct();
-double** estimate();
-void test();
-double** allocate_double_matrix();
-void print_matrix();
-void xpy();
-double solve();
-void move();
-double h_startvalue();
-double scale_from_error();
-bool test_bool();
-double FindDoubleEpsilon();
+static void construct();
+static double** estimate();
+//static void test();
+static double** allocate_double_matrix();
+static void print_matrix();
+static void xpy();
+static double solve();
+static void move();
+static double h_startvalue();
+static double scale_from_error();
+static double FindDoubleEpsilon();
 
 //Declare Estimator variables
-double const err = 1e-11;
+static double const err = 1e-11;
 
 //Private
 static bool first_move = true;
@@ -69,7 +68,7 @@ int main(int argc, char const *argv[]) {
   y[0] = 0.0;
 
   //Some testing, might be deleted
-  test();
+  //test();
 
   //Start estimator
   //estimate(0,50);
@@ -86,7 +85,7 @@ int main(int argc, char const *argv[]) {
 
 
 /* Initiate estimator */
-void construct(int n) {
+static void construct(int n) {
   neqn = n;
   DoubleEpsilon = FindDoubleEpsilon();
   y                      = malloc(sizeof(double)*neqn);
@@ -102,20 +101,19 @@ void construct(int n) {
 }
 
 /* test function */
-int TEST_MAX = 50;
+/*staticint TEST_MAX = 50;
 static int NO_tests = 1;
 
 void test_add() {
   NO_tests++;
   if (NO_tests> TEST_MAX)
     exit(0);
-}
+}*/
 
 /* Solve */
-double solve() {
+static double solve() {
 
   double ch = h / 4.0;
-
 
   //f1
   for (int i = 0; i < neqn; i++ )
@@ -148,7 +146,7 @@ double solve() {
           ( 9295.0 * f3[i] - 5643.0 * f4[i] ) ) + ( 41040.0 * f1[i] - 28352.0 * f2[i] ) );
   dy ( t + h / 2.0, f_swap, f5 );
 
-  /*
+     /*
      if (test_values == 16) {
      printf("%.16lf\n",f1[0]);
      printf("%.16lf\n",f2[0]);
@@ -169,7 +167,7 @@ double solve() {
   for (int i = 0; i < neqn; i++ )
     y_plus_one_alternative[i] = ( -2090.0 * yp[i] + ( 21970.0 * f3[i] - 15048.0 * f4[i] ) ) + ( 22528.0 * f2[i] - 27360.0 * f5[i] );
 
-  /*
+     /*
      printf("yp:   %.16lf\n",yp[0]);
      printf("ypo:  %.16lf\n",y_plus_one[0]);
      printf("ypoa: %.16lf\n",y_plus_one_alternative[0]);
@@ -204,7 +202,7 @@ double solve() {
 }
 
 /* Move */
-void move(double t_end) {
+static void move(double t_end) {
 
   //Init
   if (first_move) {
@@ -283,7 +281,7 @@ void move(double t_end) {
 /**************** Move help functions ****************/
 
 /* Calculate h's startvalue */
-double h_startvalue(double t_end)
+static double h_startvalue(double t_end)
 {
   //Calculate the start value of h
   double h = fabs( t_end - t );
@@ -306,7 +304,7 @@ double h_startvalue(double t_end)
          printf("y[k]: %.40lf\n",y[k]);
          printf("yp[k]: %.40lf\n",yp[k]);
          printf("h: %.40lf\n",h);
-         */
+      */
     }
   }
 
@@ -314,7 +312,7 @@ double h_startvalue(double t_end)
 }
 
 /* Scale from error calculations */
-double scale_from_error(double error,bool hfailed) {
+static double scale_from_error(double error,bool hfailed) {
   double scale = min(5.0,0.9 / pow( error, 0.2 ));
 
   if (hfailed)
@@ -324,7 +322,7 @@ double scale_from_error(double error,bool hfailed) {
 }
 
 /* Find double epsilon */
-double FindDoubleEpsilon() {
+static double FindDoubleEpsilon() {
   double r = 1.0;
   while (1.0 < (1.0 + r))
     r = r / 2.0;
@@ -332,7 +330,7 @@ double FindDoubleEpsilon() {
 }
 
 /* Estimate range */
-double** estimate(int start_year,int end_year) {
+static double** estimate(int start_year,int end_year) {
 
   //Start at the end year
   t = (double) end_year;
@@ -363,9 +361,65 @@ double** estimate(int start_year,int end_year) {
   return result;
 }
 
+/*******************      Matrix functions      *******************/
+//TODO: Put in a file for themself.
 
-/* Testing */
-void test() {
+/* Addtion of all elements in array b to array a */
+static void xpy(double* x, double* y,int length) {
+  for (int i=0; i<length; i++)
+    x[i] = x[i]+y[i];
+}
+
+/*Allocate Matrix */
+static double** allocate_double_matrix(int m, int n) {
+  /* Allocate memory for the elements */
+  double *mem = malloc(m * n * sizeof(double));
+  /* Allocate memory for the matrix array */
+  double **mat = malloc(m * sizeof(double *));
+  /* Setup array */
+  if (mem != NULL && mat != NULL) {
+    int i;
+    for (i = 0; i < m; ++i) {
+      mat[i] = &mem[i * n];
+    }
+  } else {
+    printf("Out of memory!\n"); exit(-1);
+  }
+  return mat;
+}
+
+/* Print Matrix */
+static void print_matrix(int m,int n,double** mat) {
+  for (int i = 0;i < m;i++) {
+    for (int j = 0;j < n;j++) {
+      printf("%.16lf, ",mat[i][j]);
+    }
+    printf("\n");
+  }
+}
+
+/* Does two matrixes have the same values */
+static bool is_equal(double** a,double** b,int m,int n) {
+  for (int i = 0;i < m;i++) {
+    for (int j = 0;j < n;j++) {
+      //printf("%.16lf, ",a[i][j]);
+      if (fabs(a[i][j] - b[i][j]) > err)
+        return false;
+    }
+  }
+  return true;
+}
+
+/* Free Matrix */
+static void free_double_matrix(double **mat) {
+  /* Free elements */
+  free(*mat);
+  /* Free matrix */
+  free(mat);
+}
+
+/* Testing TODO: Delete */
+/*static void test() {
   assert(err < 0.00000001);
 
   //Test xpy
@@ -386,58 +440,5 @@ void test() {
   //Test max
   assert(min(10,5)==5);
   assert(min(-10,5)==-10);
-}
+}*/
 
-/* Addtion of all elements in array b to array a */
-void xpy(double* x, double* y,int length) {
-  for (int i=0; i<length; i++)
-    x[i] = x[i]+y[i];
-}
-
-/*Allocate Matrix */
-double** allocate_double_matrix(int m, int n) {
-  /* Allocate memory for the elements */
-  double *mem = malloc(m * n * sizeof(double));
-  /* Allocate memory for the matrix array */
-  double **mat = malloc(m * sizeof(double *));
-  /* Setup array */
-  if (mem != NULL && mat != NULL) {
-    int i;
-    for (i = 0; i < m; ++i) {
-      mat[i] = &mem[i * n];
-    }
-  } else {
-    printf("Out of memory!\n"); exit(-1);
-  }
-  return mat;
-}
-
-/* Print Matrix */
-void print_matrix(int m,int n,double** mat) {
-  for (int i = 0;i < m;i++) {
-    for (int j = 0;j < n;j++) {
-      printf("%.16lf, ",mat[i][j]);
-    }
-    printf("\n");
-  }
-}
-
-/* IsEqual? (2 Matrixes) */
-static bool is_equal(double** a,double** b,int m,int n) {
-  for (int i = 0;i < m;i++) {
-    for (int j = 0;j < n;j++) {
-      //printf("%.16lf, ",a[i][j]);
-      if (fabs(a[i][j] - b[i][j]) > err)
-        return false;
-    }
-  }
-  return true;
-}
-
-/* Free Matrix */
-void free_double_matrix(double **mat) {
-  /* Free elements */
-  free(*mat);
-  /* Free matrix */
-  free(mat);
-}

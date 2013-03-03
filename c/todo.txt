@@ -12,9 +12,23 @@ Testing af functioner?
 
 Flere test case behøves.
 
+c code skal være structs så der skal kører flere estimatorer.
+
+Køretid på mange kunder.
+
+PLAN:
+Unit tests. cSharp
+Få mere testdata.
+Beregninger på mange kunder. <--
+Tidstagning.
+c -structs. <-- IGNORE PROBLEM!
+Rente kurver, vent med problem.
+
 Iterm2 mouse copy fix
 Iterm2 remove mouse scaling
 Iterm2 remove Space hotkey
+
+vim jump to next function definition!
 
 shell script for comparison?
 
