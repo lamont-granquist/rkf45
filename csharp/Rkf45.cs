@@ -13,7 +13,7 @@ class Estimator {
   public Action<double,double[]> bj_ii;           //State-change benefits
 
   public int neqn;                               
-  private double t,h;
+  private double t,h,interval; // current time, current stepsize, interval for each calculation and result save
   private bool first_move = true;                           //Have the move function been initialized?
   private double[] yp,f1,f2,f3,f4,f5,f_swap,y_plus_one,y_plus_one_alternative;  //yp     : k1/h,
                                                             //f1..5  : equations,
@@ -175,8 +175,9 @@ class Estimator {
   /******************* Move ***********************/
 
   /* Move from current position to t_end, and update all values */
-  public void move(double t_end)
+  public void move()
   {
+    double t_end = t - interval;
     // Init
     // Note: (we NEED initialization in the move function, the calculation of h depends on the t_end value)
     if (first_move) {
@@ -311,6 +312,9 @@ class Estimator {
     //Allocate benefit array
     double[] benefit = new double[neqn];
 
+    //interval: 1 year
+    this.interval = 1;
+
     //Solve for one year at a time
     for (int year=end_year; year>start_year; year--) { 
 
@@ -321,7 +325,7 @@ class Estimator {
       xpy(benefit, y,y); 
 
       // Integrate over [t,t-1]
-      move(year-1);
+      move();
 
       //Copy y to results
       Array.Copy(y, result[year-start_year-1], y.Length); 
