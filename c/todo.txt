@@ -14,19 +14,57 @@ Flere test case behøves.
 
 c code skal være structs så der skal kører flere estimatorer.
 
-Køretid på mange kunder.
+Hej Peter og Hans Henrik
 
-PLAN:
-Unit tests. cSharp
+Her er opfølgning på vores møde samt status rapport.
 
-  Devide solve into more functions.
+Jeg havde lavet en pænere C# kode og en C implementation. Vi blev enige om at
+jeg skulle gå videre med nedenstående pointer, i prioriteret rækkefølge.
 
+1. Yderligere opdeling af C# koden, for at få bedre mulighed for testing, og
+for at få lettere ved at implementere i C og CUDA C.
+  - Jeg har arbejdet yderligere med at gøre koden pænere, resultatet kan ses
+  på github.com/mollerhoj/rkf45
 
-Få mere testdata.
-Beregninger på mange kunder. <--
-Tidstagning.
-c -structs. <-- IGNORE PROBLEM!
-Rente kurver, vent med problem.
+2. Yderligere anskaffelse af testdata. For bedre at kunne teste
+implementationen.
+  - Er det her relevant? Jeg blev i tvivl om det virkede som om jeg
+  insisterede på at få den her testdata med. Hvis det er relevant, sender du
+  mig så nogle kilder hvor jeg kan finde dataen, Sestoft?
+
+3. Beregninger på flere kunder og tidstagning af disse beregninger.
+  - Jeg er blevet i tvivl om jeg har misforstået denne opgave. Umiddelbart
+  virker det jo meget simpelt at tage tid på hvor lang tid det tager at regne
+  den samme kunde et bestemt antal gange. Her er resultatet fra beregninger på
+  12288 identiske kunder, målt i milisekunder.
+
+  Produkt         Udleveret C# kode    Min C# implementation
+  ----------------------------------------------------------
+  PureEndowment:               1599                     1777
+  DeferredTemoraryLifeAnnuity: 3612                     3827
+  TemporaryLifeAnnuityPremium: 2079                     2148
+  TermInsurance:               2359                     2635
+  DisabilityAnnuity:           7020                     7161
+  DisabilityTermInsurance:     5778                     5867
+
+  Som det ses er der ikke nogen betydelig forskel, hvilket jo også er
+  meningen.
+
+4. Implementation af pænere kode i C og CUDA C.
+  - Denne kan jeg umiddelbart gå videre med. Selvfølgelig synd at gøre før C#
+  implementationen er smukkeseret tilstrækkeligt.
+
+5. Beregninger på rentekurver, herunder interpolartions beregninger.
+  - Dette punkt aftalte vi jeg skulle vente med indtil punkt 4. er lavet.
+
+Desuden aftaltes det at problemer der opstår pga. dybe differentialligninger
+(Der kalder deres egen differentierede) ignores i C og CUDA C
+implementationerne.
+
+Min sygdomssituation er desværre stadig lidt usikker, jeg har ligget syg i
+weekenden men er nu mere frisk og venter på resultater fra lægen.
+
+Venlig hilsen, Jens Dahl Møllerhøj
 
 Iterm2 mouse copy fix
 Iterm2 swap panes

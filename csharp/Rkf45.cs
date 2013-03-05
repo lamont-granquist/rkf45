@@ -347,7 +347,7 @@ public class Timer {
   }
 
   public double Check() {
-    return stopwatch.ElapsedMilliseconds / 1000.0;
+    return stopwatch.ElapsedMilliseconds;
   }
 }
 
@@ -362,7 +362,7 @@ public class Timer {
 class CalculationSpecifications {
 
   public static void Main(String[] args) {
-    TestAll();
+    TimeAll(12288);
   }
 
   public static readonly double err = 1e-11;
@@ -392,6 +392,16 @@ class CalculationSpecifications {
     }
   }
 
+  public static void TimeAll(int customers) {
+    Console.WriteLine("PureEndowment:               " + PureEndowment.Time(customers));
+    Console.WriteLine("DeferredTemoraryLifeAnnuity: " + DeferredTemporaryLifeAnnuity.Time(customers));
+    Console.WriteLine("TemporaryLifeAnnuityPremium: " + TemporaryLifeAnnuityPremium.Time(customers));
+    Console.WriteLine("TermInsurance:               " + TermInsurance.Time(customers));
+    Console.WriteLine("DisabilityAnnuity:           " + DisabilityAnnuity.Time(customers));
+    Console.WriteLine("DisabilityTermInsurance:     " + DisabilityTermInsurance.Time(customers));
+  }
+
+
   public static void PrintAll() {
     Print(PureEndowment.Compute());
     Print(DeferredTemporaryLifeAnnuity.Compute());
@@ -400,6 +410,7 @@ class CalculationSpecifications {
     Print(DisabilityAnnuity.Compute());
     Print(DisabilityTermInsurance.Compute());
   }
+
   public static void TestAll() {
     Assert(IsEqual(PureEndowment.Compute(),PureEndowment.test_values),"PureEndowment failed");
     Assert(IsEqual(DeferredTemporaryLifeAnnuity.Compute(),DeferredTemporaryLifeAnnuity.test_values),"DeferredTemporaryLifeAnnuity failed");
@@ -522,8 +533,16 @@ class CalculationSpecifications {
       return 0.0;
     }
 
-    public static double[][] Compute() {
+  public static double Time(int customers) {
+    Timer timer = new Timer();
+    double start_time = timer.Check();
+    for(int i = 0;i<customers;i++)
+      Compute();
+    double end_time = timer.Check();
+    return end_time - start_time;
+  }
 
+    public static double[][] Compute() {
       //Construct the estimator
       Estimator estimator = new Estimator();
       estimator.construct(1);
@@ -619,6 +638,15 @@ class CalculationSpecifications {
       return 0.0;
     }
 
+    public static double Time(int customers) {
+      Timer timer = new Timer();
+      double start_time = timer.Check();
+      for(int i = 0;i<customers;i++)
+        Compute();
+      double end_time = timer.Check();
+      return end_time - start_time;
+    }
+
     public static double[][] Compute() {
       Estimator estimator = new Estimator();
       estimator.construct(1);
@@ -710,6 +738,15 @@ class CalculationSpecifications {
 
     static double bj_01(double t) {
       return 0.0;
+    }
+
+    public static double Time(int customers) {
+      Timer timer = new Timer();
+      double start_time = timer.Check();
+      for(int i = 0;i<customers;i++)
+        Compute();
+      double end_time = timer.Check();
+      return end_time - start_time;
     }
 
     public static double[][] Compute() {
@@ -805,6 +842,15 @@ class CalculationSpecifications {
     static double bj_01(double t) {
       return bdeath * indicator(t > 0) * indicator(t < n);
     }
+
+public static double Time(int customers) {
+    Timer timer = new Timer();
+    double start_time = timer.Check();
+    for(int i = 0;i<customers;i++)
+      Compute();
+    double end_time = timer.Check();
+    return end_time - start_time;
+  }
 
     public static double[][] Compute() {
       Estimator estimator = new Estimator();
@@ -938,6 +984,15 @@ class CalculationSpecifications {
       return 0.0;
     }
 
+public static double Time(int customers) {
+    Timer timer = new Timer();
+    double start_time = timer.Check();
+    for(int i = 0;i<customers;i++)
+      Compute();
+    double end_time = timer.Check();
+    return end_time - start_time;
+  }
+
     public static double[][] Compute() {
       Estimator estimator = new Estimator();
       estimator.construct(2);
@@ -1068,6 +1123,15 @@ class CalculationSpecifications {
     static double bj_12(double t) {
       return 0.0;
     }
+
+public static double Time(int customers) {
+    Timer timer = new Timer();
+    double start_time = timer.Check();
+    for(int i = 0;i<customers;i++)
+      Compute();
+    double end_time = timer.Check();
+    return end_time - start_time;
+  }
 
     public static double[][] Compute() {
       Estimator estimator = new Estimator();
