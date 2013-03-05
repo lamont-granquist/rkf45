@@ -18,6 +18,10 @@ Køretid på mange kunder.
 
 PLAN:
 Unit tests. cSharp
+
+  Devide solve into more functions.
+
+
 Få mere testdata.
 Beregninger på mange kunder. <--
 Tidstagning.
@@ -38,3 +42,18 @@ write unit tests: of GM and dy
 
 Add test values
 Add all products
+
+Til rapport omkring solve metoden:
+
+     * y er startværdi(erne)
+     * y_diff er k1, og f1..5 er det samme som k2..5, dog uden at have ganget med stepsize
+     * Altså:
+     * k1 = y_diff * stepsize
+     * k2..5 = f2..5 * stepsize
+     *
+     * Da funktionerne skal bruge k2..5, ganger vi med stepsize. (i praksis lcd_stepsize)
+     * lcd_stepsize is the lowest diffential of stepsize. Det er praktisk at man ikke skal gange med så store tal.
+
+Til vejledere:
+
+stepsize scaleres ned hver gang vi skal have et nyt år.
