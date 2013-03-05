@@ -25,8 +25,10 @@ c -structs. <-- IGNORE PROBLEM!
 Rente kurver, vent med problem.
 
 Iterm2 mouse copy fix
+Iterm2 swap panes
 Iterm2 remove mouse scaling
 Iterm2 remove Space hotkey
+Iterm2 cmd hotkey remove. 
 
 vim jump to next function definition!
 

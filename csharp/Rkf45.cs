@@ -7,22 +7,32 @@ using System.Diagnostics;
 
 class Estimator {
 
-  static readonly double DoubleEpsilon = FindDoubleEpsilon(); //Const used for calculations
-
-  public Action<double, double[], double[]> dy;   //Differential equation(s).
-  public Action<double,double[]> bj_ii;           //State-change benefits
-
+  //Public variables to be set before estimating
   public int neqn;                               
-  private double t,h,interval; // current time, current stepsize, interval for each calculation and result save
-  private bool first_move = true;                           //Have the move function been initialized?
-  private double[] yp,f1,f2,f3,f4,f5,f_swap,y_plus_one,y_plus_one_alternative;  //yp     : k1/h,
-                                                            //f1..5  : equations,
-                                                            //f_swap : swap space,
-                                                            //s1     : Solution
-                                                            //s2     : Alternative solution
+  public int start_year;
+  public int end_year;
+  public Action<double, double[], double[]> dy;
+  public Action<double,double[]> bj_ii;
+  public double relerr;
+  public double abserr;
+  public double [] end_year_y;
 
-  public double[] y;
-  public double relerr, abserr;                            //The relative and absolute error used in equations.
+  //Private
+  private double t;
+  private double stepsize;
+  private double[] y_diff;
+  private double[] f1;
+  private double[] f2;
+  private double[] f3;
+  private double[] f4;
+  private double[] f5;
+  private double[] f_swap;
+  private double[] y;
+  private double[] y_plus_one;
+  private double[] y_plus_one_alternative;
+  private int move_start_year; 
+  private int move_end_year; 
+  static readonly double DoubleEpsilon = FindDoubleEpsilon(); //Const used for calculations
 
   /************************** Constructor ***********************/
 
@@ -30,7 +40,8 @@ class Estimator {
     neqn = n;
     y_plus_one = new double[neqn];
     y = new double[neqn];
-    yp = new double[neqn];
+    end_year_y = new double[neqn];
+    y_diff = new double[neqn];
 
     allocate_equation_space();
   }
@@ -61,60 +72,59 @@ class Estimator {
     }
   }
 
-
   /* Calculate the solution */
   private double solve ()
   {
 
     /* Preconditions:
-     * relerr, abserr, t and h needs to be set.
-     * yp must have been calculated.
-     * Update "solution" to the current time t with the stepsize h
+     * relerr, abserr, t and stepsize needs to be set.
+     * y_diff must have been calculated.
+     * Update "solution" to the current time t with the stepsize
      * and return the error value
      *
      * Personal notes:
      * y er startværdi(erne)
-     * yp er k1, og f1..5 er det samme som k2..5, dog uden at have ganget med h.
+     * y_diff er k1, og f1..5 er det samme som k2..5, dog uden at have ganget med stepsize
      * Altså:
-     * k1 = yp * h
-     * k2..5 = f2..5 * h
+     * k1 = y_diff * stepsize
+     * k2..5 = f2..5 * stepsize
      *
-     * Da funktionerne skal bruge k2..5, ganger vi med h. (i praksis ch)
-     * ch is the lowest diffential of h. Det er praktisk at man ikke skal gange med så store tal.
+     * Da funktionerne skal bruge k2..5, ganger vi med stepsize. (i praksis lcd_stepsize)
+     * lcd_stepsize is the lowest diffential of stepsize. Det er praktisk at man ikke skal gange med så store tal.
      */
 
-    double ch = h / 4.0;
+    double lcd_stepsize = stepsize / 4.0; //lowest common denominator of stepsize
 
     //f1
     for (int i = 0; i < neqn; i++ )
-      f_swap[i] = y[i] + ch * yp[i];
-    dy ( t + ch, f_swap, f1 );
+      f_swap[i] = y[i] + lcd_stepsize * y_diff[i];
+    dy ( t + lcd_stepsize, f_swap, f1 );
 
     //f2
-    ch = 3.0 * h / 32.0;
+    lcd_stepsize = 3.0 * stepsize / 32.0;
     for (int i = 0; i < neqn; i++ )
-      f_swap[i] = y[i] + ch * ( yp[i] + 3.0 * f1[i] );
-    dy ( t + 3.0 * h / 8.0, f_swap, f2 );
+      f_swap[i] = y[i] + lcd_stepsize * ( y_diff[i] + 3.0 * f1[i] );
+    dy ( t + 3.0 * stepsize / 8.0, f_swap, f2 );
 
     //f3
-    ch = h / 2197.0;
+    lcd_stepsize = stepsize / 2197.0;
     for (int i = 0; i < neqn; i++ )
-      f_swap[i] = y[i] + ch * ( 1932.0 * yp[i] + ( 7296.0 * f2[i] - 7200.0 * f1[i] ) );
-    dy ( t + 12.0 * h / 13.0, f_swap, f3 );
+      f_swap[i] = y[i] + lcd_stepsize * ( 1932.0 * y_diff[i] + ( 7296.0 * f2[i] - 7200.0 * f1[i] ) );
+    dy ( t + 12.0 * stepsize / 13.0, f_swap, f3 );
 
     //f4
-    ch = h / 4104.0;
+    lcd_stepsize = stepsize / 4104.0;
     for (int i = 0; i < neqn; i++ )
-      f_swap[i] = y[i] + ch * ( ( 8341.0 * yp[i] - 845.0 * f3[i] ) + 
+      f_swap[i] = y[i] + lcd_stepsize * ( ( 8341.0 * y_diff[i] - 845.0 * f3[i] ) + 
           ( 29440.0 * f2[i] - 32832.0 * f1[i] ) );
-    dy ( t + h, f_swap, f4 );
+    dy ( t + stepsize, f_swap, f4 );
 
     //f5
-    ch = h / 20520.0;
+    lcd_stepsize = stepsize / 20520.0;
     for (int i = 0; i < neqn; i++ )
-      f_swap[i] = y[i] + ch * ( ( -6080.0 * yp[i] + 
+      f_swap[i] = y[i] + lcd_stepsize * ( ( -6080.0 * y_diff[i] + 
             ( 9295.0 * f3[i] - 5643.0 * f4[i] ) ) + ( 41040.0 * f1[i] - 28352.0 * f2[i] ) );
-    dy ( t + h / 2.0, f_swap, f5 );
+    dy ( t + stepsize / 2.0, f_swap, f5 );
 
     /*
     if (test_values == 16) {
@@ -127,17 +137,17 @@ class Estimator {
     */
 
     //Calculate solution
-    ch = h / 7618050.0;
+    lcd_stepsize = stepsize / 7618050.0;
     for (int i = 0; i < neqn; i++ )
-      y_plus_one[i] = y[i] + ch * ( ( 902880.0 * yp[i] + 
+      y_plus_one[i] = y[i] + lcd_stepsize * ( ( 902880.0 * y_diff[i] + 
             ( 3855735.0 * f3[i] - 1371249.0 * f4[i] ) ) + ( 3953664.0 * f2[i] + 277020.0 * f5[i] ) );
 
     //Calculate alternative solution
     for (int i = 0; i < neqn; i++ )
-      y_plus_one_alternative[i] = ( -2090.0 * yp[i] + ( 21970.0 * f3[i] - 15048.0 * f4[i] ) ) + ( 22528.0 * f2[i] - 27360.0 * f5[i] );
+      y_plus_one_alternative[i] = ( -2090.0 * y_diff[i] + ( 21970.0 * f3[i] - 15048.0 * f4[i] ) ) + ( 22528.0 * f2[i] - 27360.0 * f5[i] );
 
     /*
-    Console.WriteLine("yp:   "+ yp[0]);
+    Console.WriteLine("y_diff:   "+ y_diff[0]);
     Console.WriteLine("ypo:  "+ y_plus_one[0]);
     Console.WriteLine("ypoa: "+ y_plus_one_alternative[0]);
     */
@@ -165,75 +175,88 @@ class Estimator {
     Console.WriteLine("bg:   "+ biggest_difference);
     Console.WriteLine("yp1:  "+ y_plus_one[0]);
     Console.WriteLine("yp1a: "+ y_plus_one_alternative[0]);
-    Console.WriteLine("err:  "+ Math.Abs( h ) * biggest_difference * scale / 752400.0);
+    Console.WriteLine("err:  "+ Math.Abs( stepsize ) * biggest_difference * scale / 752400.0);
     */
 
     //Return the error 
-    return Math.Abs( h ) * biggest_difference * scale / 752400.0;
+    return Math.Abs( stepsize ) * biggest_difference * scale / 752400.0;
   }
 
   /******************* Move ***********************/
 
-  /* Move from current position to t_end, and update all values */
-  public void move()
+  private void prepare_move() {
+    //Calculate y_diff
+    dy ( t, y, y_diff );
+
+    //Calculate stepsize
+    stepsize = h_startvalue();
+  }
+
+  /* Start year reached
+   * Reaction if stepsize is going to the start_year.
+   * Look 2.0 steps ahead, so stepsize is not 'suddenly' decreased.
+   */ 
+  private bool start_year_to_be_reached() {
+    double dt = move_start_year - t;
+    if ( 2.0 * Math.Abs( stepsize ) > Math.Abs( dt ) )
+    {
+      if ( Math.Abs( dt ) <= Math.Abs( stepsize ) ) //Final step?
+      {
+        stepsize = dt;                   //Let stepsize hit output point
+        return true;
+      }
+      else
+      {
+        stepsize = 0.5 * dt; // If not final step, set stepsize to be second final step. (evens out)
+      }
+    }
+    return false;
+  }
+
+  /* Move from current position to move_start_year, and update all values */
+  /* Preconditions:
+   * move_start_year
+   * move_end_year
+   * dy
+   * bj_ii
+   * abserr
+   * relerr
+   * end_year_y????? not sure
+   * prepare_move() must have been called
+   */
+  private void move()
   {
-    double t_end = t - interval;
-    // Init
-    // Note: (we NEED initialization in the move function, the calculation of h depends on the t_end value)
-    if (first_move) {
-      first_move = false;
-
-      //Calculate yp
-      dy ( t, y, yp );
-
-      //Calculate stepsize
-      h = h_startvalue(t_end);
-
-    } 
+    t = (double)move_end_year;
 
     //Step by step integration.
-    bool end_reached = false;
-
-    while (!end_reached)
+    bool start_year_reached = false;
+    while (!start_year_reached)
     {
       //Variables used in calculations
       bool hfaild = false;
-      double dt = t_end - t;
       double hmin = 26.0 * DoubleEpsilon * Math.Abs( t );
 
-      //Reaction if h is going to the endpoint.
-      //Look 2.0 steps ahead, so stepsize is not 'suddenly' decreased.
-      if ( 2.0 * Math.Abs( h ) > Math.Abs( dt ) )
-      {
-        if ( Math.Abs( dt ) <= Math.Abs( h ) ) //Final step?
-        {
-          end_reached = true; //Return output
-          h = dt;                   //Let h hit output point
-        }
-        else
-        {
-          h = 0.5 * dt; // If not final step, set h to be second final step. (evens out)
-        }
-      }
+      start_year_reached = start_year_to_be_reached(); //Has side effects for stepsize.
 
+      //Try to solve
       double error = solve();
 
       //Integreate 1 step
       while(error > 1.0)
       {
         hfaild = true;
-        end_reached = false;
+        start_year_reached = false;
         
         //Scale down.
         double s = Math.Max(0.1,0.9 / Math.Pow( error, 0.2 ));
-        h = s * h;  
+        stepsize = s * stepsize;  
 
         //Try again.
         error = solve();
       }
 
       //Advance in time
-      t = t + h; 
+      t = t + stepsize; 
 
       //Apply solution
       for (int i = 0; i < neqn; i++ )
@@ -242,50 +265,50 @@ class Estimator {
       /* print test values
       if (y[0] != 0) {
         Console.WriteLine("t: " + t);
-        Console.WriteLine("h: " + h);
+        Console.WriteLine("stepsize: " + stepsize);
         Console.WriteLine("y[0]: " + y[0]);
         System.Threading.Thread.Sleep(1000);
       }
       */
 
-      //Update yp
-      dy ( t, y, yp );
+      //Update y_diff
+      dy ( t, y, y_diff );
 
       //Apply scale to stepsize
       double scale = scale_from_error(error,hfaild);
-      h = r8_sign ( h ) * Math.Max ( scale * Math.Abs( h ), hmin );
+      stepsize = r8_sign ( stepsize ) * Math.Max ( scale * Math.Abs( stepsize ), hmin );
     }
   }
 
   /******************* Move help functions  *******************/
 
-  /* Calculate h's startvalue */
-  public double h_startvalue(double t_end)
+  /* Calculate stepsize's startvalue */
+  public double h_startvalue()
   {
-      //Calculate the start value of h
-      double h = Math.Abs( t_end - t );
+      //Calculate the start value of stepsize
+      double stepsize = Math.Abs( move_start_year - t );
 
       for (int k = 0; k < neqn; k++ )
       {
         double tol = relerr * Math.Abs( y[k] ) + abserr;
         if ( 0.0 < tol )
         {
-          double ypk = Math.Abs( yp[k] );
-          if ( tol < ypk * Math.Pow( h, 5 ) ) //We never really get in here...
+          double y_diff_k = Math.Abs( y_diff[k] );
+          if ( tol < y_diff_k * Math.Pow( stepsize, 5 ) ) //We never really get in here...
           {
             //Assert(false,"h_startvalue wrong");
-            h = Math.Pow( ( tol / ypk ), 0.2 );
+            stepsize = Math.Pow( ( tol / y_diff_k ), 0.2 );
           }
           /*
           Console.WriteLine("tol: "+tol);
-          Console.WriteLine("ypk: "+ypk);
+          Console.WriteLine("y_diff_k: "+y_diff_k);
           Console.WriteLine("y[k]: "+y[k]);
-          Console.WriteLine("yp[k]: "+y[k]);
-          Console.WriteLine("h: "+h);*/
+          Console.WriteLine("y_diff[k]: "+y[k]);
+          Console.WriteLine("stepsize: "+stepsize);*/
         }
       }
 
-      return  Math.Max ( h, 26.0 * DoubleEpsilon * Math.Max ( Math.Abs( t ), Math.Abs( t_end - t ) ) );
+      return  Math.Max ( stepsize, 26.0 * DoubleEpsilon * Math.Max ( Math.Abs( t ), Math.Abs( move_start_year - t ) ) );
   }
 
   /* Scale from error calculations */
@@ -299,8 +322,11 @@ class Estimator {
   }
 
   /*************************** Estimator year solver  ***************************/
-  public double[][] estimate(int start_year,int end_year)
+  public double[][] estimate()
   {
+    //Set the startvalues
+    Array.Copy(end_year_y,y,y.Length); 
+
     //Start at the end year
     t = (double) end_year;
 
@@ -312,8 +338,8 @@ class Estimator {
     //Allocate benefit array
     double[] benefit = new double[neqn];
 
-    //interval: 1 year
-    this.interval = 1;
+    //Prepare to move
+    prepare_move();
 
     //Solve for one year at a time
     for (int year=end_year; year>start_year; year--) { 
@@ -324,7 +350,9 @@ class Estimator {
       //add benefit
       xpy(benefit, y,y); 
 
-      // Integrate over [t,t-1]
+      // Integrate over [year,year-1]
+      move_start_year = (int)year-1;
+      move_end_year = (int)year;
       move();
 
       //Copy y to results
@@ -567,7 +595,9 @@ class CalculationSpecifications {
       //Set estimator variables (Term insurrance)
       estimator.relerr = err;
       estimator.abserr = err;
-      estimator.y = new double[] { 0 };
+      estimator.end_year_y = new double[] { 0 };
+      estimator.start_year = 0;
+      estimator.end_year = 40;
       estimator.bj_ii =
           (double t, double[] res) =>
           res[0] = bj_00(t);
@@ -575,7 +605,7 @@ class CalculationSpecifications {
           (double t, double[] V, double[] res) =>
           res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
 
-      return estimator.estimate(0,40);
+      return estimator.estimate();
     }
   }
 
@@ -657,14 +687,16 @@ class CalculationSpecifications {
       Estimator estimator = new Estimator(1);
       estimator.relerr = err;
       estimator.abserr = err;
-      estimator.y = new double[] { 0 };
+      estimator.start_year = 0;
+      estimator.end_year = 50;
+      estimator.end_year_y = new double[] { 0 };
       estimator.bj_ii =
           (double t, double[] res) => res[0] = bj_00(t);
       estimator.dy =
           (double t, double[] V, double[] res) =>
           res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
 
-      return estimator.estimate(0,50);
+      return estimator.estimate();
     }
   }
 
@@ -747,14 +779,16 @@ class CalculationSpecifications {
       Estimator estimator = new Estimator(1);
       estimator.relerr = err;
       estimator.abserr = err;
-      estimator.y = new double[] { 0 };
+      estimator.start_year = 0;
+      estimator.end_year = 50;
+      estimator.end_year_y = new double[] { 0 };
       estimator.bj_ii =
           (double t, double[] res) => res[0] = bj_00(t);
       estimator.dy =
           (double t, double[] V, double[] res) =>
           res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
 
-      return estimator.estimate(0,50);
+      return estimator.estimate();
     }
   }
 
@@ -838,14 +872,16 @@ class CalculationSpecifications {
       Estimator estimator = new Estimator(1);
       estimator.relerr = err;
       estimator.abserr = err;
-      estimator.y = new double[] { 0 };
+      estimator.start_year = 0;
+      estimator.end_year = 50;
+      estimator.end_year_y = new double[] { 0 };
       estimator.bj_ii =
           (double t, double[] res) => res[0] = bj_00(t);
       estimator.dy =
           (double t, double[] V, double[] res) =>
           res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
 
-      return estimator.estimate(0,50);
+      return estimator.estimate();
     }
   }
 
@@ -967,7 +1003,9 @@ class CalculationSpecifications {
       Estimator estimator = new Estimator(2);
       estimator.relerr = err;
       estimator.abserr = err;
-      estimator.y = new double[] { 0,0 };
+      estimator.start_year = 0;
+      estimator.end_year = 50;
+      estimator.end_year_y = new double[] { 0,0 };
       estimator.bj_ii =
           (double t, double[] res) => {res[0] = bj_00(t); res[1] = bj_11(t);};
       estimator.dy =
@@ -976,7 +1014,7 @@ class CalculationSpecifications {
           res[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t)); 
           };
 
-      return estimator.estimate(0,50);
+      return estimator.estimate();
     }
   }
 
@@ -1095,7 +1133,9 @@ class CalculationSpecifications {
       Estimator estimator = new Estimator(2);
       estimator.relerr = err;
       estimator.abserr = err;
-      estimator.y = new double[] { 0,0 };
+      estimator.start_year = 0;
+      estimator.end_year = 50;
+      estimator.end_year_y = new double[] { 0,0 };
       estimator.bj_ii =
           (double t, double[] res) => { res[0] = bj_00(t); res[1] = bj_11(t); };
       estimator.dy =
@@ -1104,7 +1144,7 @@ class CalculationSpecifications {
             res[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t));
           };
           
-      return estimator.estimate(0,50);
+      return estimator.estimate();
     }
   }
 }
