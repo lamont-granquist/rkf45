@@ -178,22 +178,20 @@ class Estimator {
         local_start_year_reached = false;
 
         //Scale down.
-        double s = Math.Max(0.1,0.9 / Math.Pow( error, 0.2 ));
-        stepsize = s * stepsize;  
+        stepsize *= Math.Max(0.1,0.9 / Math.Pow( error, 0.2 ));  
         stepsize_decreased = true;
 
         //Try again.
         calculate_solutions();
         error = calculate_solution_error();
       }
-
-      //Advance in time
-      //
-      t = t + stepsize; 
-
+      
       //Apply solution
       for (int i = 0; i < neqn; i++ )
         y[i] = y_plus_one[i];
+
+      //Advance in time
+      t += stepsize; 
 
       //Update y_diff
       dy ( t, y, y_diff );
