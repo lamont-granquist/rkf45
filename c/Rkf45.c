@@ -13,6 +13,7 @@
 #include "Matrix_Library.h"
 #include <unistd.h> //only for sleep?
 #include <string.h> //only for sleep?
+#include <time.h>
 
 //Boolean values
 typedef int bool;
@@ -26,10 +27,14 @@ typedef int bool;
 
 //Declare functions
 bool is_equal();
+static void test_all();
+static void time_all();
+static double time_one();
 static bool local_start_to_be_reached();
 static void construct();
 static void allocate_equation_space();
 static double** estimate();
+static double** compute();
 static void xpy();
 static double calculate_solutions();
 static void local_estimate();
@@ -246,6 +251,7 @@ static double calculate_initial_stepsize()
   //Calculate the start value of stepsize
   double stepsize = fabs( start_year - t );
 
+
   for (int k = 0; k < neqn; k++ )
   {
     double tol = relerr * fabs( y[k] ) + abserr;
@@ -278,8 +284,8 @@ static double scale_from_error(double error,bool stepsize_decreased) {
 /* Estimate range */
 static double** estimate() {
 
-  //Set the initial values
-  memcpy(y,end_year_y,neqn);               // y
+  for(int i = 0;i<neqn;i++)                // y
+    y[i] = end_year_y[i];
   t = (double) end_year;                   // t
   dy( t, y, y_diff);                       // y_diff
   stepsize = calculate_initial_stepsize(); // stepsize
@@ -323,17 +329,47 @@ int main(int argc, char const *argv[]) {
   //Construct the estimator
   construct(1);
 
+  test_all();
+  time_all(2288);
+
+  return 0;
+}
+
+void test_all() {
+  policy = 1;
+  assert(is_equal(test_values(),compute(),41,1));
+  policy = 4;
+  assert(is_equal(test_values(),compute(),51,1));
+  printf("Tests passed\n");
+}
+
+void time_all(int customers) {
+  policy = 1;
+  printf("PureEndowment:                %f\n",time_one(customers));
+  printf("DeferredTemporaryLifeAnnuity: %f\n",time_one(customers));
+  printf("TemporaryLifeAnnuityPremium:  %f\n",time_one(customers));
+  policy = 4;
+  printf("TermInsurance:                %f\n",time_one(customers));
+  printf("DisabilityAnnuity:            %f\n",time_one(customers));
+  printf("DisabilityTermInsurance:      %f\n",time_one(customers));
+}
+
+double time_one(int customers) {
+  clock_t start = clock();
+  for (int i = 0;i<customers;i++)
+    compute();
+  clock_t end = clock();
+  return (double) (end - start) * 1000 / CLOCKS_PER_SEC;
+}
+
+static double** compute() {
   //Set estimator variables (Term insurrance)
   start_year = 0;
   end_year = 50;
   relerr = err;
   abserr = err;
   end_year_y[0] = 0.0;
-
-  assert(is_equal(test_values(),estimate(),51,1));
-  printf("test succesful\n");
-
-  return 0;
+  return estimate();
 }
 
 /************************** To be removed?? *********************/
@@ -342,6 +378,7 @@ int main(int argc, char const *argv[]) {
 bool is_equal(double** a,double** b,int m,int n) {
   for (int i = 0;i < m;i++) {
     for (int j = 0;j < n;j++) {
+      //printf("%f = %f\n",a[i][j],b[i][j]);
       if (fabs(a[i][j] - b[i][j]) > err)
         return false;
     }

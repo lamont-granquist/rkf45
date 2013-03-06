@@ -312,8 +312,8 @@ public class Timer {
 class CalculationSpecifications {
 
   public static void Main(String[] args) {
-    //TimeAll(12288);
-    TestAll();
+    TimeAll(82288);
+    //TestAll();
   }
 
   public static readonly double err = 1e-11;
@@ -344,12 +344,12 @@ class CalculationSpecifications {
   }
 
   public static void TimeAll(int customers) {
-    Console.WriteLine("PureEndowment:               " + PureEndowment.Time(customers));
-    Console.WriteLine("DeferredTemoraryLifeAnnuity: " + DeferredTemporaryLifeAnnuity.Time(customers));
-    Console.WriteLine("TemporaryLifeAnnuityPremium: " + TemporaryLifeAnnuityPremium.Time(customers));
+    //Console.WriteLine("PureEndowment:               " + PureEndowment.Time(customers));
+    //Console.WriteLine("DeferredTemoraryLifeAnnuity: " + DeferredTemporaryLifeAnnuity.Time(customers));
+    //Console.WriteLine("TemporaryLifeAnnuityPremium: " + TemporaryLifeAnnuityPremium.Time(customers));
     Console.WriteLine("TermInsurance:               " + TermInsurance.Time(customers));
-    Console.WriteLine("DisabilityAnnuity:           " + DisabilityAnnuity.Time(customers));
-    Console.WriteLine("DisabilityTermInsurance:     " + DisabilityTermInsurance.Time(customers));
+    //Console.WriteLine("DisabilityAnnuity:           " + DisabilityAnnuity.Time(customers));
+    //Console.WriteLine("DisabilityTermInsurance:     " + DisabilityTermInsurance.Time(customers));
   }
 
 
