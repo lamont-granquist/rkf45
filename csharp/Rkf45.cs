@@ -229,7 +229,7 @@ class Estimator {
       }
     }
 
-      return  Math.Max ( stepsize, 26.0 * DoubleEpsilon * Math.Max ( Math.Abs( t ), Math.Abs( start_year - t ) ) );
+    return  Math.Max ( stepsize, 26.0 * DoubleEpsilon * Math.Max ( Math.Abs( t ), Math.Abs( start_year - t ) ) );
   }
 
   /* Scale from error calculations */

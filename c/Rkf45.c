@@ -1,9 +1,16 @@
+/*
+ * C implementation of the Rkf45 algoritm.
+ */
+
+/********************* INIT *******************/
+
+//Library inclusion
 #include <stdlib.h>
 #include <stdio.h>
 #include "Policy_Distributor.h" 
 #include <assert.h>
 #include <math.h>
-
+#include "Matrix_Library.h"
 #include <unistd.h> //only for sleep?
 #include <string.h> //only for sleep?
 
@@ -18,13 +25,11 @@ typedef int bool;
 #define sign(x)  ((x > 0) - ( x < 0))
 
 //Declare functions
+bool is_equal();
 static bool local_start_to_be_reached();
-static bool is_equal();
 static void construct();
 static void allocate_equation_space();
 static double** estimate();
-static double** allocate_double_matrix();
-static void print_matrix();
 static void xpy();
 static double calculate_solutions();
 static void local_estimate();
@@ -35,7 +40,7 @@ static double FindDoubleEpsilon();
 //Declare Estimator variables
 static double const err = 1e-11;
 
-//Public
+//Public variables
 static int neqn;
 static int start_year;
 static int end_year;
@@ -44,7 +49,8 @@ static int end_year;
 static double relerr;
 static double abserr;
 static double* end_year_y; 
-//Private
+
+//Private variables
 static double t;
 static double stepsize;
 static double* f1;
@@ -63,33 +69,16 @@ static double DoubleEpsilon;
 
 static int m; //Result length;
 
-/* Main test function */
-int main(int argc, char const *argv[]) {
+/******************* Constructor *********************/
 
-  //Construct the estimator
-  construct(1);
-
-  //Set estimator variables (Term insurrance)
-  start_year = 0;
-  end_year = 50;
-  relerr = err;
-  abserr = err;
-  end_year_y[0] = 0.0;
-
-  assert(is_equal(test_values(),estimate(),51,1));
-  printf("test succesful\n");
-
-  return 0;
-}
-
-
-/* Initiate estimator */
+/* Construct */
 static void construct(int n) {
   neqn = n;
   DoubleEpsilon = FindDoubleEpsilon();
   allocate_equation_space();
 }
 
+/* Allocate equation space */
 static void allocate_equation_space() {
   //Global for the class
   y_plus_one             = malloc(sizeof(double)*neqn);
@@ -107,7 +96,10 @@ static void allocate_equation_space() {
   y_plus_one_alternative = malloc(sizeof(double)*neqn);
 }
 
-/* Solve */
+/********************** Solve *********************/
+
+/* Calculate the actual and the alternative solutions */
+//y_plus_one and y_plus_one_alternative will be set
 static double calculate_solutions() {
 
   double lcd_stepsize = stepsize / 4.0; //lowest common denominator of stepsize
@@ -143,17 +135,6 @@ static double calculate_solutions() {
           ( 9295.0 * f3[i] - 5643.0 * f4[i] ) ) + ( 41040.0 * f1[i] - 28352.0 * f2[i] ) );
   dy ( t + stepsize / 2.0, f_swap, f5 );
 
-     /*
-     if (test_values == 16) {
-     printf("%.16lf\n",f1[0]);
-     printf("%.16lf\n",f2[0]);
-     printf("%.16lf\n",f3[0]);
-     printf("%.16lf\n",f4[0]);
-     printf("%.16lf\n",f5[0]);
-     }
-     test_add();
-     */
-
   //Calculate solution
   lcd_stepsize = stepsize / 7618050.0;
   for (int i = 0; i < neqn; i++ )
@@ -166,7 +147,8 @@ static double calculate_solutions() {
 
 }
 
-//Calculate the error.
+/* Calculate the error of the solution */
+//Pure
 static double calculate_solution_error() {
 
   //Used in calculations
@@ -186,16 +168,18 @@ static double calculate_solution_error() {
   return fabs( stepsize ) * biggest_difference * scale / 752400.0;
 }
 
-/* Move */
+/******************* Local estimation ***********************/
+
+/* Move from current position to local_start_year, and update all values */
+// Updates y, h
 static void local_estimate() {
   
   //Step by step integration.
   bool local_start_reached = false;
-
   while (!local_start_reached)
   {
     //Variables used in calculations
-    bool hfaild = false;
+    bool stepsize_descresed = false;
     double hmin = 26.0 * DoubleEpsilon * fabs( t );
 
     local_start_reached = local_start_to_be_reached();
@@ -206,7 +190,7 @@ static void local_estimate() {
     //Integreate 1 step
     while(error > 1.0)
     {
-      hfaild = true;
+      stepsize_descresed = true;
       local_start_reached = false;
 
       //Scale down.
@@ -229,17 +213,18 @@ static void local_estimate() {
     dy ( t, y, y_diff );
 
     //Apply scale to stepsize
-    double scale = scale_from_error(error,hfaild);
+    double scale = scale_from_error(error,stepsize_descresed);
     stepsize = sign ( stepsize ) * max ( scale * fabs( stepsize ), hmin );
   }
 }
 
-/**************** Move help functions ****************/
+/**************** Local estimation help functions ****************/
 
+
+/* React if the "local start year" is about to be reached */
+//Effects stepsize, returns whether the start year is reached
 static bool local_start_to_be_reached() {
     double dt = local_end_year - t;
-    //Reaction if stepsize is going to the endpoint.
-    //Look 2.0 steps ahead, so stepsize is not 'suddenly' decreased.
     if ( 2.0 * fabs( stepsize ) > fabs( dt ) )
     {
       if ( fabs( dt ) <= fabs( stepsize ) ) //Final step?
@@ -272,14 +257,6 @@ static double calculate_initial_stepsize()
         stepsize = pow( ( tol / ypk ), 0.2 );
         printf("this should not happen.\n");
       }
-      /* test startvalues
-         printf("abserr: %.40lf\n",abserr);
-         printf("tol: %.40lf\n",tol);
-         printf("ypk: %.40lf\n",ypk);
-         printf("y[k]: %.40lf\n",y[k]);
-         printf("y_diff[k]: %.40lf\n",y_diff[k]);
-         printf("stepsize: %.40lf\n",stepsize);
-         */
     }
   }
 
@@ -287,48 +264,37 @@ static double calculate_initial_stepsize()
 }
 
 /* Scale from error calculations */
-static double scale_from_error(double error,bool hfailed) {
+static double scale_from_error(double error,bool stepsize_decreased) {
   double scale = min(5.0,0.9 / pow( error, 0.2 ));
 
-  if (hfailed)
+  if (stepsize_decreased)
     scale = min( scale, 1.0 );
 
   return scale;
 }
 
-/* Find double epsilon */
-static double FindDoubleEpsilon() {
-  double r = 1.0;
-  while (1.0 < (1.0 + r))
-    r = r / 2.0;
-  return 2.0 * r;
-}
+/*********************** Estimate **************************/
 
 /* Estimate range */
 static double** estimate() {
 
   //Set the initial values
-  memcpy(y,end_year_y,neqn);      // y
-  t = (double) end_year;          // t
-  dy( t, y, y_diff);
-  stepsize = calculate_initial_stepsize();
+  memcpy(y,end_year_y,neqn);               // y
+  t = (double) end_year;                   // t
+  dy( t, y, y_diff);                       // y_diff
+  stepsize = calculate_initial_stepsize(); // stepsize
 
   //Allocate result matrix, calculate m (length of result)
   m = end_year-start_year+1;
   double** result = allocate_double_matrix(m,neqn);
 
-  //Allocate benefit array
-  double* benefit = malloc(sizeof(double)*neqn);
-
   //Solve for one year at a time
   for (int year=end_year; year>start_year; year--) {
-    //calcuate this years benefit
-    bj_ii(year,benefit);
 
-    //add benefit
-    xpy(y,benefit);
+    //Add this years benefit to y
+    bj_ii(year,y);
 
-    //Integate
+    // Integrate over [year,year-1]
     local_start_year = year;
     local_end_year = year-1;
     local_estimate();
@@ -341,48 +307,41 @@ static double** estimate() {
   return result;
 }
 
-/*******************      Matrix functions      *******************/
-//TODO: Put in a file for themself.
+/*************************** Auxiliaries ****************************/
 
-/* Addtion of all elements in array b to array a */
-static void xpy(double* x, double* y,int length) {
-  for (int i=0; i<length; i++)
-    x[i] = x[i]+y[i];
+/* Find double epsilon */
+static double FindDoubleEpsilon() {
+  double r = 1.0;
+  while (1.0 < (1.0 + r))
+    r = r / 2.0;
+  return 2.0 * r;
 }
 
-/*Allocate Matrix */
-static double** allocate_double_matrix(int m, int n) {
-  /* Allocate memory for the elements */
-  double *mem = malloc(m * n * sizeof(double));
-  /* Allocate memory for the matrix array */
-  double **mat = malloc(m * sizeof(double *));
-  /* Setup array */
-  if (mem != NULL && mat != NULL) {
-    int i;
-    for (i = 0; i < m; ++i) {
-      mat[i] = &mem[i * n];
-    }
-  } else {
-    printf("Out of memory!\n"); exit(-1);
-  }
-  return mat;
+/* Main test function */
+int main(int argc, char const *argv[]) {
+
+  //Construct the estimator
+  construct(1);
+
+  //Set estimator variables (Term insurrance)
+  start_year = 0;
+  end_year = 50;
+  relerr = err;
+  abserr = err;
+  end_year_y[0] = 0.0;
+
+  assert(is_equal(test_values(),estimate(),51,1));
+  printf("test succesful\n");
+
+  return 0;
 }
 
-/* Print Matrix */
-static void print_matrix(int m,int n,double** mat) {
-  for (int i = 0;i < m;i++) {
-    for (int j = 0;j < n;j++) {
-      printf("%.16lf, ",mat[i][j]);
-    }
-    printf("\n");
-  }
-}
+/************************** To be removed?? *********************/
 
 /* Does two matrixes have the same values */
-static bool is_equal(double** a,double** b,int m,int n) {
+bool is_equal(double** a,double** b,int m,int n) {
   for (int i = 0;i < m;i++) {
     for (int j = 0;j < n;j++) {
-      //printf("%.16lf, ",a[i][j]);
       if (fabs(a[i][j] - b[i][j]) > err)
         return false;
     }
@@ -390,34 +349,3 @@ static bool is_equal(double** a,double** b,int m,int n) {
   return true;
 }
 
-/* Free Matrix */
-static void free_double_matrix(double **mat) {
-  /* Free elements */
-  free(*mat);
-  /* Free matrix */
-  free(mat);
-}
-
-/* Testing TODO: Delete */
-/*static void test() {
-  assert(err < 0.00000001);
-
-//Test xpy
-int a[5] = {1,2,3,4,5};
-int b[5] = {5,4,3,2,1};
-xpy(a,b,5);
-
-for(int i=0;i<5;i++)
-assert(a[i]==6);
-
-//Test fabs
-assert(fabs(-100.12434588557878543)==100.12434588557878543);
-
-//Test max
-assert(max(10,5)==10);
-assert(max(-10,5)==5);
-
-//Test max
-assert(min(10,5)==5);
-assert(min(-10,5)==-10);
-}*/
