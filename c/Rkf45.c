@@ -327,10 +327,13 @@ static double FindDoubleEpsilon() {
 int main(int argc, char const *argv[]) {
 
   //Construct the estimator
-  construct(1);
+  construct(2);
 
-  test_all();
-  time_all(2288);
+  //test_all();
+  //time_all(2288);
+  policy = 5;
+  neqn = 2;
+  assert(is_equal(test_values(),compute(),51,2));
 
   return 0;
 }
@@ -376,6 +379,7 @@ static double** compute() {
   relerr = err;
   abserr = err;
   end_year_y[0] = 0.0;
+  end_year_y[1] = 0.0;
   return estimate();
 }
 
@@ -385,6 +389,7 @@ static double** compute() {
 bool is_equal(double** a,double** b,int m,int n) {
   for (int i = 0;i < m;i++) {
     for (int j = 0;j < n;j++) {
+      //printf(": %f = %f\n",a[i][j],b[i][j]);
       if (fabs(a[i][j] - b[i][j]) > err)
         printf("is_equal failed: %f != %f\n",a[i][j],b[i][j]);
         //return false;
