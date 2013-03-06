@@ -30,8 +30,8 @@ class Estimator {
   private double[] y;
   private double[] y_plus_one;
   private double[] y_plus_one_alternative;
-  private int move_start_year; 
-  private int move_end_year; 
+  private int local_start_year; 
+  private int local_end_year; 
   static readonly double DoubleEpsilon = FindDoubleEpsilon(); //Const used for calculations
 
   //Test/Statistic values
@@ -131,15 +131,14 @@ class Estimator {
   //Pure
   private double calculate_solution_error() {
 
-    //Calculate the error.
+    //Used in calculations
+    double scale = 2.0 / relerr;
+
+    //Calculate the biggest_difference
     double biggest_difference = 0.0;
-
-    double scale = 2.0 / relerr; //scale
-    double ae = scale * abserr;  //absolute error
-
     for (int i = 0; i < neqn; i++ )
     {
-      double et = Math.Abs( y[i] ) + Math.Abs( y_plus_one[i] ) + ae;
+      double et = Math.Abs( y[i] ) + Math.Abs( y_plus_one[i] ) + scale * abserr;
       double ee = Math.Abs( y_plus_one_alternative[i] );
 
       biggest_difference = Math.Max ( biggest_difference, ee / et );
@@ -149,36 +148,25 @@ class Estimator {
     return Math.Abs( stepsize ) * biggest_difference * scale / 752400.0;
   }
 
-  /******************* Move ***********************/
+  /******************* Local estimation ***********************/
 
-  /* Move from current position to move_start_year, and update all values */
+  /* Move from current position to local_start_year, and update all values */
   // Updates y, h
-  /* Preconditions:
-   * move_start_year
-   * move_end_year
-   * dy
-   * bj_ii
-   * abserr
-   * relerr
-   * end_year_y????? not sure
-   * stepsize initial value must have been calculated
-   * dy must have been calculated
-   */
-  private void move()
+  private void local_estimate()
   {
-    t = (double)move_end_year;
+    t = (double)local_end_year;
 
     //Step by step integration.
-    bool start_year_reached = false;
-    while (!start_year_reached)
+    bool local_start_year_reached = false;
+    while (!local_start_year_reached)
     {
       steps_taken_in_last_estimation++;
 
       //Variables used in calculations
-      bool hfaild = false;
-      double hmin = 26.0 * DoubleEpsilon * Math.Abs( t );
+      bool stepsize_decreased = false;
+      double minimum_stepsize = 26.0 * DoubleEpsilon * Math.Abs( t );
 
-      start_year_reached = move_start_year_to_be_reached(); //Has side effects for stepsize.
+      local_start_year_reached = local_start_year_to_be_reached(); //Has side effects for stepsize.
 
       //Try to solve
       calculate_solutions();
@@ -187,12 +175,12 @@ class Estimator {
       //Integreate 1 step
       while(error > 1.0)
       {
-        hfaild = true;
-        start_year_reached = false;
+        local_start_year_reached = false;
 
         //Scale down.
         double s = Math.Max(0.1,0.9 / Math.Pow( error, 0.2 ));
         stepsize = s * stepsize;  
+        stepsize_decreased = true;
 
         //Try again.
         calculate_solutions();
@@ -200,6 +188,7 @@ class Estimator {
       }
 
       //Advance in time
+      //
       t = t + stepsize; 
 
       //Apply solution
@@ -210,17 +199,17 @@ class Estimator {
       dy ( t, y, y_diff );
 
       //Apply scale to stepsize
-      double scale = scale_from_error(error,hfaild);
-      stepsize = Math.Sign ( stepsize ) * Math.Max ( scale * Math.Abs( stepsize ), hmin );
+      double scale = scale_from_error(error,stepsize_decreased);
+      stepsize = Math.Sign ( stepsize ) * Math.Max ( scale * Math.Abs( stepsize ), minimum_stepsize );
     }
   }
 
-  /******************* Move help functions *******************/
+  /******************* Local estimation help functions *******************/
 
-  /* React if the "move start year" is about to be reached */
+  /* React if the "local start year" is about to be reached */
   //Effects stepsize, returns whether the start year is reached
-  private bool move_start_year_to_be_reached() {
-    double dt = move_start_year - t;
+  private bool local_start_year_to_be_reached() {
+    double dt = local_start_year - t;
     if ( 2.0 * Math.Abs( stepsize ) > Math.Abs( dt ) )
     {
       if ( Math.Abs( dt ) <= Math.Abs( stepsize ) ) //Final step?
@@ -240,7 +229,7 @@ class Estimator {
   public double calculate_initial_stepsize()
   {
     //Calculate the start value of stepsize
-    double stepsize = Math.Abs( move_start_year - t );
+    double stepsize = Math.Abs( local_start_year - t );
 
     for (int k = 0; k < neqn; k++ )
     {
@@ -256,40 +245,31 @@ class Estimator {
       }
     }
 
-      return  Math.Max ( stepsize, 26.0 * DoubleEpsilon * Math.Max ( Math.Abs( t ), Math.Abs( move_start_year - t ) ) );
+      return  Math.Max ( stepsize, 26.0 * DoubleEpsilon * Math.Max ( Math.Abs( t ), Math.Abs( local_start_year - t ) ) );
   }
 
   /* Scale from error calculations */
-  public double scale_from_error(double error,bool hfailed) {
+  public double scale_from_error(double error,bool stepsize_decreased) {
     double scale = Math.Min(5.0,0.9 / Math.Pow( error, 0.2 ));
 
-    if (hfailed)
+    if (stepsize_decreased)
       scale = Math.Min ( scale, 1.0 );
 
     return scale;
   }
 
   /*************************** Estimate ***************************/
+
   public double[][] estimate()
   {
     steps_taken_in_last_estimation = 0;
 
-    //Set the startvalues
-    Array.Copy(end_year_y,y,y.Length); // y = end_year_y
+    //Set the initial values
+    Array.Copy(end_year_y,y,y.Length);       // y
+    t = (double) end_year;                   // t
+    dy ( t, y, y_diff );                     // y_diff
+    stepsize = calculate_initial_stepsize(); // stepsize
 
-    //Start at the end year
-    t = (double) end_year;
-
-    //Allocate benefit array
-    double[] benefit = new double[neqn];
-
-    //Calculate y_diff
-    dy ( t, y, y_diff );
-
-    //Calculate the initial stepsize
-    stepsize = calculate_initial_stepsize();
-
-    //Allocate result matrix
     double[][] result = new double[end_year-start_year+1][];
     for (int year=end_year; year>=start_year; year--) 
       result[year-start_year] = new double[neqn];
@@ -297,16 +277,13 @@ class Estimator {
     //Solve for one year at a time
     for (int year=end_year; year>start_year; year--) { 
 
-      //calculate this years benefit
-      bj_ii(year, benefit); 
-
-      //add benefit
-      xpy(benefit, y,y); 
+      //Add this years benefit to y
+      bj_ii(year, y); 
 
       // Integrate over [year,year-1]
-      move_start_year = (int)year-1;
-      move_end_year = (int)year;
-      move();
+      local_start_year = (int)year-1;
+      local_end_year = (int)year;
+      local_estimate();
 
       //Copy y to results
       Array.Copy(y, result[year-start_year-1], y.Length); 
@@ -322,17 +299,6 @@ class Estimator {
     while (1.0 < (1.0 + r))
       r = r / 2.0;
     return 2.0 * r;
-  }
-
-  // xpy =  x array plus y array, imperative version
-  static void xpy(double[] x, double[] y, double[] res) {
-    if (x.Length != y.Length)
-      throw new Exception("saxpy: lengths of x and y differ");
-    if (x.Length != res.Length)
-      throw new Exception("saxpy: lengths of x and res differ");
-
-    for (int i=0; i<x.Length; i++)
-      res[i] = x[i] + y[i];
   }
 
 }
@@ -362,7 +328,8 @@ public class Timer {
 class CalculationSpecifications {
 
   public static void Main(String[] args) {
-    TimeAll(12288);
+    //TimeAll(12288);
+    TestAll();
   }
 
   public static readonly double err = 1e-11;
@@ -418,7 +385,7 @@ class CalculationSpecifications {
     Assert(IsEqual(TermInsurance.Compute(),TermInsurance.test_values),"TempInsurance failed");
     Assert(IsEqual(DisabilityAnnuity.Compute(),DisabilityAnnuity.test_values),"DisAnnu failed");
     Assert(IsEqual(DisabilityTermInsurance.Compute(),DisabilityTermInsurance.test_values),"DisabilityTermInsurance failed");
-    Console.WriteLine("tests passed");
+    Console.WriteLine("Tests passed");
   }
 
   // Gompertz-Makeham mortality intensities for Danish women
@@ -555,7 +522,7 @@ class CalculationSpecifications {
       estimator.end_year = 40;
       estimator.bj_ii =
         (double t, double[] res) =>
-        res[0] = bj_00(t);
+        res[0] += bj_00(t);
       estimator.dy =
         (double t, double[] V, double[] res) =>
         res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
@@ -656,7 +623,7 @@ class CalculationSpecifications {
       estimator.end_year = 50;
       estimator.end_year_y = new double[] { 0 };
       estimator.bj_ii =
-        (double t, double[] res) => res[0] = bj_00(t);
+        (double t, double[] res) => res[0] += bj_00(t);
       estimator.dy =
         (double t, double[] V, double[] res) =>
         res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
@@ -758,7 +725,7 @@ class CalculationSpecifications {
       estimator.end_year = 50;
       estimator.end_year_y = new double[] { 0 };
       estimator.bj_ii =
-        (double t, double[] res) => res[0] = bj_00(t);
+        (double t, double[] res) => res[0] += bj_00(t);
       estimator.dy =
         (double t, double[] V, double[] res) =>
         res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
@@ -861,7 +828,7 @@ public static double Time(int customers) {
       estimator.end_year = 50;
       estimator.end_year_y = new double[] { 0 };
       estimator.bj_ii =
-        (double t, double[] res) => res[0] = bj_00(t);
+        (double t, double[] res) => res[0] += bj_00(t);
       estimator.dy =
         (double t, double[] V, double[] res) =>
         res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
@@ -1002,7 +969,7 @@ public static double Time(int customers) {
       estimator.end_year = 50;
       estimator.end_year_y = new double[] { 0,0 };
       estimator.bj_ii =
-        (double t, double[] res) => {res[0] = bj_00(t); res[1] = bj_11(t);};
+        (double t, double[] res) => {res[0] += bj_00(t); res[1] += bj_11(t);};
       estimator.dy =
         (double t, double[] V, double[] res) => {
           res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (V[1] - V[0] + bj_01(t)) - mu_02(t) * (0 - V[0] + bj_02(t));
@@ -1142,7 +1109,7 @@ public static double Time(int customers) {
       estimator.end_year = 50;
       estimator.end_year_y = new double[] { 0,0 };
       estimator.bj_ii =
-        (double t, double[] res) => { res[0] = bj_00(t); res[1] = bj_11(t); };
+        (double t, double[] res) => { res[0] += bj_00(t); res[1] += bj_11(t); };
       estimator.dy =
         (double t, double[] V, double[] res) => {
           res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (V[1] - V[0] + bj_01(t)) - mu_02(t) * (0 - V[0] + bj_02(t));
