@@ -20,7 +20,6 @@ class Estimator {
   //Private
   private double t;
   private double stepsize;
-  private double[] y_diff;
   private double[] f1;
   private double[] f2;
   private double[] f3;
@@ -28,13 +27,13 @@ class Estimator {
   private double[] f5;
   private double[] f_swap;
   private double[] y;
+  private double[] y_diff;
   private double[] y_plus_one;
   private double[] y_plus_one_alternative;
   private int local_start_year; 
   private int local_end_year; 
   static readonly double DoubleEpsilon = FindDoubleEpsilon(); //Const used for calculations
 
-  //Test/Statistic values
   public int steps_taken_in_last_estimation;
 
   /************************** Temporary funcitons ***************/

@@ -441,4 +441,3 @@ static void free_double_matrix(double **mat) {
   assert(min(10,5)==5);
   assert(min(-10,5)==-10);
 }*/
-

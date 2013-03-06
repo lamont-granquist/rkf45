@@ -5,71 +5,12 @@ Add the algoritm while adding assertions to the C# code.
 Might want to split up estimator and testing, running of it?
 
 Vejleder hjælp:
-Se på opbygning, gode råd.
-Tids tagning.
-Lav RK4?
-Testing af functioner?
-
-Flere test case behøves.
-
-c code skal være structs så der skal kører flere estimatorer.
-
-Hej Peter og Hans Henrik
-
-Her er opfølgning på vores møde samt status rapport.
-
-Jeg havde lavet en pænere C# kode og en C implementation. Vi blev enige om at
-jeg skulle gå videre med nedenstående pointer, i prioriteret rækkefølge.
-
-1. Yderligere opdeling af C# koden, for at få bedre mulighed for testing, og
-for at få lettere ved at implementere i C og CUDA C.
-  - Jeg har arbejdet yderligere med at gøre koden pænere, resultatet kan ses
-  på github.com/mollerhoj/rkf45
-
-2. Yderligere anskaffelse af testdata. For bedre at kunne teste
-implementationen.
-  - Er det her relevant? Jeg blev i tvivl om det virkede som om jeg
-  insisterede på at få den her testdata med. Hvis det er relevant, sender du
-  mig så nogle kilder hvor jeg kan finde dataen, Sestoft?
-
-3. Beregninger på flere kunder og tidstagning af disse beregninger.
-  - Jeg er blevet i tvivl om jeg har misforstået denne opgave. Umiddelbart
-  virker det jo meget simpelt at tage tid på hvor lang tid det tager at regne
-  den samme kunde et bestemt antal gange. Her er resultatet fra beregninger på
-  12288 identiske kunder, målt i milisekunder.
-
-  Produkt         Udleveret C# kode    Min C# implementation
-  ----------------------------------------------------------
-  PureEndowment:               1599                     1777
-  DeferredTemoraryLifeAnnuity: 3612                     3827
-  TemporaryLifeAnnuityPremium: 2079                     2148
-  TermInsurance:               2359                     2635
-  DisabilityAnnuity:           7020                     7161
-  DisabilityTermInsurance:     5778                     5867
-
-  Som det ses er der ikke nogen betydelig forskel, hvilket jo også er
-  meningen.
-
-4. Implementation af pænere kode i C og CUDA C.
-  - Denne kan jeg umiddelbart gå videre med. Selvfølgelig synd at gøre før C#
-  implementationen er smukkeseret tilstrækkeligt.
-
-5. Beregninger på rentekurver, herunder interpolartions beregninger.
-  - Dette punkt aftalte vi jeg skulle vente med indtil punkt 4. er lavet.
-
-Desuden aftaltes det at problemer der opstår pga. dybe differentialligninger
-(Der kalder deres egen differentierede) ignores i C og CUDA C
-implementationerne.
-
-Min sygdomssituation er desværre stadig lidt usikker, jeg har ligget syg i
-weekenden men er nu mere frisk og venter på resultater fra lægen.
-
-Venlig hilsen, Jens Dahl Møllerhøj
+y_diff (gammel yp) er previous_d_diff. Er det en fejl? Stemmer ikke overens
+med udregninger.
+stepsize scales ned ved years afslutninger. Er det et problem?
 
 Iterm2 mouse copy fix
-Iterm2 swap panes
 Iterm2 remove mouse scaling
-Iterm2 remove Space hotkey
 Iterm2 cmd hotkey remove. 
 
 vim jump to next function definition!
@@ -91,7 +32,3 @@ Til rapport omkring solve metoden:
      *
      * Da funktionerne skal bruge k2..5, ganger vi med stepsize. (i praksis lcd_stepsize)
      * lcd_stepsize is the lowest diffential of stepsize. Det er praktisk at man ikke skal gange med så store tal.
-
-Til vejledere:
-
-stepsize scaleres ned hver gang vi skal have et nyt år.
