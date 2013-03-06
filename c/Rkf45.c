@@ -330,7 +330,7 @@ int main(int argc, char const *argv[]) {
   construct(1);
 
   test_all();
-  time_all(12288);
+  time_all(2288);
 
   return 0;
 }
@@ -356,7 +356,8 @@ void time_all(int customers) {
   printf("TemporaryLifeAnnuityPremium:  %f\n",time_one(customers));
   policy = 4;
   printf("TermInsurance:                %f\n",time_one(customers));
-  //printf("DisabilityAnnuity:            %f\n",time_one(customers));
+  policy = 5;
+  printf("DisabilityAnnuity:            %f\n",time_one(customers));
   //printf("DisabilityTermInsurance:      %f\n",time_one(customers));
 }
 

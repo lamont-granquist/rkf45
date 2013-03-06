@@ -4,6 +4,7 @@
 #include "PureEndowment.h"
 #include "Policy_Distributor.h"
 #include "DeferredTemporaryLifeAnnuity.h"
+#include "DisabilityAnnuity.h"
 #include "TemporaryLifeAnnuityPremium.h"
 
 int policy = 0;
@@ -23,6 +24,9 @@ void dy(double t, double* V, double* result) {
     case 4:
       dy_TermInsurance(t,V,result);
     break;
+    case 5:
+      dy_DisabilityAnnuity(t,V,result);
+    break; 
   };
 }
 
@@ -41,6 +45,10 @@ void bj_ii(double t, double* result) {
     case 4:
       bj_ii_TermInsurance(t,result);
     break;
+    case 5:
+      bj_ii_DisabilityAnnuity(t,result);
+    break;
+
   };
 }
 
@@ -58,6 +66,9 @@ double** test_values() {
     break;
     case 4:
       return tv_TermInsurance();
+    break;
+    case 5:
+      return tv_DisabilityAnnuity();
     break;
   }
   return tv_PureEndowment();
