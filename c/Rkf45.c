@@ -346,7 +346,9 @@ void test_all() {
 void time_all(int customers) {
   policy = 1;
   printf("PureEndowment:                %f\n",time_one(customers));
+  policy = 2;
   printf("DeferredTemporaryLifeAnnuity: %f\n",time_one(customers));
+  policy = 3;
   printf("TemporaryLifeAnnuityPremium:  %f\n",time_one(customers));
   policy = 4;
   printf("TermInsurance:                %f\n",time_one(customers));
