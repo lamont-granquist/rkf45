@@ -32,28 +32,16 @@ class Estimator {
   private double[] y_plus_one_alternative;
   private int local_start_year; 
   private int local_end_year; 
-  static readonly double DoubleEpsilon = FindDoubleEpsilon(); //Const used for calculations
+  static double DoubleEpsilon; //Const used for calculations
 
   public int steps_taken_in_last_estimation;
-
-  /************************** Temporary funcitons ***************/
-
-  /* Test function */
-  private int TEST_MAX = 50;
-  private int test_values = 1;
-
-  public void test_add() {
-    test_values++;
-    if (test_values > TEST_MAX) {
-      Environment.Exit(0);
-    }
-  }
 
   /************************** Constructor ***********************/
 
   /* Construct */
   public void construct(int this_neqn) {
     neqn = this_neqn;
+    DoubleEpsilon = FindDoubleEpsilon();
     allocate_equation_space();
   }
 
@@ -151,8 +139,7 @@ class Estimator {
 
   /* Move from current position to local_start_year, and update all values */
   // Updates y, h
-  private void local_estimate()
-  {
+  private void local_estimate() {
     t = (double)local_end_year;
 
     //Step by step integration.
@@ -226,7 +213,7 @@ class Estimator {
   public double calculate_initial_stepsize()
   {
     //Calculate the start value of stepsize
-    double stepsize = Math.Abs( local_start_year - t );
+    double stepsize = Math.Abs( start_year - t );
 
     for (int k = 0; k < neqn; k++ )
     {
@@ -242,7 +229,7 @@ class Estimator {
       }
     }
 
-      return  Math.Max ( stepsize, 26.0 * DoubleEpsilon * Math.Max ( Math.Abs( t ), Math.Abs( local_start_year - t ) ) );
+      return  Math.Max ( stepsize, 26.0 * DoubleEpsilon * Math.Max ( Math.Abs( t ), Math.Abs( start_year - t ) ) );
   }
 
   /* Scale from error calculations */
