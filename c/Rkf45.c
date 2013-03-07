@@ -315,47 +315,7 @@ static double FindDoubleEpsilon() {
   return 2.0 * r;
 }
 
-/*static double const err = 1e-11;
-
-static double** compute() {
-  //Set estimator variables (Term insurrance)
-  start_year = 0;
-  end_year = 50;
-  relerr = err;
-  abserr = err;
-  end_year_y[0] = 0.0;
-  end_year_y[1] = 0.0;
-  return estimate();
-}
-
-int main(int argc, char const *argv[]) {
-
-  //Construct the estimator
-  construct(1);
-  compute();
-
-
-  //test_all();
-  //time_all(2288);
-  //policy = 5;
-  //neqn = 2;
-  //assert(is_equal(test_values(),compute(),51,2));
-
-  return 0;
-}
-
-void test_all() {
-  policy = 1;
-  assert(is_equal(test_values(),compute(),41,1));
-  policy = 2;
-  assert(is_equal(test_values(),compute(),51,1));
-  policy = 3;
-  assert(is_equal(test_values(),compute(),51,1));
-  policy = 4;
-  assert(is_equal(test_values(),compute(),51,1));
-  printf("Tests passed\n");
-}
-
+/*
 void time_all(int customers) {
   policy = 1;
   printf("PureEndowment:                %f\n",time_one(customers));
@@ -377,6 +337,4 @@ double time_one(int customers) {
   clock_t end = clock();
   return (double) (end - start) * 1000 / CLOCKS_PER_SEC;
 }*/
-
-/************************** To be removed?? *********************/
 
