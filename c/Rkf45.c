@@ -329,11 +329,11 @@ int main(int argc, char const *argv[]) {
   //Construct the estimator
   construct(2);
 
-  //test_all();
+  test_all();
   //time_all(2288);
   policy = 5;
   neqn = 2;
-  assert(is_equal(test_values(),compute(),51,2));
+  //assert(is_equal(test_values(),compute(),51,2));
 
   return 0;
 }
