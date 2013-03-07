@@ -29,7 +29,7 @@ static double time_one();
 static bool local_start_to_be_reached();
 static void allocate_equation_space();
 static void xpy();
-static double calculate_solutions();
+static void calculate_solutions();
 static void local_estimate();
 static double calculate_initial_stepsize();
 static double scale_from_error();
@@ -97,7 +97,7 @@ static void allocate_equation_space() {
 
 /* Calculate the actual and the alternative solutions */
 //y_plus_one and y_plus_one_alternative will be set
-static double calculate_solutions() {
+static void calculate_solutions() {
 
   double lcd_stepsize = stepsize / 4.0; //lowest common denominator of stepsize
 

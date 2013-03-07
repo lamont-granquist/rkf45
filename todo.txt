@@ -1,21 +1,35 @@
-Setup testing enviroment. With all policies.
+/************** TODO NEXT *************/
 
-Add the algoritm while adding assertions to the C# code.
+Lave unittests i csharp
+  - Set testing op ligesom i c
+  - Få testværdier til dy og GM.
 
-Might want to split up estimator and testing, running of it?
 
-Vejleder hjælp:
+
+
+/************** QUESTIONS *************/
 y_diff (gammel yp) er previous_d_diff. Er det en fejl? Stemmer ikke overens
 med udregninger.
 stepsize scales ned ved years afslutninger. Er det et problem?
 
+/************** HACK SETUP **************/
 Iterm2 mouse copy fix
 Iterm2 cmd hotkey remove. 
-
-git:
 lola command show max of 16 lines..
-GIT COMMANDS:
 
+/************** WORKFLOW ***************/
+Workflow:
+Start of the day:
+  Check todo file.
+  
+Regularly:
+  git status
+  git commit -m DESCRIPTION
+
+End of the day:
+  Write down the next moves, and status in the todo file.
+
+/************** GIT COMMANDS ***********/
 Undo working changes:
   git stash save --keep-index
 
@@ -25,22 +39,7 @@ Checkout and create new branch
 Merge:
   git merge TO GET
 
-#include "Policies/PureEndowment.h"
-#include "Policies/DeferredTemporaryLifeAnnuity.h"
-#include "Policies/TemporaryLifeAnnuityPremium.h"
-#include "Policies/TermInsurance.h"
-#include "Policies/DisabilityAnnuity.h"
-
-vim jump to next function definition!
-
-shell script for comparison?
-
-write unit tests: of GM and dy
-
-Add test values
-Add all products
-
-Til rapport omkring solve metoden:
+/************ FOR THE REPORT ***********/
 
      * y er startværdi(erne)
      * y_diff er k1, og f1..5 er det samme som k2..5, dog uden at have ganget med stepsize
