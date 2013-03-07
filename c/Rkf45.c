@@ -27,7 +27,6 @@ static void test_all();
 static void time_all();
 static double time_one();
 static bool local_start_to_be_reached();
-static void construct();
 static void allocate_equation_space();
 static void xpy();
 static double calculate_solutions();
@@ -70,7 +69,7 @@ static int m; //Result length;
 /******************* Constructor *********************/
 
 /* Construct */
-static void construct(int n) {
+void construct(int n) {
   neqn = n;
   DoubleEpsilon = FindDoubleEpsilon();
   allocate_equation_space();
@@ -316,24 +315,9 @@ static double FindDoubleEpsilon() {
   return 2.0 * r;
 }
 
-/* Main test function */
-int main(int argc, char const *argv[]) {
+/*static double const err = 1e-11;
 
-  //Construct the estimator
-  construct(1);
-
-  test_all();
-  //time_all(2288);
-  //policy = 5;
-  //neqn = 2;
-  //assert(is_equal(test_values(),compute(),51,2));
-
-  return 0;
-}
-
-static double const err = 1e-11;
-
-double** compute() {
+static double** compute() {
   //Set estimator variables (Term insurrance)
   start_year = 0;
   end_year = 50;
@@ -342,6 +326,22 @@ double** compute() {
   end_year_y[0] = 0.0;
   end_year_y[1] = 0.0;
   return estimate();
+}
+
+int main(int argc, char const *argv[]) {
+
+  //Construct the estimator
+  construct(1);
+  compute();
+
+
+  //test_all();
+  //time_all(2288);
+  //policy = 5;
+  //neqn = 2;
+  //assert(is_equal(test_values(),compute(),51,2));
+
+  return 0;
 }
 
 void test_all() {
@@ -376,7 +376,7 @@ double time_one(int customers) {
     compute();
   clock_t end = clock();
   return (double) (end - start) * 1000 / CLOCKS_PER_SEC;
-}
+}*/
 
 /************************** To be removed?? *********************/
 
