@@ -25,6 +25,12 @@ Checkout and create new branch
 Merge:
   git merge TO GET
 
+#include "Policies/PureEndowment.h"
+#include "Policies/DeferredTemporaryLifeAnnuity.h"
+#include "Policies/TemporaryLifeAnnuityPremium.h"
+#include "Policies/TermInsurance.h"
+#include "Policies/DisabilityAnnuity.h"
+
 vim jump to next function definition!
 
 shell script for comparison?
