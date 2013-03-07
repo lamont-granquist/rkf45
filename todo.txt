@@ -10,8 +10,20 @@ med udregninger.
 stepsize scales ned ved years afslutninger. Er det et problem?
 
 Iterm2 mouse copy fix
-Iterm2 remove mouse scaling
 Iterm2 cmd hotkey remove. 
+
+git:
+lola command show max of 16 lines..
+GIT COMMANDS:
+
+Undo working changes:
+  git stash save --keep-index
+
+Checkout and create new branch
+  git checkout -b NAME
+
+Merge:
+  git merge TO GET
 
 vim jump to next function definition!
 

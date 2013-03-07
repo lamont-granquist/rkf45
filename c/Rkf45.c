@@ -14,11 +14,7 @@
 #include <unistd.h> //only for sleep?
 #include <string.h> //only for sleep?
 #include <time.h>
-
-//Boolean values
-typedef int bool;
-#define false 0
-#define true 1
+#include "Boolean.h"
 
 //Max,min,sign functions
 #define max(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b);_a > _b ? _a : _b; })
@@ -33,8 +29,6 @@ static double time_one();
 static bool local_start_to_be_reached();
 static void construct();
 static void allocate_equation_space();
-static double** estimate();
-static double** compute();
 static void xpy();
 static double calculate_solutions();
 static void local_estimate();
@@ -43,17 +37,16 @@ static double scale_from_error();
 static double FindDoubleEpsilon();
 
 //Declare Estimator variables
-static double const err = 1e-11;
 
 //Public variables
-static int neqn;
-static int start_year;
-static int end_year;
+int neqn;
+int start_year;
+int end_year;
 // dy
 // bj_ii
-static double relerr;
-static double abserr;
-static double* end_year_y; 
+double relerr;
+double abserr;
+double* end_year_y; 
 
 //Private variables
 static double t;
@@ -282,7 +275,7 @@ static double scale_from_error(double error,bool stepsize_decreased) {
 /*********************** Estimate **************************/
 
 /* Estimate range */
-static double** estimate() {
+double** estimate() {
 
   for(int i = 0;i<neqn;i++)                // y
     y[i] = end_year_y[i];
@@ -324,7 +317,7 @@ static double FindDoubleEpsilon() {
 }
 
 /* Main test function */
-int main(int argc, char const *argv[]) {
+/*int main(int argc, char const *argv[]) {
 
   //Construct the estimator
   construct(2);
@@ -336,7 +329,9 @@ int main(int argc, char const *argv[]) {
   //assert(is_equal(test_values(),compute(),51,2));
 
   return 0;
-}
+}*/
+
+/*
 
 void test_all() {
   policy = 1;
@@ -381,20 +376,8 @@ static double** compute() {
   end_year_y[0] = 0.0;
   end_year_y[1] = 0.0;
   return estimate();
-}
+}*/
 
 /************************** To be removed?? *********************/
 
-/* Does two matrixes have the same values */
-bool is_equal(double** a,double** b,int m,int n) {
-  for (int i = 0;i < m;i++) {
-    for (int j = 0;j < n;j++) {
-      //printf(": %f = %f\n",a[i][j],b[i][j]);
-      if (fabs(a[i][j] - b[i][j]) > err)
-        printf("is_equal failed: %f != %f\n",a[i][j],b[i][j]);
-        //return false;
-    }
-  }
-  return true;
-}
 

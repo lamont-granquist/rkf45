@@ -1,11 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "TermInsurance.h"
-#include "PureEndowment.h"
 #include "Policy_Distributor.h"
-#include "DeferredTemporaryLifeAnnuity.h"
-#include "DisabilityAnnuity.h"
-#include "TemporaryLifeAnnuityPremium.h"
+#include "Policies/TermInsurance.h"
+#include "Policies/PureEndowment.h"
+#include "Policies/DeferredTemporaryLifeAnnuity.h"
+#include "Policies/DisabilityAnnuity.h"
+#include "Policies/TemporaryLifeAnnuityPremium.h"
 
 int policy = 0;
 
