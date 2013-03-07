@@ -317,21 +317,32 @@ static double FindDoubleEpsilon() {
 }
 
 /* Main test function */
-/*int main(int argc, char const *argv[]) {
+int main(int argc, char const *argv[]) {
 
   //Construct the estimator
-  construct(2);
+  construct(1);
 
   test_all();
   //time_all(2288);
-  policy = 5;
-  neqn = 2;
+  //policy = 5;
+  //neqn = 2;
   //assert(is_equal(test_values(),compute(),51,2));
 
   return 0;
-}*/
+}
 
-/*
+static double const err = 1e-11;
+
+double** compute() {
+  //Set estimator variables (Term insurrance)
+  start_year = 0;
+  end_year = 50;
+  relerr = err;
+  abserr = err;
+  end_year_y[0] = 0.0;
+  end_year_y[1] = 0.0;
+  return estimate();
+}
 
 void test_all() {
   policy = 1;
@@ -367,17 +378,5 @@ double time_one(int customers) {
   return (double) (end - start) * 1000 / CLOCKS_PER_SEC;
 }
 
-static double** compute() {
-  //Set estimator variables (Term insurrance)
-  start_year = 0;
-  end_year = 50;
-  relerr = err;
-  abserr = err;
-  end_year_y[0] = 0.0;
-  end_year_y[1] = 0.0;
-  return estimate();
-}*/
-
 /************************** To be removed?? *********************/
-
 
