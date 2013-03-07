@@ -312,8 +312,8 @@ public class Timer {
 class CalculationSpecifications {
 
   public static void Main(String[] args) {
-    TimeAll(82288);
-    //TestAll();
+    //TimeAll(82288);
+    TestAll();
   }
 
   public static readonly double err = 1e-11;
@@ -418,6 +418,14 @@ class CalculationSpecifications {
     }
   }
 
+  //Print dy values
+  static void Print_dy(double[][] result) {
+    
+
+      Console.Write(result);
+    }
+  }
+  
   // The two-state Actulus calculation kernel examples; 
   // really one-state because V1(t) = 0 for all t.
 
