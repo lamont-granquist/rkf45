@@ -106,6 +106,18 @@ static void calculate_solutions() {
     f_swap[i] = y[i] + lcd_stepsize * y_diff[i];
   dy ( t + lcd_stepsize, f_swap, f1 );
 
+  //if(f1[0] != 0) {
+  
+  /*
+    printf("y     :           %.16f\n",y[0]);
+    printf("y_diff:           %.16f\n",y_diff[0]);
+    printf("f_swap:           %.16f\n",f_swap[0]);
+    printf("t + lcd_stepsize: %.16f\n",t + lcd_stepsize);
+    printf("f1[0]:            %.16f\n",f1[0]);
+  */
+ 
+ // }
+
   //f2
   lcd_stepsize = 3.0 * stepsize / 32.0;
   for (int i = 0; i < neqn; i++ )
@@ -160,7 +172,7 @@ static double calculate_solution_error() {
 
     biggest_difference = max ( biggest_difference, ee / et );
   }
-
+  
   //Return the error
   return fabs( stepsize ) * biggest_difference * scale / 752400.0;
 }
@@ -199,12 +211,14 @@ static void local_estimate() {
       error = calculate_solution_error();
     }
 
+
     //Advance in time
     t = t + stepsize; 
 
     //Apply solution
     for (int i = 0; i < neqn; i++ )
       y[i] = y_plus_one[i];
+
 
     //Update y_diff
     dy ( t, y, y_diff );

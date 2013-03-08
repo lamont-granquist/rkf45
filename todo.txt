@@ -16,7 +16,8 @@ stepsize scales ned ved years afslutninger. Er det et problem?
 Iterm2 mouse copy fix
 Iterm2 cmd hotkey remove. 
 lola command show max of 16 lines..
-
+vim undo last jump
+Iterm2 copy paste easier
 /************** WORKFLOW ***************/
 Workflow:
 Start of the day:

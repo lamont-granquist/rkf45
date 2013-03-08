@@ -36,6 +36,18 @@ class Estimator {
 
   public int steps_taken_in_last_estimation;
 
+  /***** TESTED *****/
+  public int TESTED_NUMBER = 0;
+  public int TESTED_MAX    = 15;
+
+  public void TESTED() {
+    TESTED_NUMBER++;
+    if (TESTED_NUMBER > TESTED_MAX) {
+      Environment.Exit(0);
+    }
+  }
+
+
   /************************** Constructor ***********************/
 
   /* Construct */
@@ -76,11 +88,23 @@ class Estimator {
       f_swap[i] = y[i] + lcd_stepsize * y_diff[i];
     dy ( t + lcd_stepsize, f_swap, f1 );
 
+    /*
+    Console.WriteLine("f_swap         " + f_swap[1]); 
+    Console.WriteLine("t         " + (t + 3.0 * stepsize / 8.0));
+
+    double[] result = new double[2];
+    double[] W      = new double[2];
+    dy(t + lcd_stepsize,W,result);
+    Console.WriteLine("TEMP:" +  result[1]);
+    */
+
     //f2
     lcd_stepsize = 3.0 * stepsize / 32.0;
     for (int i = 0; i < neqn; i++ )
       f_swap[i] = y[i] + lcd_stepsize * ( y_diff[i] + 3.0 * f1[i] );
     dy ( t + 3.0 * stepsize / 8.0, f_swap, f2 );
+
+
 
     //f3
     lcd_stepsize = stepsize / 2197.0;
@@ -112,6 +136,18 @@ class Estimator {
     for (int i = 0; i < neqn; i++ )
       y_plus_one_alternative[i] = ( -2090.0 * y_diff[i] + ( 21970.0 * f3[i] - 15048.0 * f4[i] ) ) + ( 22528.0 * f2[i] - 27360.0 * f5[i] );
 
+      /*Console.WriteLine("y              " + y[1]);
+      Console.WriteLine("y_diff         " + y_diff[1]);
+      Console.WriteLine("t+lcd_stepsize " + (t+lcd_stepsize));
+      Console.WriteLine("f1[0]:         " + f1[1]);
+      Console.WriteLine("f2[0]:         " + f2[1]);
+      Console.WriteLine("f3[0]:         " + f3[1]);
+      Console.WriteLine("f4[0]:         " + f4[1]);
+      Console.WriteLine("f5[0]:         " + f5[1]);
+      Console.WriteLine("s [0]:         " + y_plus_one[1]);
+      Console.WriteLine("sa[0]:         " + y_plus_one_alternative[1]);
+      Console.WriteLine("");
+      TESTED();*/
   }
 
   /* Calculate the error of the solution */
@@ -263,7 +299,7 @@ class Estimator {
 
       //Add this years benefit to y
       bj_ii(year, y); 
-
+      
       // Integrate over [year,year-1]
       local_start_year = (int)year-1;
       local_end_year = (int)year;
@@ -418,21 +454,13 @@ class CalculationSpecifications {
     }
   }
 
-  //Print dy values
-  static void Print_dy(double[][] result) {
-    
-
-      Console.Write(result);
-    }
-  }
-  
   // The two-state Actulus calculation kernel examples; 
   // really one-state because V1(t) = 0 for all t.
 
   public class PureEndowment {
 
     static public double[][] test_values = new double[][] {
-          new double[] {0.1437946974886250},
+      new double[] {0.1437946974886250},
           new double[] {0.1513594875720590},
           new double[] {0.1593334830357050},
           new double[] {0.1677404776222450},
@@ -492,14 +520,39 @@ class CalculationSpecifications {
       return 0.0;
     }
 
-  public static double Time(int customers) {
-    Timer timer = new Timer();
-    double start_time = timer.Check();
-    for(int i = 0;i<customers;i++)
-      Compute();
-    double end_time = timer.Check();
-    return end_time - start_time;
-  }
+    public static void Print_dy() {
+      Estimator estimator = new Estimator();
+      estimator.dy =
+        (double t, double[] V, double[] res) =>
+        res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
+      
+      double[] result = new double[1];
+      double[] W      = new double[1];
+      W[0]            = 0;
+      estimator.dy(0,W,result);
+      Console.WriteLine(result[0]);
+
+      W[0]            = 1;
+      estimator.dy(0,W,result);
+      Console.WriteLine(result[0]);
+
+      W[0]            = 1;
+      estimator.dy(1,W,result);
+      Console.WriteLine(result[0]);
+
+      W[0]            = -2;
+      estimator.dy(1,W,result);
+      Console.WriteLine(result[0]);
+    }
+
+    public static double Time(int customers) {
+      Timer timer = new Timer();
+      double start_time = timer.Check();
+      for(int i = 0;i<customers;i++)
+        Compute();
+      double end_time = timer.Check();
+      return end_time - start_time;
+    }
 
     public static double[][] Compute() {
       //Construct the estimator
@@ -604,6 +657,31 @@ class CalculationSpecifications {
         Compute();
       double end_time = timer.Check();
       return end_time - start_time;
+    }
+    public static void Print_dy() {
+      Estimator estimator = new Estimator();
+      estimator.dy =
+        (double t, double[] V, double[] res) =>
+        res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
+      
+      double[] result = new double[1];
+      double[] W      = new double[1];
+
+      W[0]            = 0;
+      estimator.dy(0,W,result);
+      Console.WriteLine(result[0]);
+
+      W[0]            = 1;
+      estimator.dy(0,W,result);
+      Console.WriteLine(result[0]);
+
+      W[0]            = 1;
+      estimator.dy(1,W,result);
+      Console.WriteLine(result[0]);
+
+      W[0]            = -2;
+      estimator.dy(1,W,result);
+      Console.WriteLine(result[0]);
     }
 
     public static double[][] Compute() {
@@ -802,14 +880,14 @@ class CalculationSpecifications {
       return bdeath * indicator(t > 0) * indicator(t < n);
     }
 
-public static double Time(int customers) {
-    Timer timer = new Timer();
-    double start_time = timer.Check();
-    for(int i = 0;i<customers;i++)
-      Compute();
-    double end_time = timer.Check();
-    return end_time - start_time;
-  }
+    public static double Time(int customers) {
+      Timer timer = new Timer();
+      double start_time = timer.Check();
+      for(int i = 0;i<customers;i++)
+        Compute();
+      double end_time = timer.Check();
+      return end_time - start_time;
+    }
 
     public static double[][] Compute() {
       Estimator estimator = new Estimator();
@@ -835,7 +913,7 @@ public static double Time(int customers) {
   public class DisabilityAnnuity {
 
     static public double[][] test_values = new double[][] {
-      new double[] {    0.5555261079604120,   15.9717676673750000},
+          new double[] {    0.5555261079604120,   15.9717676673750000},
           new double[] {    0.5697939362470290,   15.7859295725873000},
           new double[] {    0.5842458860490700,   15.5914495774393000},
           new double[] {    0.5988112559939020,   15.3879467041578000},
@@ -943,14 +1021,45 @@ public static double Time(int customers) {
       return 0.0;
     }
 
-public static double Time(int customers) {
-    Timer timer = new Timer();
-    double start_time = timer.Check();
-    for(int i = 0;i<customers;i++)
-      Compute();
-    double end_time = timer.Check();
-    return end_time - start_time;
-  }
+    public static void Print_dy() {
+      Estimator estimator = new Estimator();
+      estimator.dy =
+        (double t, double[] V, double[] res) => {
+          res[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (V[1] - V[0] + bj_01(t)) - mu_02(t) * (0 - V[0] + bj_02(t));
+          res[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t)); 
+        };
+      
+      double[] result = new double[2];
+      double[] W      = new double[2];
+      W[0]            = 0;
+      estimator.dy(0,W,result);
+      Console.WriteLine(result[0]);
+
+      W[0]            = 1;
+      estimator.dy(0,W,result);
+      Console.WriteLine(result[0]);
+
+      W[0]            = 1;
+      estimator.dy(1,W,result);
+      Console.WriteLine(result[0]);
+
+      W[0]            = -2;
+      estimator.dy(1,W,result);
+      Console.WriteLine(result[0]);
+
+      W[0]            = 0;
+      estimator.dy(34.625,W,result);
+      Console.WriteLine("result: " + result[1]);
+    }
+
+    public static double Time(int customers) {
+      Timer timer = new Timer();
+      double start_time = timer.Check();
+      for(int i = 0;i<customers;i++)
+        Compute();
+      double end_time = timer.Check();
+      return end_time - start_time;
+    }
 
     public static double[][] Compute() {
       Estimator estimator = new Estimator();
@@ -1083,14 +1192,14 @@ public static double Time(int customers) {
       return 0.0;
     }
 
-public static double Time(int customers) {
-    Timer timer = new Timer();
-    double start_time = timer.Check();
-    for(int i = 0;i<customers;i++)
-      Compute();
-    double end_time = timer.Check();
-    return end_time - start_time;
-  }
+    public static double Time(int customers) {
+      Timer timer = new Timer();
+      double start_time = timer.Check();
+      for(int i = 0;i<customers;i++)
+        Compute();
+      double end_time = timer.Check();
+      return end_time - start_time;
+    }
 
     public static double[][] Compute() {
       Estimator estimator = new Estimator();

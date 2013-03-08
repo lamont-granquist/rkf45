@@ -133,6 +133,7 @@ static double b_0(double t) {
 }
 
 static double b_1(double t) {
+  //printf("b_1: %.16f t: %.16f\n",bdisabled * indicator(t > 0) * indicator(t < n),t);
   return bdisabled * indicator(t > 0) * indicator(t < n);
 }
 
@@ -181,12 +182,14 @@ static double bj_12(double t) {
 }
 
 void bj_ii_DisabilityAnnuity(double t, double* result) {
-  result[0] += bj_00(t);
-  result[1] += bj_11(t);
+  result[0] += bj_00(t); // 0.0
+  result[1] += bj_11(t); // 0.0
 }
 
 void dy_DisabilityAnnuity(double t, double* V,double* result)
 {
-  result[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
-  result[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t));
+  //printf("GM01: %.16f t: %.16f\n",GM01(t),t);
+  result[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (V[1] - V[0] + bj_01(t)) - mu_02(t) * (0 - V[0] + bj_02(t));
+  result[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t)); 
+  //printf("result[1]: %.16f t: %.16f\n",result[1],t);
 }
