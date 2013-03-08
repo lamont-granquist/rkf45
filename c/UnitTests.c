@@ -4,6 +4,7 @@
 #include "Policy_Distributor.h"
 #include <math.h>
 #include "Boolean.h"
+#include <time.h>
 
 //Accepted error
 static double const err = 1e-11;
@@ -46,9 +47,9 @@ bool matrix_ewt_print(double** a,double** b,int m,int n) {
   return true;
 }
 
-/*************** Estimator tests ***************/
+/*************** Test cases *******************/
 
-static char* test_PureEndowment() {
+static void test_case_PureEndowment() {
   policy = 1;
   neqn = 1;
   start_year = 0;
@@ -56,11 +57,9 @@ static char* test_PureEndowment() {
   relerr = err;
   abserr = err;
   end_year_y[0] = 0.0;
-  mu_assert("PureEndowment failed",matrix_ewt(test_values(),estimate(),41,1));
-  return 0;
 }
 
-static char* test_DeferredTemporaryLifeAnnuity() {
+static void test_case_DeferredTemporaryLifeAnnuity() {
   neqn = 1;
   policy = 2;
   start_year = 0;
@@ -68,22 +67,18 @@ static char* test_DeferredTemporaryLifeAnnuity() {
   relerr = err;
   abserr = err;
   end_year_y[0] = 0.0;
-  mu_assert("DeferredTemporaryLifeAnnuity failed",matrix_ewt(test_values(),estimate(),51,1));
-  return 0;
 }
 
-static char* test_TemporaryLifeAnnuityPremium() {
+static void test_case_TemporaryLifeAnnuityPremium() {
   policy = 3;
   start_year = 0;
   end_year = 50;
   relerr = err;
   abserr = err;
   end_year_y[0] = 0.0;
-  mu_assert("TemporaryLifeAnnuityPremium failed",matrix_ewt(test_values(),estimate(),51,1));
-  return 0;
 }
 
-static char* test_TermInsurance() {
+static void test_case_TermInsurance() {
   neqn = 1;
   policy = 4;
   start_year = 0;
@@ -91,11 +86,9 @@ static char* test_TermInsurance() {
   relerr = err;
   abserr = err;
   end_year_y[0] = 0.0;
-  mu_assert("TermInsurance failed",matrix_ewt(test_values(),estimate(),51,1));
-  return 0;
 }
 
-static char* test_DisabilityAnnuity() {
+static void test_case_DisabilityAnnuity() {
   neqn = 2;
   policy = 5;
   start_year = 0;
@@ -104,11 +97,9 @@ static char* test_DisabilityAnnuity() {
   abserr = err;
   end_year_y[0] = 0.0;
   end_year_y[1] = 0.0;
-  mu_assert("DisabilityAnnuity failed",matrix_ewt(test_values(),estimate(),51,2));
-  return 0;
 }
 
-static char* test_DisabilityTermInsurance() {
+static void test_case_DisabilityTermInsurance() {
   neqn = 2;
   policy = 6;
   start_year = 0;
@@ -117,6 +108,41 @@ static char* test_DisabilityTermInsurance() {
   abserr = err;
   end_year_y[0] = 0.0;
   end_year_y[1] = 0.0;
+}
+/*************** Estimator tests ***************/
+
+static char* test_PureEndowment() {
+  test_case_PureEndowment();
+  mu_assert("PureEndowment failed",matrix_ewt(test_values(),estimate(),41,1));
+  return 0;
+}
+
+static char* test_DeferredTemporaryLifeAnnuity() {
+  test_case_DeferredTemporaryLifeAnnuity();
+  mu_assert("DeferredTemporaryLifeAnnuity failed",matrix_ewt(test_values(),estimate(),51,1));
+  return 0;
+}
+
+static char* test_TemporaryLifeAnnuityPremium() {
+  test_case_TemporaryLifeAnnuityPremium();
+  mu_assert("TemporaryLifeAnnuityPremium failed",matrix_ewt(test_values(),estimate(),51,1));
+  return 0;
+}
+
+static char* test_TermInsurance() {
+  test_case_TermInsurance();
+  mu_assert("TermInsurance failed",matrix_ewt(test_values(),estimate(),51,1));
+  return 0;
+}
+
+static char* test_DisabilityAnnuity() {
+  test_case_DisabilityAnnuity();
+  mu_assert("DisabilityAnnuity failed",matrix_ewt(test_values(),estimate(),51,2));
+  return 0;
+}
+
+static char* test_DisabilityTermInsurance() {
+  test_case_DisabilityTermInsurance();
   mu_assert("DisabilityTermInsurance failed",matrix_ewt(test_values(),estimate(),51,2));
   return 0;
 }
@@ -174,6 +200,30 @@ static char* test_DisabilityAnnuity_dy() {
   mu_assert("DisabilityAnnuity_dy5 failed",doubles_ewt(result[1],-1.0));
   return 0;
 }
+/********************* Timing ******************/
+
+double time_one(int customers) {
+  clock_t start = clock();
+  for (int i = 0;i<customers;i++)
+    estimate();
+  clock_t end = clock();
+  return (double) (end - start) * 1000 / CLOCKS_PER_SEC;
+}
+
+void all_timing(int customers) {
+  test_case_PureEndowment();
+  printf("PureEndowment:                %f\n",time_one(customers));
+  test_case_DeferredTemporaryLifeAnnuity();
+  printf("DeferredTemporaryLifeAnnuity: %f\n",time_one(customers));
+  test_case_TemporaryLifeAnnuityPremium();
+  printf("TemporaryLifeAnnuityPremium:  %f\n",time_one(customers));
+  test_case_TermInsurance();
+  printf("TermInsurance:                %f\n",time_one(customers));
+  test_case_DisabilityAnnuity();
+  printf("DisabilityAnnuity:            %f\n",time_one(customers));
+  test_case_DisabilityTermInsurance();
+  printf("DisabilityTermInsurance:      %f\n",time_one(customers));
+}
 
 /********************* Main ********************/
 
@@ -189,12 +239,7 @@ static char* all_tests() {
   return 0;
 }
 
-static void init_tests() {
-  construct(2);
-}
-
-int main(int argc, char **argv) {
-  init_tests();
+int start_testing() {
   char *result = all_tests();
   if (result != 0) {
     printf("%s\n", result);
@@ -205,4 +250,12 @@ int main(int argc, char **argv) {
   printf("Tests run: %d\n", tests_run);
 
   return result != 0;
+}
+
+int main(int argc, char **argv) {
+  construct(2);
+  int r = 0;
+  r = start_testing();
+  all_timing(42000);
+  return r;
 }

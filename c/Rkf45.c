@@ -13,7 +13,6 @@
 #include "Matrix_Library.h"
 #include <unistd.h> //only for sleep?
 #include <string.h> //only for sleep?
-#include <time.h>
 #include "Boolean.h"
 
 //Max,min,sign functions
@@ -329,26 +328,4 @@ static double FindDoubleEpsilon() {
   return 2.0 * r;
 }
 
-/*
-void time_all(int customers) {
-  policy = 1;
-  printf("PureEndowment:                %f\n",time_one(customers));
-  policy = 2;
-  printf("DeferredTemporaryLifeAnnuity: %f\n",time_one(customers));
-  policy = 3;
-  printf("TemporaryLifeAnnuityPremium:  %f\n",time_one(customers));
-  policy = 4;
-  printf("TermInsurance:                %f\n",time_one(customers));
-  policy = 5;
-  printf("DisabilityAnnuity:            %f\n",time_one(customers));
-  //printf("DisabilityTermInsurance:      %f\n",time_one(customers));
-}
-
-double time_one(int customers) {
-  clock_t start = clock();
-  for (int i = 0;i<customers;i++)
-    compute();
-  clock_t end = clock();
-  return (double) (end - start) * 1000 / CLOCKS_PER_SEC;
-}*/
 
