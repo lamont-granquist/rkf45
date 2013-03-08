@@ -104,7 +104,7 @@ static char* test_DisabilityAnnuity() {
   abserr = err;
   end_year_y[0] = 0.0;
   end_year_y[1] = 0.0;
-  mu_assert("DisabilityAnnuity failed",matrix_ewt_print(test_values(),estimate(),51,2));
+  mu_assert("DisabilityAnnuity failed",matrix_ewt(test_values(),estimate(),51,2));
   return 0;
 }
 
@@ -117,7 +117,7 @@ static char* test_DisabilityTermInsurance() {
   abserr = err;
   end_year_y[0] = 0.0;
   end_year_y[1] = 0.0;
-  mu_assert("DisabilityTermInsurance failed",matrix_ewt_print(test_values(),estimate(),51,2));
+  mu_assert("DisabilityTermInsurance failed",matrix_ewt(test_values(),estimate(),51,2));
   return 0;
 }
 
