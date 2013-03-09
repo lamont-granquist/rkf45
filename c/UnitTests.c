@@ -256,6 +256,6 @@ int main(int argc, char **argv) {
   construct(2);
   int r = 0;
   r = start_testing();
-  all_timing(42000);
+  //all_timing(42000);
   return r;
 }

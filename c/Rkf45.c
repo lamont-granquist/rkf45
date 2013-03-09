@@ -40,7 +40,7 @@ static double FindDoubleEpsilon();
 int neqn;
 int start_year;
 int end_year;
-// dy
+// dy       //policy
 // bj_ii
 double relerr;
 double abserr;
@@ -80,7 +80,7 @@ static void allocate_equation_space() {
   y_plus_one             = malloc(sizeof(double)*neqn);
   end_year_y             = malloc(sizeof(double)*neqn);
   y                      = malloc(sizeof(double)*neqn);
-  y_diff                     = malloc(sizeof(double)*neqn);
+  y_diff                 = malloc(sizeof(double)*neqn);
 
   //Temporary for the solve method
   f1                     = malloc(sizeof(double)*neqn);

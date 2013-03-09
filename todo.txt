@@ -1,7 +1,14 @@
 /************** TODO NEXT *************/
 
 Cuda c
-  -Implementer c.
+  - Learn how to use structs.
+  - Learn how to set variables.
+  - Vars really needed:
+    end_year
+    relerr;
+    abserr;
+    policy;
+
 
 Finde ud af hvordan man timer forskellige customers
 
@@ -9,6 +16,11 @@ Lave unittests i csharp
   - Få testværdier til dy og GM.
 
 /************** QUESTIONS *************/
+NICOLAI / CHRISTIAN:
+
+Skal alle variable i device gå igennem kernel fncitonen?
+
+VEJLEDER:
 y_diff (gammel yp) er previous_d_diff. Er det en fejl? Stemmer ikke overens
 med udregninger.
 stepsize scales ned ved years afslutninger. Er det et problem?
