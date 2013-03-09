@@ -1,11 +1,12 @@
 /************** TODO NEXT *************/
 
+Cuda c
+  -Implementer c.
+
+Finde ud af hvordan man timer forskellige customers
+
 Lave unittests i csharp
-  - Set testing op ligesom i c
   - Få testværdier til dy og GM.
-
-
-
 
 /************** QUESTIONS *************/
 y_diff (gammel yp) er previous_d_diff. Er det en fejl? Stemmer ikke overens
