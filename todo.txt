@@ -19,6 +19,7 @@ Iterm2 cmd hotkey remove.
 lola command show max of 16 lines..
 vim undo last jump
 Iterm2 copy paste easier
+
 /************** WORKFLOW ***************/
 Workflow:
 Start of the day:
@@ -26,7 +27,7 @@ Start of the day:
   
 Regularly:
   git status
-  git commit -m DESCRIPTION
+  git commit -am DESCRIPTION
 
 End of the day:
   Write down the next moves, and status in the todo file.
