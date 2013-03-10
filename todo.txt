@@ -1,13 +1,24 @@
 /************** TODO NEXT *************/
 
 Cuda c
-  - Learn how to use structs.
-  - Learn how to set variables.
+  - Learn to use an array of structs. Use link in browser.
+
+
+  NOTES:
   - Vars really needed:
     end_year
     relerr;
     abserr;
     policy;
+
+  //HOST:
+  //construct (decide neqn)
+
+  //Set public vars.
+  //(Must be viewable from device)
+
+  //Start kernel
+  //(estimate);
 
 
 Finde ud af hvordan man timer forskellige customers

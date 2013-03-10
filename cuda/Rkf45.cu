@@ -32,7 +32,7 @@ __global__ void kernel(int *customer,point *myPoint, int *result) {
   //construct(2);
 
   // Use the thread ID as an index
-  result[id] = myPoint->a; //neqn; //get_n();//idz; //dev_a[tid] + dev_b[tid];
+  result[id] = myPoint[id].a; //neqn; //get_n();//idz; //dev_a[tid] + dev_b[tid];
 }
 
 /**************************** HOST ******************************/
@@ -63,10 +63,15 @@ int main(int argc, char const *argv[]) {
   int *dev_customer , *dev_result;    // device pointers
 
   point *dev_myPoint; 
+  point *myPoint;
 
-  point *myPoint = (point*) malloc(sizeof(point));
-  myPoint->a = 9;
-  myPoint->b = 4;
+  myPoint = (point*) malloc(sizeof(point)*nsize);
+  myPoint[0].a = 3;
+  myPoint[0].b = 4;
+  myPoint[1].a = 7;
+  myPoint[1].b = 19;
+  myPoint[30].a = 17;
+
   // Fill the arrays on the host
   for(int i = 0; i < nsize; i++) {
     customer[i] = i * i;
@@ -74,12 +79,12 @@ int main(int argc, char const *argv[]) {
   
   // Allocate memory on the device
   cudaMalloc((void**)&dev_customer, sizeof(int) * nsize);
-  cudaMalloc((void**)&dev_myPoint, sizeof(point));
+  cudaMalloc((void**)&dev_myPoint, sizeof(point) * nsize);
   cudaMalloc((void**)&dev_result, sizeof(int) * nsize);
 
   // Copy data to the device
   cudaMemcpy(dev_customer, customer, sizeof(int) * nsize, cudaMemcpyHostToDevice);
-  cudaMemcpy(dev_myPoint, myPoint, sizeof(point), cudaMemcpyHostToDevice);
+  cudaMemcpy(dev_myPoint, myPoint, sizeof(point) * nsize, cudaMemcpyHostToDevice);
 
   // Launch the kernel with 10 blocks, each with 1 thread
   kernel <<<grid_dim, block_dim>>>(dev_customer,dev_myPoint,dev_result);
