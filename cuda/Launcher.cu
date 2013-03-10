@@ -30,6 +30,9 @@ int main(int argc, char const *argv[]) {
     customers[i].abserr = 1e-11;
   }
 
+  //Construct RKF45
+  construct(2);
+
   // Allocate memory on the device
   cudaMalloc((void**)&dev_customers, sizeof(CUSTOMERS) * nsize);
   cudaMalloc((void**)&dev_result, sizeof(int) * nsize);

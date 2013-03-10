@@ -27,13 +27,14 @@ static void test_all();
 static void time_all();
 static double time_one();
 static bool local_start_to_be_reached();
-static void allocate_equation_space();
 static void xpy();
 static void calculate_solutions();
 static void local_estimate();
 static double calculate_initial_stepsize();
 static double scale_from_error();
 static double FindDoubleEpsilon();
+*/
+static void allocate_equation_space();
 
 //Declare Estimator variables
 
@@ -65,23 +66,21 @@ static int local_end_year;
 static double DoubleEpsilon;
 
 static int m; //Result length;
-*/
 /******************* Constructor *********************/
 
 /* Construct */
-/*void construct(int n) {
-  neqn = n;
-  DoubleEpsilon = FindDoubleEpsilon();
+void construct(int n) {
+  //DoubleEpsilon = FindDoubleEpsilon();
   allocate_equation_space();
-}*/
+}
 
 /* Allocate equation space */
-/*static void allocate_equation_space() {
+static void allocate_equation_space() {
   //Global for the class
-  y_plus_one             = malloc(sizeof(double)*neqn);
-  end_year_y             = malloc(sizeof(double)*neqn);
-  y                      = malloc(sizeof(double)*neqn);
-  y_diff                 = malloc(sizeof(double)*neqn);
+  y_plus_one             = (double) malloc(sizeof(double)*neqn);
+  end_year_y             = (double) malloc(sizeof(double)*neqn);
+  y                      = (double) malloc(sizeof(double)*neqn);
+  y_diff                 = (double) malloc(sizeof(double)*neqn);
 
   //Temporary for the solve method
   f1                     = malloc(sizeof(double)*neqn);
@@ -92,7 +91,7 @@ static int m; //Result length;
   f_swap                 = malloc(sizeof(double)*neqn);
   y_plus_one_alternative = malloc(sizeof(double)*neqn);
 }
-*/
+
 /********************** Solve *********************/
 
 /* Calculate the actual and the alternative solutions */
@@ -286,6 +285,7 @@ __device__ double estimate() {
 
   for(int i = 0;i<neqn;i++)                // y
     y[i] = end_year_y[i];
+
   t = (double) end_year;                   // t
   dy( t, y, y_diff);                       // y_diff
   stepsize = calculate_initial_stepsize(); // stepsize
@@ -352,5 +352,8 @@ __device__ int get_n_device(void) {
 // Device code
 __global__ void test_kernel(CUSTOMERS *customers,int *result) {
   int id = get_id();
+
+  estimate();
+
   result[id] = 99;
 }

@@ -16,9 +16,11 @@ __device__ int get_n(void) {
   return blockDim.x * blockDim.y * blockDim.z * gridDim.x * gridDim.y * gridDim.z;
 }
 
+__device__ int id;
+
 // Device code
 __global__ void kernel(int *dev_a, int *dev_b, int *dev_c) {
-  int id = get_id();
+  id = get_id();
   // Use the thread ID as an index
   dev_c[id] = id; //get_n();//idz; //dev_a[tid] + dev_b[tid];
 }

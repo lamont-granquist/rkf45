@@ -14,4 +14,6 @@ extern double* end_year_y;
 
 __global__ void test_kernel(CUSTOMERS *customers,int *result);
 
+void construct(int n);
+
 #endif
