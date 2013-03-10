@@ -354,7 +354,12 @@ __device__ int get_n_device(void) {
   return blockDim.x * blockDim.y * blockDim.z * gridDim.x * gridDim.y * gridDim.z;
 }
 
+__global__ void test_kernel(int *result) {
+  result[0] = 99;
+}
+
 // Device code
+/*
 __global__ void kernel(CUSTOMERS *customers, int *result) {
   int id = get_id();
 
@@ -364,4 +369,4 @@ __global__ void kernel(CUSTOMERS *customers, int *result) {
   // Use the thread ID as an index
   result[id] = customers[id].policy; //neqn; //get_n();//idz; //dev_a[tid] + dev_b[tid];
 }
-
+*/
