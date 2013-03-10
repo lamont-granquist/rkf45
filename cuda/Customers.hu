@@ -1,0 +1,13 @@
+#ifndef Customers_h
+#define Customers_h
+
+typedef struct
+{
+  int policy;
+  int end_year;
+  double abserr;
+  double relerr;
+} CUSTOMERS;
+
+#endif
+

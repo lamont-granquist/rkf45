@@ -328,13 +328,8 @@ __device__ double estimate() {
 
 /**************************** DEVICE ******************************/
 
-typedef struct
-{
-  int policy;
-  int end_year;
-  double abserr;
-  double relerr;
-} CUSTOMERS;
+#include "Customers.hu"
+#include "Rkf45.hu"
 
 //Calculate the id
 __device__ int get_id(void) {
@@ -354,19 +349,8 @@ __device__ int get_n_device(void) {
   return blockDim.x * blockDim.y * blockDim.z * gridDim.x * gridDim.y * gridDim.z;
 }
 
-__global__ void test_kernel(int *result) {
-  result[0] = 99;
-}
-
 // Device code
-/*
-__global__ void kernel(CUSTOMERS *customers, int *result) {
+__global__ void test_kernel(CUSTOMERS *customers,int *result) {
   int id = get_id();
-
-  //construct(2);
-  //estimate();
-
-  // Use the thread ID as an index
-  result[id] = customers[id].policy; //neqn; //get_n();//idz; //dev_a[tid] + dev_b[tid];
+  result[id] = 99;
 }
-*/

@@ -65,6 +65,9 @@ Checkout and create new branch
 Merge:
   git merge TO GET
 
+Git add all:
+  git add .
+
 /************ FOR THE REPORT ***********/
 
      * y er startværdi(erne)
