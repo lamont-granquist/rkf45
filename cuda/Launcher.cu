@@ -12,8 +12,8 @@ int get_n_host(dim3 block_dim,dim3 grid_dim) {
 // Host code
 int main(int argc, char const *argv[]) {
 
-  dim3 block_dim(2,2,3); //Number of threads per block
-  dim3 grid_dim(2,3,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
+  dim3 block_dim(2,1,1); //Number of threads per block
+  dim3 grid_dim(1,1,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
   int nsize = get_n_host(block_dim,grid_dim); 
 
   // Data on the host and the device, respectively
@@ -46,7 +46,7 @@ int main(int argc, char const *argv[]) {
 
   // Print the result: "0 5 20 45 80 125 180 245 320 405"
   for(int i = 0; i < nsize; i++) {
-    printf("%f ", result[i]);
+    printf("%.26f ", result[i]);
   }
 
   printf("\n");

@@ -5,7 +5,7 @@
 const int MAX_NEQN = 2;
 const float relerr = 1e-11;
 const float abserr = 1e-11;
-const float DoubleEpsilon = 0; //TODO: Calculate this constant
+const float FloatEpsilon = 0.00000011920928955078125000f; //TODO: Calculate this constant
 /********************* INIT *******************/
 //Library inclusion
 #include <stdlib.h>
@@ -194,7 +194,7 @@ __device__ void local_estimate(float local_end_year,float local_start_year,float
   {
     //Variables used in calculations
     bool stepsize_descresed = false;
-    float hmin = 26.0f * DoubleEpsilon * fabs( t );
+    float hmin = 26.0f * FloatEpsilon * fabs( t );
 
     local_start_reached = local_start_to_be_reached((float)local_end_year - t,stepsize);
 
@@ -274,7 +274,7 @@ __device__ float calculate_initial_stepsize(int neqn,float* y, float* y_diff,flo
     }
   }
 
-  return max( s, 26.0f * DoubleEpsilon * max( fabs( t ), fabs(start_year - t)));
+  return max( s, 26.0f * FloatEpsilon * max( fabs( t ), fabs(start_year - t)));
 }
 
 /* Scale from error calculations */
@@ -309,13 +309,12 @@ __device__ void estimate(int neqn,int policy,int end_year,float *y) {
 
 /*************************** Auxiliaries ****************************/
 
-/* Find float epsilon */
-/*static float FindDoubleEpsilon() {
-  float r = 1.0;
-  while (1.0 < (1.0 + r))
-    r = r / 2.0;
-  return 2.0 * r;
-}*/
+__device__ float FindFloatEpsilon() {
+  float r = 1.0f;
+  while (1.0f < (1.0f + r))
+    r = r / 2.0f;
+  return 2.0f * r;
+}
 
 /**************************** DEVICE ******************************/
 
@@ -355,7 +354,7 @@ __global__ void test_kernel(CUSTOMERS *customers,float *result) {
            y
           );
 
-  result[id] = y[0];
+  result[id] = FindFloatEpsilon();
 }
 
 /**************** RK_LIBRARY *****************/
