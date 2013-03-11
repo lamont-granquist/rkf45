@@ -379,7 +379,8 @@ __device__ float bpension = 1;
 __device__ float pensiontime = 35;
 
 __device__ float GM(float t) {
-    return 0.0005 + pow(10.0, 5.728 - 10.0 + 0.038*(age + t));
+    float aget = 5;
+    return 0.0005 + powf(10.0, 5.728 - 10.0 + 0.038*(aget));
 }
 
 // Interest
