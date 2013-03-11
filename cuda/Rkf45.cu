@@ -2,13 +2,16 @@
  * C implementation of the Rkf45 algoritm.
  */
 
+const int MAX_NEQN = 2;
 
 /********************* INIT *******************/
-/*
 //Library inclusion
 #include <stdlib.h>
 #include <stdio.h>
-#include "Policy_Distributor.h" 
+
+__device__ void dy(float t, float* V,float* result);
+
+/*
 #include <assert.h>
 #include <math.h>
 #include "Matrix_Library.h"
@@ -25,14 +28,14 @@
 bool is_equal();
 static void test_all();
 static void time_all();
-static double time_one();
+static float time_one();
 static bool local_start_to_be_reached();
 static void xpy();
 static void calculate_solutions();
 static void local_estimate();
-static double calculate_initial_stepsize();
-static double scale_from_error();
-static double FindDoubleEpsilon();
+static float calculate_initial_stepsize();
+static float scale_from_error();
+static float FindDoubleEpsilon();
 static void allocate_equation_space();
 
 //Declare Estimator variables
@@ -45,26 +48,26 @@ int start_year;
 int end_year;
 // dy       //policy
 // bj_ii
-double relerr;
-double abserr;
-double* end_year_y; 
+float relerr;
+float abserr;
+float* end_year_y; 
 
 //Private variables
-static double t;
-static double stepsize;
-static double* f1;
-static double* f2;
-static double* f3;
-static double* f4;
-static double* f5;
-static double* f_swap;
-static double* y;
-static double* y_diff;
-static double* y_plus_one;
-static double* y_plus_one_alternative;
+static float t;
+static float stepsize;
+static float* f1;
+static float* f2;
+static float* f3;
+static float* f4;
+static float* f5;
+static float* f_swap;
+static float* y;
+static float* y_diff;
+static float* y_plus_one;
+static float* y_plus_one_alternative;
 static int local_start_year;
 static int local_end_year;
-static double DoubleEpsilon;
+static float DoubleEpsilon;
 
 static int m; //Result length;
 */
@@ -81,19 +84,19 @@ void construct(int n) {
 /*
 static void allocate_equation_space() {
   //Global for the class
-  y_plus_one             = (double) malloc(sizeof(double)*neqn);
-  end_year_y             = (double) malloc(sizeof(double)*neqn);
-  y                      = (double) malloc(sizeof(double)*neqn);
-  y_diff                 = (double) malloc(sizeof(double)*neqn);
+  y_plus_one             = (float) malloc(sizeof(float)*neqn);
+  end_year_y             = (float) malloc(sizeof(float)*neqn);
+  y                      = (float) malloc(sizeof(float)*neqn);
+  y_diff                 = (float) malloc(sizeof(float)*neqn);
 
   //Temporary for the solve method
-  f1                     = malloc(sizeof(double)*neqn);
-  f2                     = malloc(sizeof(double)*neqn);
-  f3                     = malloc(sizeof(double)*neqn);
-  f4                     = malloc(sizeof(double)*neqn);
-  f5                     = malloc(sizeof(double)*neqn);
-  f_swap                 = malloc(sizeof(double)*neqn);
-  y_plus_one_alternative = malloc(sizeof(double)*neqn);
+  f1                     = malloc(sizeof(float)*neqn);
+  f2                     = malloc(sizeof(float)*neqn);
+  f3                     = malloc(sizeof(float)*neqn);
+  f4                     = malloc(sizeof(float)*neqn);
+  f5                     = malloc(sizeof(float)*neqn);
+  f_swap                 = malloc(sizeof(float)*neqn);
+  y_plus_one_alternative = malloc(sizeof(float)*neqn);
 }*/
 
 /********************** Solve *********************/
@@ -102,7 +105,7 @@ static void allocate_equation_space() {
 //y_plus_one and y_plus_one_alternative will be set
 /*static void calculate_solutions() {
 
-  double lcd_stepsize = stepsize / 4.0; //lowest common denominator of stepsize
+  float lcd_stepsize = stepsize / 4.0; //lowest common denominator of stepsize
 
   //f1
   for (int i = 0; i < neqn; i++ )
@@ -149,17 +152,17 @@ static void allocate_equation_space() {
 */
 /* Calculate the error of the solution */
 //Pure
-/*static double calculate_solution_error() {
+/*static float calculate_solution_error() {
 
   //Used in calculations
-  double scale = 2.0 / relerr;
+  float scale = 2.0 / relerr;
 
   //Calculate the biggest_difference
-  double biggest_difference = 0.0;
+  float biggest_difference = 0.0;
   for (int i = 0; i < neqn; i++ )
   {
-    double et = fabs( y[i] ) + fabs( y_plus_one[i] ) + scale * abserr;
-    double ee = fabs( y_plus_one_alternative[i] );
+    float et = fabs( y[i] ) + fabs( y_plus_one[i] ) + scale * abserr;
+    float ee = fabs( y_plus_one_alternative[i] );
 
     biggest_difference = max ( biggest_difference, ee / et );
   }
@@ -174,6 +177,7 @@ static void allocate_equation_space() {
 // Updates y, h
 /*
 static void local_estimate() {
+  /!!! t = local_end_year !!!/
   
   //Step by step integration.
   bool local_start_reached = false;
@@ -181,12 +185,12 @@ static void local_estimate() {
   {
     //Variables used in calculations
     bool stepsize_descresed = false;
-    double hmin = 26.0 * DoubleEpsilon * fabs( t );
+    float hmin = 26.0 * DoubleEpsilon * fabs( t );
 
     local_start_reached = local_start_to_be_reached();
 
     calculate_solutions();
-    double error = calculate_solution_error();
+    float error = calculate_solution_error();
 
     //Integreate 1 step
     while(error > 1.0)
@@ -195,7 +199,7 @@ static void local_estimate() {
       local_start_reached = false;
 
       //Scale down.
-      double s = max(0.1,0.9 / pow( error, 0.2 ));
+      float s = max(0.1,0.9 / pow( error, 0.2 ));
       stepsize = s * stepsize;  
 
       //Try again.
@@ -216,7 +220,7 @@ static void local_estimate() {
     dy ( t, y, y_diff );
 
     //Apply scale to stepsize
-    double scale = scale_from_error(error,stepsize_descresed);
+    float scale = scale_from_error(error,stepsize_descresed);
     stepsize = sign ( stepsize ) * max ( scale * fabs( stepsize ), hmin );
   }
 }*/
@@ -227,7 +231,7 @@ static void local_estimate() {
 /* React if the "local start year" is about to be reached */
 //Effects stepsize, returns whether the start year is reached
 /*static bool local_start_to_be_reached() {
-    double dt = local_end_year - t;
+    float dt = local_end_year - t;
     if ( 2.0 * fabs( stepsize ) > fabs( dt ) )
     {
       if ( fabs( dt ) <= fabs( stepsize ) ) //Final step?
@@ -245,18 +249,18 @@ static void local_estimate() {
 
 /* Calculate stepsize's startvalue */
 /*
-static double calculate_initial_stepsize()
+static float calculate_initial_stepsize()
 {
   //Calculate the start value of stepsize
-  double stepsize = fabs( start_year - t );
+  float stepsize = fabs( start_year - t );
 
 
   for (int k = 0; k < neqn; k++ )
   {
-    double tol = relerr * fabs( y[k] ) + abserr;
+    float tol = relerr * fabs( y[k] ) + abserr;
     if ( 0.0 < tol )
     {
-      double ypk = fabs( y_diff[k] );
+      float ypk = fabs( y_diff[k] );
       if ( tol < ypk * pow( stepsize, 5 ) )
       {
         stepsize = pow( ( tol / ypk ), 0.2 );
@@ -271,8 +275,8 @@ static double calculate_initial_stepsize()
 
 /* Scale from error calculations */
 /*
-static double scale_from_error(double error,bool stepsize_decreased) {
-  double scale = min(5.0,0.9 / pow( error, 0.2 ));
+static float scale_from_error(float error,bool stepsize_decreased) {
+  float scale = min(5.0,0.9 / pow( error, 0.2 ));
 
   if (stepsize_decreased)
     scale = min( scale, 1.0 );
@@ -284,19 +288,22 @@ static double scale_from_error(double error,bool stepsize_decreased) {
 /*********************** Estimate **************************/
 
 /* Estimate range */
-__device__ double estimate() {
-  /*
+__device__ float estimate(int neqn,int policy,int end_year) {
+
+  float y[MAX_NEQN];
+  float y_diff[MAX_NEQN];
 
   for(int i = 0;i<neqn;i++)                // y
-    y[i] = end_year_y[i];
+    y[i] = 0.0;
 
-  t = (double) end_year;                   // t
-  dy( t, y, y_diff);                       // y_diff
-  stepsize = calculate_initial_stepsize(); // stepsize
+  dy((float) end_year, y, y_diff);                       // y_diff
+
+  //stepsize = calculate_initial_stepsize(); // stepsize
+  /*
 
   //Allocate result matrix, calculate m (length of result)
   m = end_year-start_year+1;
-  double** result = allocate_double_matrix(m,neqn);
+  float** result = allocate_float_matrix(m,neqn);
 
   //Solve for one year at a time
   for (int year=end_year; year>start_year; year--) {
@@ -322,9 +329,9 @@ __device__ double estimate() {
 
 /*************************** Auxiliaries ****************************/
 
-/* Find double epsilon */
-/*static double FindDoubleEpsilon() {
-  double r = 1.0;
+/* Find float epsilon */
+/*static float FindDoubleEpsilon() {
+  float r = 1.0;
   while (1.0 < (1.0 + r))
     r = r / 2.0;
   return 2.0 * r;
@@ -357,5 +364,55 @@ __device__ int get_n_device(void) {
 __global__ void test_kernel(CUSTOMERS *customers,int *result) {
   int id = get_id();
 
-  result[id] = customers[id].end_year; //estimate();
+  result[id] = estimate(
+                        customers[id].neqn,
+                        customers[id].policy,
+                        customers[id].end_year
+                       );
+}
+
+/**************** RK_LIBRARY *****************/
+
+__device__ float age = 30;
+__device__ float interestrate = 0.05;
+__device__ float bpension = 1;
+__device__ float pensiontime = 35;
+
+__device__ float GM(float t) {
+    return 0.0005 + pow(10.0, 5.728 - 10.0 + 0.038*(age + t));
+}
+
+// Interest
+__device__ float r(float t) {
+    return interestrate;
+}
+
+__device__ float indicator(int b) {
+    return b ? 1.0 : 0.0;
+}
+
+/**************** PRODUCT, PURE ENDOWMENT ***************************/
+__device__ static float b_0(float t) {
+    return 0.0;
+}
+
+__device__ static float mu_01(float t) {
+    return GM(t);
+}
+
+__device__ static float bj_00(float t) {
+    return t == pensiontime ? bpension: 0.0;
+}
+
+__device__ static float bj_01(float t) {
+    return 0.0; 
+}
+
+__device__ void bj_ii(float t, float* result) {
+  result[0] += bj_00(t);
+}
+
+__device__ void dy(float t, float* V,float* result)
+{
+    result[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
 }

@@ -3,10 +3,9 @@
 
 typedef struct
 {
+  int neqn;
   int policy;
   int end_year;
-  double abserr;
-  double relerr;
 } CUSTOMERS;
 
 #endif

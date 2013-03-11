@@ -25,10 +25,9 @@ int main(int argc, char const *argv[]) {
   customers = (CUSTOMERS*) malloc(sizeof(CUSTOMERS)*nsize);
 
   for(int i = 0;i < nsize;i++) {
+    customers[i].neqn = 1;
     customers[i].policy = 1;
     customers[i].end_year = 40;
-    customers[i].relerr = 1e-11;
-    customers[i].abserr = 1e-11;
   }
 
   // Allocate memory on the device
