@@ -33,10 +33,11 @@ static void local_estimate();
 static double calculate_initial_stepsize();
 static double scale_from_error();
 static double FindDoubleEpsilon();
-*/
 static void allocate_equation_space();
 
 //Declare Estimator variables
+
+const int MAX_KERNELS;
 
 //Public variables
 int neqn;
@@ -66,15 +67,18 @@ static int local_end_year;
 static double DoubleEpsilon;
 
 static int m; //Result length;
+*/
 /******************* Constructor *********************/
 
 /* Construct */
+/*
 void construct(int n) {
   //DoubleEpsilon = FindDoubleEpsilon();
   allocate_equation_space();
-}
+}*/
 
 /* Allocate equation space */
+/*
 static void allocate_equation_space() {
   //Global for the class
   y_plus_one             = (double) malloc(sizeof(double)*neqn);
@@ -90,7 +94,7 @@ static void allocate_equation_space() {
   f5                     = malloc(sizeof(double)*neqn);
   f_swap                 = malloc(sizeof(double)*neqn);
   y_plus_one_alternative = malloc(sizeof(double)*neqn);
-}
+}*/
 
 /********************** Solve *********************/
 
@@ -353,7 +357,5 @@ __device__ int get_n_device(void) {
 __global__ void test_kernel(CUSTOMERS *customers,int *result) {
   int id = get_id();
 
-  estimate();
-
-  result[id] = 99;
+  result[id] = customers[id].end_year; //estimate();
 }

@@ -2,10 +2,15 @@
 
 Cuda c
   - Learn to use an array of structs. Use link in browser.
+  - Template: Include using different files with kernel threads.
 
+  Do a diagram that shows how each variable is passed around.
+  Implement in c-sharp.
 
   NOTES:
+  - 124 registers per thread.
   - Vars really needed:
+    neqn;
     end_year
     relerr;
     abserr;

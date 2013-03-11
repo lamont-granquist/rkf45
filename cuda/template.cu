@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+const int MAX_KERNELS = 72;
+
 __device__ int get_id(void) {
   // Find the ID for this thread, based on which block it is in.
   int idx = threadIdx.x + blockIdx.x * blockDim.x; //thread x coordinate
@@ -17,18 +19,19 @@ __device__ int get_n(void) {
 }
 
 __device__ int id;
+__device__ int gpu_array[MAX_KERNELS];
 
 // Device code
 __global__ void kernel(int *dev_a, int *dev_b, int *dev_c) {
-  id = get_id();
-  // Use the thread ID as an index
-  dev_c[id] = id; //get_n();//idz; //dev_a[tid] + dev_b[tid];
+  int tid = get_id();
+
+  dev_c[tid] = 2;//id;
 }
 
 // Host code
 int main(int argc, char const *argv[]) {
 
-  dim3 block_dim(2,2,3); //Number of threads per block
+  dim3 block_dim(2,1,1); //Number of threads per block
   dim3 grid_dim(2,3,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
   //Number of kernels:
   int nsize = grid_dim.x * grid_dim.y * grid_dim.z * block_dim.x * block_dim.y * block_dim.z; 

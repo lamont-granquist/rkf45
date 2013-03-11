@@ -76,8 +76,10 @@ void construct(int n) {
 
 /* Allocate equation space */
 static void allocate_equation_space() {
+
   //Global for the class
   y_plus_one             = malloc(sizeof(double)*neqn);
+  y_plus_one_alternative = malloc(sizeof(double)*neqn);
   end_year_y             = malloc(sizeof(double)*neqn);
   y                      = malloc(sizeof(double)*neqn);
   y_diff                 = malloc(sizeof(double)*neqn);
@@ -89,7 +91,6 @@ static void allocate_equation_space() {
   f4                     = malloc(sizeof(double)*neqn);
   f5                     = malloc(sizeof(double)*neqn);
   f_swap                 = malloc(sizeof(double)*neqn);
-  y_plus_one_alternative = malloc(sizeof(double)*neqn);
 }
 
 /********************** Solve *********************/

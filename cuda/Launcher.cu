@@ -23,15 +23,13 @@ int main(int argc, char const *argv[]) {
   CUSTOMERS *customers;
 
   customers = (CUSTOMERS*) malloc(sizeof(CUSTOMERS)*nsize);
+
   for(int i = 0;i < nsize;i++) {
     customers[i].policy = 1;
     customers[i].end_year = 40;
     customers[i].relerr = 1e-11;
     customers[i].abserr = 1e-11;
   }
-
-  //Construct RKF45
-  construct(2);
 
   // Allocate memory on the device
   cudaMalloc((void**)&dev_customers, sizeof(CUSTOMERS) * nsize);
@@ -42,7 +40,7 @@ int main(int argc, char const *argv[]) {
 
   // Launch the kernel with 10 blocks, each with 1 thread
   //kernel <<<grid_dim, block_dim>>>(dev_customers,dev_result);
-  test_kernel <<<grid_dim, block_dim>>>(customers, dev_result);
+  test_kernel <<<grid_dim, block_dim>>>(dev_customers, dev_result);
 
   // Copy the result back from the device
   cudaMemcpy(result, dev_result, sizeof(int) * nsize, cudaMemcpyDeviceToHost);
