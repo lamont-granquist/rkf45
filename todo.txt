@@ -1,11 +1,14 @@
 /************** TODO NEXT *************/
 
 Cuda c
-  - Learn to use an array of structs. Use link in browser.
-  - Template: Include using different files with kernel threads.
 
   Do a diagram that shows how each variable is passed around.
   Implement in c-sharp.
+
+
+
+  - cSharp, modify: Convert to float precition
+  - c = make as cuda code.
 
   NOTES:
   - 124 registers per thread.
@@ -35,6 +38,8 @@ Lave unittests i csharp
 NICOLAI / CHRISTIAN:
 
 Skal alle variable i device gå igennem kernel fncitonen?
+
+Er det kun y[0] som er interessant? skal y[0..neqn] returners?
 
 VEJLEDER:
 y_diff (gammel yp) er previous_d_diff. Er det en fejl? Stemmer ikke overens

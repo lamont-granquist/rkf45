@@ -17,8 +17,8 @@ int main(int argc, char const *argv[]) {
   int nsize = get_n_host(block_dim,grid_dim); 
 
   // Data on the host and the device, respectively
-  int result[nsize];
-  int *dev_result;
+  float result[nsize];
+  float *dev_result;
   CUSTOMERS *dev_customers; 
   CUSTOMERS *customers;
 
@@ -32,7 +32,7 @@ int main(int argc, char const *argv[]) {
 
   // Allocate memory on the device
   cudaMalloc((void**)&dev_customers, sizeof(CUSTOMERS) * nsize);
-  cudaMalloc((void**)&dev_result, sizeof(int) * nsize);
+  cudaMalloc((void**)&dev_result, sizeof(float) * nsize);
 
   // Copy data to the device
   cudaMemcpy(dev_customers, customers, sizeof(CUSTOMERS) * nsize, cudaMemcpyHostToDevice);
@@ -42,11 +42,11 @@ int main(int argc, char const *argv[]) {
   test_kernel <<<grid_dim, block_dim>>>(dev_customers, dev_result);
 
   // Copy the result back from the device
-  cudaMemcpy(result, dev_result, sizeof(int) * nsize, cudaMemcpyDeviceToHost);
+  cudaMemcpy(result, dev_result, sizeof(float) * nsize, cudaMemcpyDeviceToHost);
 
   // Print the result: "0 5 20 45 80 125 180 245 320 405"
   for(int i = 0; i < nsize; i++) {
-    printf("%d ", result[i]);
+    printf("%f ", result[i]);
   }
 
   printf("\n");
