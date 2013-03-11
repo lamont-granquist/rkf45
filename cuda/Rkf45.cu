@@ -15,6 +15,9 @@ __device__ void dy(float t, float* V,float* result);
 __device__ void bj_ii(float t, float* result);
 __device__ bool local_start_to_be_reached(float t_left,float &stepsize);
 __device__ float calculate_solution_error(int neqn,int stepsize,float* y,float* y_plus_one,float* y_lus_one_alternative);
+__device__ float scale_from_error(float error,bool stepsize_decreased);
+
+#define sign(x)  ((x > 0) - ( x < 0))
 /*
 #include <assert.h>
 #include <math.h>
@@ -219,14 +222,12 @@ __device__ void local_estimate(float local_end_year,float local_start_year,float
     for (int i = 0; i < neqn; i++ )
       y[i] = y_plus_one[i];
 
-    /*
     //Update y_diff
     dy ( t, y, y_diff );
 
     //Apply scale to stepsize
     float scale = scale_from_error(error,stepsize_descresed);
     stepsize = sign ( stepsize ) * max ( scale * fabs( stepsize ), hmin );
-    */
   }
 }
 
@@ -277,16 +278,14 @@ __device__ float calculate_initial_stepsize(int neqn,float* y, float* y_diff,flo
 }
 
 /* Scale from error calculations */
-/*
-static float scale_from_error(float error,bool stepsize_decreased) {
-  float scale = min(5.0,0.9 / pow( error, 0.2 ));
+__device__ float scale_from_error(float error,bool stepsize_decreased) {
+  float scale = min(5.0,0.9 / __powf( error, 0.2 ));
 
   if (stepsize_decreased)
     scale = min( scale, 1.0 );
 
   return scale;
 }
-*/
 
 /*********************** Estimate **************************/
 
