@@ -226,7 +226,7 @@ __device__ void local_estimate(float local_end_year,float local_start_year) {
 
 /* React if the "local start year" is about to be reached */
 //Effects stepsize, returns whether the start year is reached
-/*static bool local_start_to_be_reached() {
+__device__ bool local_start_to_be_reached() {
     float dt = local_end_year - t;
     if ( 2.0 * fabs( stepsize ) > fabs( dt ) )
     {
@@ -241,7 +241,7 @@ __device__ void local_estimate(float local_end_year,float local_start_year) {
       }
     }
     return false;
-}*/
+}
 
 /* Calculate stepsize's startvalue */
 __device__ float calculate_initial_stepsize(int neqn,float* y, float* y_diff,float t)
