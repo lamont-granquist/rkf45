@@ -12,14 +12,13 @@ const float DoubleEpsilon = 0; //TODO: Calculate this constant
 #include <stdio.h>
 
 __device__ void dy(float t, float* V,float* result);
-
+__device__ void bj_ii(float t, float* result);
 /*
 #include <assert.h>
 #include <math.h>
 #include "Matrix_Library.h"
 #include <unistd.h> //only for sleep?
 #include <string.h> //only for sleep?
-#include "Boolean.h"
 
 //Max,min,sign functions /REMOVED/
 
@@ -172,38 +171,38 @@ static void allocate_equation_space() {
 
 /* Move from current position to local_start_year, and update all values */
 // Updates y, h
-/*
-static void local_estimate() {
-  /!!! t = local_end_year !!!/
+__device__ void local_estimate(float local_end_year,float local_start_year) {
+  float t = local_end_year;
   
   //Step by step integration.
   bool local_start_reached = false;
+
   while (!local_start_reached)
   {
     //Variables used in calculations
     bool stepsize_descresed = false;
-    float hmin = 26.0 * DoubleEpsilon * fabs( t );
+    float hmin = 26.0f * DoubleEpsilon * fabs( t );
 
     local_start_reached = local_start_to_be_reached();
 
+    /*
     calculate_solutions();
     float error = calculate_solution_error();
 
     //Integreate 1 step
-    while(error > 1.0)
+    while(error > 1.0f)
     {
       stepsize_descresed = true;
       local_start_reached = false;
 
       //Scale down.
-      float s = max(0.1,0.9 / pow( error, 0.2 ));
+      float s = max(0.1f,0.9f / pow( error, 0.2f ));
       stepsize = s * stepsize;  
 
       //Try again.
       calculate_solutions();
       error = calculate_solution_error();
     }
-
 
     //Advance in time
     t = t + stepsize; 
@@ -212,15 +211,15 @@ static void local_estimate() {
     for (int i = 0; i < neqn; i++ )
       y[i] = y_plus_one[i];
 
-
     //Update y_diff
     dy ( t, y, y_diff );
 
     //Apply scale to stepsize
     float scale = scale_from_error(error,stepsize_descresed);
     stepsize = sign ( stepsize ) * max ( scale * fabs( stepsize ), hmin );
+    */
   }
-}*/
+}
 
 /**************** Local estimation help functions ****************/
 
@@ -293,14 +292,11 @@ __device__ void estimate(int neqn,int policy,int end_year,float *y) {
   float stepsize = calculate_initial_stepsize(neqn,y,y_diff,(float) end_year); // stepsize
 
   //Solve for one year at a time
-  for (int year=end_year; year>start_year; year--) {
+  for (int year=end_year; year>0; year--) { //start_year = 0;
     //Add this years benefit to y
     bj_ii(year,y);
 
-    // Integrate over [year,year-1]
-    //local_start_year = year;
-    //local_end_year = year-1;
-    //local_estimate();
+    local_estimate((float)year,(float)year-1);
   }
 }
 
