@@ -298,12 +298,10 @@ __device__ void estimate(int neqn,int policy,int end_year,float *y) {
     bj_ii(year,y);
 
     // Integrate over [year,year-1]
-    local_start_year = year;
-    local_end_year = year-1;
-    local_estimate();
+    //local_start_year = year;
+    //local_end_year = year-1;
+    //local_estimate();
   }
-
-
 }
 
 /*************************** Auxiliaries ****************************/
