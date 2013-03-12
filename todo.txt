@@ -2,11 +2,6 @@
 
 Cuda c
 
-  Do a diagram that shows how each variable is passed around.
-  Implement in c-sharp.
-
-
-
   - cSharp, modify: Convert to float precition
   - c = make as cuda code.
 
@@ -28,7 +23,6 @@ Cuda c
   //Start kernel
   //(estimate);
 
-
 Finde ud af hvordan man timer forskellige customers
 
 Lave unittests i csharp
@@ -40,9 +34,10 @@ NICOLAI / CHRISTIAN:
 Skal alle variable i device gå igennem kernel fncitonen?
 
 Er det kun y[0] som er interessant? skal y[0..neqn] returners?
+kun y[0] er interessant.
 
 VEJLEDER:
-y_diff (gammel yp) er previous_d_diff. Er det en fejl? Stemmer ikke overens
+y_diff (gammel yp) er previous_d_diff. Er det en fejl? Stemmer ikke overens.
 med udregninger.
 stepsize scales ned ved years afslutninger. Er det et problem?
 

@@ -891,8 +891,8 @@ class TestRkf45 {
     // }
     // Compute and print reserves
 
-    CalculationSpecifications.TimeAll(12288);
-    //CalculationSpecifications.ComputeAll();
+    //CalculationSpecifications.TimeAll(12288);
+    CalculationSpecifications.ComputeAll();
   }
 
   public static void Zero(double t, double[] yv, /* for output: */ double[] yvp) {
