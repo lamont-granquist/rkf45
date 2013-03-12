@@ -6,11 +6,11 @@ extern int start_year;
 extern int end_year;
 // dy
 // bj_ii
-extern double relerr;
-extern double abserr;
-extern double* end_year_y; 
+extern float relerr;
+extern float abserr;
+extern float* end_year_y; 
 
-double** estimate();
+float** estimate();
 void construct(int n);
 
 #endif

@@ -2,11 +2,11 @@
 #include <stdio.h>
 
 /*Allocate Matrix */
-double** allocate_double_matrix(int m, int n) {
+float** allocate_float_matrix(int m, int n) {
   /* Allocate memory for the elements */
-  double *mem = malloc(m * n * sizeof(double));
+  float *mem = malloc(m * n * sizeof(float));
   /* Allocate memory for the matrix array */
-  double **mat = malloc(m * sizeof(double *));
+  float **mat = malloc(m * sizeof(float *));
   /* Setup array */
   if (mem != NULL && mat != NULL) {
     int i;
@@ -20,7 +20,7 @@ double** allocate_double_matrix(int m, int n) {
 }
 
 /* Print Matrix */
-void print_matrix(int m,int n,double** mat) {
+void print_matrix(int m,int n,float** mat) {
   for (int i = 0;i < m;i++) {
     for (int j = 0;j < n;j++) {
       printf("%.16lf, ",mat[i][j]);
@@ -30,7 +30,7 @@ void print_matrix(int m,int n,double** mat) {
 }
 
 /* Free Matrix */
-void free_double_matrix(double **mat) {
+void free_float_matrix(float **mat) {
   /* Free elements */
   free(*mat);
   /* Free matrix */

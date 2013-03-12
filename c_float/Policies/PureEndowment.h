@@ -1,8 +1,8 @@
 #ifndef RK_C_PureEndowment_h
 #define RK_C_PureEndowment_h
 
-double** tv_PureEndowment();
-void dy_PureEndowment(double t,double* V,double* result);
-void bj_ii_PureEndowment(double t, double* result);
+float** tv_PureEndowment();
+void dy_PureEndowment(float t,float* V,float* result);
+void bj_ii_PureEndowment(float t, float* result);
 
 #endif

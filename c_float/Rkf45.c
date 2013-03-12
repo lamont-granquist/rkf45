@@ -31,7 +31,7 @@ static void xpy();
 static void calculate_solutions();
 static void local_estimate();
 static float calculate_initial_stepsize();
-static float scale_from_error();
+static float scale_from_error(float error,bool stepsize_decreased);
 static float FindDoubleEpsilon();
 
 //Declare Estimator variables

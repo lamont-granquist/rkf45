@@ -12,16 +12,16 @@
 #define RK_C_RK_Library_h
 
 
-extern double age, interestrate, bpension, pensiontime;
+extern float age, interestrate, bpension, pensiontime;
 extern int states;
 
 
-double GM(double t);
-double r(double t);
-double indicator(int b);
+float GM(float t);
+float r(float t);
+float indicator(int b);
 
 
-void sax(double a, double* x, double* result);
-void saxpy(double a, double* x, double* y, double* result);
+void sax(float a, float* x, float* result);
+void saxpy(float a, float* x, float* y, float* result);
 
 #endif

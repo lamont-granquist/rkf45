@@ -10,7 +10,7 @@
 
 int policy = 0;
 
-void dy(double t, double* V, double* result) {
+void dy(float t, float* V, float* result) {
   switch(policy)
   {
     case 1:
@@ -34,7 +34,7 @@ void dy(double t, double* V, double* result) {
   };
 }
 
-void bj_ii(double t, double* result) {
+void bj_ii(float t, float* result) {
   switch(policy)
   {
     case 1:
@@ -59,7 +59,7 @@ void bj_ii(double t, double* result) {
   };
 }
 
-double** test_values() {
+float** test_values() {
   switch(policy)
   {
     case 1:
