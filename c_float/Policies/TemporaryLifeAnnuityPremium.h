@@ -1,8 +1,8 @@
 #ifndef RK_C_TemporaryLifeAnnuityPremium_h
 #define RK_C_TemporaryLifeAnnuityPremium_h
 
-double** tv_TemporaryLifeAnnuityPremium();
-void dy_TemporaryLifeAnnuityPremium(double t,double* V,double* result);
-void bj_ii_TemporaryLifeAnnuityPremium(double t, double* result);
+float** tv_TemporaryLifeAnnuityPremium();
+void dy_TemporaryLifeAnnuityPremium(float t,float* V,float* result);
+void bj_ii_TemporaryLifeAnnuityPremium(float t, float* result);
 
 #endif

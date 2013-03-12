@@ -12,62 +12,62 @@
 #include "../RK_Library.h"
 #include "TemporaryLifeAnnuityPremium.h"
 
-static double *matrix[51];
+static float *matrix[51];
 
-static double row0[] =  {-15.9717676660001000};
-static double row1[] =  {-15.7859295725898000};
-static double row2[] =  {-15.5914495774420000};
-static double row3[] =  {-15.3879467041606000};
-static double row4[] =  {-15.1750230434772000};
-static double row5[] =  {-14.9522626687192000};
-static double row6[] =  {-14.7192304105538000};
-static double row7[] =  {-14.4754704664848000};
-static double row8[] =  {-14.2205048162637000};
-static double row9[] =  {-13.9538314093213000};
-static double row10[] = {-13.6749220843743000};
-static double row11[] = {-13.3832201743607000};
-static double row12[] = {-13.0781377416068000};
-static double row13[] = {-12.7590523783886000};
-static double row14[] = {-12.4253034965330000};
-static double row15[] = {-12.0761880160465000};
-static double row16[] = {-11.7109553465719000};
-static double row17[] = {-11.3288015361432000};
-static double row18[] = {-10.9288624386922000};
-static double row19[] = {-10.5102057241661000};
-static double row20[] = {-10.0718215219905000};
-static double row21[] = { -9.6126114486954800};
-static double row22[] = { -9.1313757222581100};
-static double row23[] = { -8.6267980071471600};
-static double row24[] = { -8.0974275627022600};
-static double row25[] = { -7.5416581802140900};
-static double row26[] = { -6.9577032868934500};
-static double row27[] = { -6.3435664627206500};
-static double row28[] = { -5.6970064523888100};
-static double row29[] = { -5.0154955507238000};
-static double row30[] = { -4.2961699850952200};
-static double row31[] = { -3.5357705981019300};
-static double row32[] = { -2.7305717294876500};
-static double row33[] = { -1.8762956830915000};
-static double row34[] = { -0.9680095100191570};
-static double row35[] = {  0.0000000000000000};
-static double row36[] = {  0.0000000000000000};
-static double row37[] = {  0.0000000000000000};
-static double row38[] = {  0.0000000000000000};
-static double row39[] = {  0.0000000000000000};
-static double row40[] = {  0.0000000000000000};
-static double row41[] = {  0.0000000000000000};
-static double row42[] = {  0.0000000000000000};
-static double row43[] = {  0.0000000000000000};
-static double row44[] = {  0.0000000000000000};
-static double row45[] = {  0.0000000000000000};
-static double row46[] = {  0.0000000000000000};
-static double row47[] = {  0.0000000000000000};
-static double row48[] = {  0.0000000000000000};
-static double row49[] = {  0.0000000000000000};
-static double row50[] = {  0.0000000000000000};
+static float row0[] =  {-15.97177f};
+static float row1[] =  {-15.78593f};
+static float row2[] =  {-15.59145f};
+static float row3[] =  {-15.38794f};
+static float row4[] =  {-15.17502f};
+static float row5[] =  {-14.95226f};
+static float row6[] =  {-14.71923f};
+static float row7[] =  {-14.47547f};
+static float row8[] =  {-14.22050f};
+static float row9[] =  {-13.95383f};
+static float row10[] = {-13.67492f};
+static float row11[] = {-13.38322f};
+static float row12[] = {-13.07813f};
+static float row13[] = {-12.75905f};
+static float row14[] = {-12.42530f};
+static float row15[] = {-12.07619f};
+static float row16[] = {-11.71095f};
+static float row17[] = {-11.32880f};
+static float row18[] = {-10.92886f};
+static float row19[] = {-10.51020f};
+static float row20[] = {-10.07182f};
+static float row21[] = {-9.612608f};
+static float row22[] = {-9.131372f};
+static float row23[] = {-8.626795f};
+static float row24[] = {-8.097425f};
+static float row25[] = {-7.541655f};
+static float row26[] = {-6.957700f};
+static float row27[] = {-6.343563f};
+static float row28[] = {-5.697003f};
+static float row29[] = {-5.015492f};
+static float row30[] = {-4.296166f};
+static float row31[] = {-3.535767f};
+static float row32[] = {-2.730567f};
+static float row33[] = {-1.876291f};
+static float row34[] = {-0.968004f};
+static float row35[] = {0.0000000f};
+static float row36[] = {0.0000000f};
+static float row37[] = {0.0000000f};
+static float row38[] = {0.0000000f};
+static float row39[] = {0.0000000f};
+static float row40[] = {0.0000000f};
+static float row41[] = {0.0000000f};
+static float row42[] = {0.0000000f};
+static float row43[] = {0.0000000f};
+static float row44[] = {0.0000000f};
+static float row45[] = {0.0000000f};
+static float row46[] = {0.0000000f};
+static float row47[] = {0.0000000f};
+static float row48[] = {0.0000000f};
+static float row49[] = {0.0000000f};
+static float row50[] = {0.0000000f};
 
 /* tv */
-double** tv_TemporaryLifeAnnuityPremium() {
+float** tv_TemporaryLifeAnnuityPremium() {
 
   matrix[0] = row0;
   matrix[1] = row1;
@@ -125,29 +125,29 @@ double** tv_TemporaryLifeAnnuityPremium() {
 }
 
 static int n = 35;
-static double bpremium = 1;
+static float bpremium = 1.0f;
 
-static double b_0(double t) {
+static float b_0(float t) {
     return -bpremium * indicator(t >= 0) * indicator(t < n);
 }
 
-static double mu_01(double t) {
+static float mu_01(float t) {
     return GM(t);
 }
 
-static double bj_00(double t) {
-    return 0.0;
+static float bj_00(float t) {
+    return 0.0f;
 }
 
-static double bj_01(double t) {
-    return 0.0; 
+static float bj_01(float t) {
+    return 0.0f; 
 }
 
-void bj_ii_TemporaryLifeAnnuityPremium(double t, double* result) {
+void bj_ii_TemporaryLifeAnnuityPremium(float t, float* result) {
   result[0] += bj_00(t);
 }
 
-void dy_TemporaryLifeAnnuityPremium(double t, double* V,double* result)
+void dy_TemporaryLifeAnnuityPremium(float t, float* V,float* result)
 {
     result[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
 }

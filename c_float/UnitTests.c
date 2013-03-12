@@ -37,7 +37,7 @@ bool matrix_ewt(float** a,float** b,int m,int n) {
 bool matrix_ewt_print(float** a,float** b,int m,int n) {
   for (int i = 0;i < m;i++) {
     for (int j = 0;j < n;j++) {
-      printf("%.16f = %.16f, ",a[i][j],b[i][j]);
+      printf("%.7f = %.7f, ",a[i][j],b[i][j]);
       if (!floats_ewt(a[i][j],b[i][j])) {
         //return false;
       }
@@ -113,13 +113,13 @@ static void test_case_DisabilityTermInsurance() {
 
 static char* test_PureEndowment() {
   test_case_PureEndowment();
-  mu_assert("PureEndowment failed",matrix_ewt_print(test_values(),estimate(),41,1));
+  mu_assert("PureEndowment failed",matrix_ewt(test_values(),estimate(),41,1));
   return 0;
 }
 
 static char* test_DeferredTemporaryLifeAnnuity() {
   test_case_DeferredTemporaryLifeAnnuity();
-  mu_assert("DeferredTemporaryLifeAnnuity failed",matrix_ewt(test_values(),estimate(),51,1));
+  mu_assert("DeferredTemporaryLifeAnnuity failed",matrix_ewt_print(test_values(),estimate(),51,1));
   return 0;
 }
 
@@ -176,12 +176,14 @@ static char* test_PureEndowment_dy() {
 static char* test_DisabilityAnnuity_dy() {
   float V[2];
   float result[2];
+  result[0] = 99.0f;
+  result[1] = 99.0f;
   policy = 5;
   neqn = 2;
   V[1] = 0;
 
   dy(0,V,result); 
-  mu_assert("DisabilityAnnuity_dy1 failed",floats_ewt(result[0],0.0f));
+  mu_assert("DisabilityAnnuity_dy1 failed",floats_ewt_print(result[0],0.0f));
 
   V[0] = 1.0f;
   dy(0,V,result); 
@@ -200,6 +202,7 @@ static char* test_DisabilityAnnuity_dy() {
   mu_assert("DisabilityAnnuity_dy5 failed",floats_ewt(result[1],-1.0f));
   return 0;
 }
+
 /********************* Timing ******************/
 
 float time_one(int customers) {
@@ -228,14 +231,14 @@ void all_timing(int customers) {
 /********************* Main ********************/
 
 static char* all_tests() {
-  /*mu_run_test(test_PureEndowment_dy);
-  mu_run_test(test_DisabilityAnnuity_dy);*/
+  mu_run_test(test_PureEndowment_dy);
+  mu_run_test(test_DisabilityAnnuity_dy);
   mu_run_test(test_PureEndowment);
-  /*mu_run_test(test_DeferredTemporaryLifeAnnuity);
+  mu_run_test(test_DeferredTemporaryLifeAnnuity);
   mu_run_test(test_TemporaryLifeAnnuityPremium);
   mu_run_test(test_TermInsurance);
   mu_run_test(test_DisabilityAnnuity);
-  mu_run_test(test_DisabilityTermInsurance);*/
+  mu_run_test(test_DisabilityTermInsurance);
   return 0;
 }
 

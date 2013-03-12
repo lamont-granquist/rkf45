@@ -13,62 +13,62 @@
 #include "DisabilityAnnuity.h"
 #include <math.h>
 
-static double *matrix[51];
+static float *matrix[51];
 
-static double row0[]  = {0.5555261079604120,   15.9717676673750000};
-static double row1[]  = {0.5697939362470290,   15.7859295725873000};
-static double row2[]  = {0.5842458860490700,   15.5914495774393000};
-static double row3[]  = {0.5988112559939020,   15.3879467041578000};
-static double row4[]  = {0.6134061668653150,   15.1750230434743000};
-static double row5[]  = {0.6279320187147260,   14.9522626687161000};
-static double row6[]  = {0.6422738476905750,   14.7192304105506000};
-static double row7[]  = {0.6562985942478250,   14.4754704664814000};
-static double row8[]  = {0.6698533011953220,   14.2205048162601000};
-static double row9[]  = {0.6827632688462940,   13.9538314093175000};
-static double row10[] = {0.6948302058887720,   13.6749220843703000};
-static double row11[] = {0.7058304291697920,   13.3832201743564000};
-static double row12[] = {0.7155131842695250,   13.0781377416023000};
-static double row13[] = {0.7235991826741960,   12.7590523783855000};
-static double row14[] = {0.7297794820426480,   12.4253034965300000};
-static double row15[] = {0.7337148754958810,   12.0761880160438000};
-static double row16[] = {0.7350360067043140,   11.7109553465694000};
-static double row17[] = {0.7333444934112320,   11.3288015361409000};
-static double row18[] = {0.7282154278216300,   10.9288624386901000};
-static double row19[] = {0.7192017347676550,   10.5102057241642000};
-static double row20[] = {0.7058410171284570,   10.0718215219888000};
-static double row21[] = {0.6876657158018430,    9.6126114486939200};
-static double row22[] = {0.6642176772198330,    9.1313757222565700};
-static double row23[] = {0.6350685815395070,    8.6267980071455300};
-static double row24[] = {0.5998481774680660,    8.0974275627005400};
-static double row25[] = {0.5582829507417500,    7.5416581802122700};
-static double row26[] = {0.5102488039940220,    6.9577032868915200};
-static double row27[] = {0.4558426666237880,    6.3435664627186100};
-static double row28[] = {0.3954798644641650,    5.6970064523866500};
-static double row29[] = {0.3300268327704200,    5.0154955507223200};
-static double row30[] = {0.2609827682846260,    4.2961699850940100};
-static double row31[] = {0.1907297303473690,    3.5357705981010400};
-static double row32[] = {0.1228795253423570,    2.7305717294870500};
-static double row33[] = {0.0627590447157113,    1.8762956830912200};
-static double row34[] = {0.0180961562710709,    0.9680095100190450};
-static double row35[] = {0.0000000000000000,    0.0000000000000000};
-static double row36[] = {0.0000000000000000,    0.0000000000000000};
-static double row37[] = {0.0000000000000000,    0.0000000000000000};
-static double row38[] = {0.0000000000000000,    0.0000000000000000};
-static double row39[] = {0.0000000000000000,    0.0000000000000000};
-static double row40[] = {0.0000000000000000,    0.0000000000000000};
-static double row41[] = {0.0000000000000000,    0.0000000000000000};
-static double row42[] = {0.0000000000000000,    0.0000000000000000};
-static double row43[] = {0.0000000000000000,    0.0000000000000000};
-static double row44[] = {0.0000000000000000,    0.0000000000000000};
-static double row45[] = {0.0000000000000000,    0.0000000000000000};
-static double row46[] = {0.0000000000000000,    0.0000000000000000};
-static double row47[] = {0.0000000000000000,    0.0000000000000000};
-static double row48[] = {0.0000000000000000,    0.0000000000000000};
-static double row49[] = {0.0000000000000000,    0.0000000000000000};
-static double row50[] = {0.0000000000000000,    0.0000000000000000};
+static float row0[]  = {0.55552600f, 15.97177000f};
+static float row1[]  = {0.56979390f, 15.78593000f};
+static float row2[]  = {0.58424580f, 15.59145000f};
+static float row3[]  = {0.59881110f, 15.38794000f};
+static float row4[]  = {0.61340610f, 15.17502000f};
+static float row5[]  = {0.62793190f, 14.95226000f};
+static float row6[]  = {0.64227370f, 14.71923000f};
+static float row7[]  = {0.65629850f, 14.47547000f};
+static float row8[]  = {0.66985320f, 14.22050000f};
+static float row9[]  = {0.68276310f, 13.95383000f};
+static float row10[] = {0.69483000f, 13.67492000f};
+static float row11[] = {0.70583020f, 13.38322000f};
+static float row12[] = {0.71551300f, 13.07813000f};
+static float row13[] = {0.72359900f, 12.75905000f};
+static float row14[] = {0.72977920f, 12.42530000f};
+static float row15[] = {0.73371460f, 12.07619000f};
+static float row16[] = {0.73503580f, 11.71095000f};
+static float row17[] = {0.73334430f, 11.32880000f};
+static float row18[] = {0.72821520f, 10.92886000f};
+static float row19[] = {0.71920140f, 10.51020000f};
+static float row20[] = {0.70584070f, 10.07182000f};
+static float row21[] = {0.68766540f,  9.61260800f};
+static float row22[] = {0.66421740f,  9.13137200f};
+static float row23[] = {0.63506820f,  8.62679500f};
+static float row24[] = {0.59984780f,  8.09742500f};
+static float row25[] = {0.55828260f,  7.54165500f};
+static float row26[] = {0.51024840f,  6.95770000f};
+static float row27[] = {0.45584220f,  6.34356300f};
+static float row28[] = {0.39547940f,  5.69700300f};
+static float row29[] = {0.33002640f,  5.01549200f};
+static float row30[] = {0.26098230f,  4.29616600f};
+static float row31[] = {0.19072930f,  3.53576700f};
+static float row32[] = {0.12287920f,  2.73056700f};
+static float row33[] = {0.06275875f,  1.87629100f};
+static float row34[] = {0.01809598f,  0.96800480f};
+static float row35[] = {0.00000000f,  0.00000000f};
+static float row36[] = {0.00000000f,  0.00000000f};
+static float row37[] = {0.00000000f,  0.00000000f};
+static float row38[] = {0.00000000f,  0.00000000f};
+static float row39[] = {0.00000000f,  0.00000000f};
+static float row40[] = {0.00000000f,  0.00000000f};
+static float row41[] = {0.00000000f,  0.00000000f};
+static float row42[] = {0.00000000f,  0.00000000f};
+static float row43[] = {0.00000000f,  0.00000000f};
+static float row44[] = {0.00000000f,  0.00000000f};
+static float row45[] = {0.00000000f,  0.00000000f};
+static float row46[] = {0.00000000f,  0.00000000f};
+static float row47[] = {0.00000000f,  0.00000000f};
+static float row48[] = {0.00000000f,  0.00000000f};
+static float row49[] = {0.00000000f,  0.00000000f};
+static float row50[] = {0.00000000f,  0.00000000f};
 
 /* tv */
-double** tv_DisabilityAnnuity() {
+float** tv_DisabilityAnnuity() {
 
   matrix[0] = row0;
   matrix[1] = row1;
@@ -128,68 +128,66 @@ double** tv_DisabilityAnnuity() {
 static int n = 35;
 static int bdisabled = 1;
 
-static double b_0(double t) {
-  return 0.0;
+static float b_0(float t) {
+  return 0.0f;
 }
 
-static double b_1(double t) {
+static float b_1(float t) {
   //printf("b_1: %.16f t: %.16f\n",bdisabled * indicator(t > 0) * indicator(t < n),t);
   return bdisabled * indicator(t > 0) * indicator(t < n);
 }
 
-static double GM01(double t) {
-  return 0.0006 + pow(10, 4.71609 - 10 + 0.06*(age + t));
+static float GM01(float t) {
+  return 0.0006f + powf(10.0f, 4.71609f - 10.0f + 0.06f*(age + t));
 }
 
-static double GM02(double t) {
+static float GM02(float t) {
   return GM(t);
 }
 
-static double GM12(double t) {
+static float GM12(float t) {
   return GM(t);
 }
 
-static double mu_01(double t) {
+static float mu_01(float t) {
   return GM01(t);
 }
 
-static double mu_02(double t) {
+static float mu_02(float t) {
   return GM02(t);
 }
 
-static double mu_12(double t) {
+static float mu_12(float t) {
   return GM12(t);
 }
 
-static double bj_00(double t) {
-  return 0.0;
+static float bj_00(float t) {
+  return 0.0f;
 }
 
-static double bj_01(double t) {
-  return 0.0;
+static float bj_01(float t) {
+  return 0.0f;
 }
 
-static double bj_02(double t) {
-  return 0.0;
+static float bj_02(float t) {
+  return 0.0f;
 }
 
-static double bj_11(double t) {
-  return 0.0;
+static float bj_11(float t) {
+  return 0.0f;
 }
 
-static double bj_12(double t) {
-  return 0.0;
+static float bj_12(float t) {
+  return 0.0f;
 }
 
-void bj_ii_DisabilityAnnuity(double t, double* result) {
+void bj_ii_DisabilityAnnuity(float t, float* result) {
   result[0] += bj_00(t); // 0.0
   result[1] += bj_11(t); // 0.0
 }
 
-void dy_DisabilityAnnuity(double t, double* V,double* result)
+void dy_DisabilityAnnuity(float t, float* V,float* result)
 {
-  //printf("GM01: %.16f t: %.16f\n",GM01(t),t);
   result[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (V[1] - V[0] + bj_01(t)) - mu_02(t) * (0 - V[0] + bj_02(t));
-  result[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t)); 
-  //printf("result[1]: %.16f t: %.16f\n",result[1],t);
+  //result[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t)); 
 }

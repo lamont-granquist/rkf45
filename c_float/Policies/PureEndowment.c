@@ -14,47 +14,47 @@
 
 static float *matrix[41];
 
-static float row0[]  = {0.1437946974886250f};
-static float row1[]  = {0.1513594875720590f};
-static float row2[]  = {0.1593334830357050f};
-static float row3[]  = {0.1677404776222450f};
-static float row4[]  = {0.1766058889630630f};
-static float row5[]  = {0.1859569023966960f};
-static float row6[]  = {0.1958226315281160f};
-static float row7[]  = {0.2062342978884670f};
-static float row8[]  = {0.2172254324285080f};
-static float row9[]  = {0.2288321020171980f};
-static float row10[] = {0.2410931646317720f};
-static float row11[] = {0.2540505575320670f};
-static float row12[] = {0.2677496234274150f};
-static float row13[] = {0.2822394804908960f};
-static float row14[] = {0.2975734430792770f};
-static float row15[] = {0.3138095012097790f};
-static float row16[] = {0.3310108682663330f};
-static float row17[] = {0.3492466081065300f};
-static float row18[] = {0.3685923547759590f};
-static float row19[] = {0.3891311404830350f};
-static float row20[] = {0.4109543504366150f};
-static float row21[] = {0.4341628267168120f};
-static float row22[] = {0.4588681476758340f};
-static float row23[] = {0.4851941146396860f};
-static float row24[] = {0.5132784841210240f};
-static float row25[] = {0.5432749916555080f};
-static float row26[] = {0.5753557231029890f};
-static float row27[] = {0.6097139012822690f};
-static float row28[] = {0.6465671707381610f};
-static float row29[] = {0.6861614820516400f};
-static float row30[] = {0.7287757004081980f};
-static float row31[] = {0.7747270924521970f};
-static float row32[] = {0.8243778824987340f};
-static float row33[] = {0.8781431162166330f};
-static float row34[] = {0.9365001299367070f};
-static float row35[] = {0.0000000000000000f};
-static float row36[] = {0.0000000000000000f};
-static float row37[] = {0.0000000000000000f};
-static float row38[] = {0.0000000000000000f};
-static float row39[] = {0.0000000000000000f};
-static float row40[] = {0.0000000000000000f};
+static float row0[]  = {0.1437959f};
+static float row1[]  = {0.1513607f};
+static float row2[]  = {0.1593348f};
+static float row3[]  = {0.1677418f};
+static float row4[]  = {0.1766073f};
+static float row5[]  = {0.1859584f};
+static float row6[]  = {0.1958242f};
+static float row7[]  = {0.2062360f};
+static float row8[]  = {0.2172272f};
+static float row9[]  = {0.2288340f};
+static float row10[] = {0.2410951f};
+static float row11[] = {0.2540526f};
+static float row12[] = {0.2677518f};
+static float row13[] = {0.2822418f};
+static float row14[] = {0.2975759f};
+static float row15[] = {0.3138121f};
+static float row16[] = {0.3310136f};
+static float row17[] = {0.3492495f};
+static float row18[] = {0.3685954f};
+static float row19[] = {0.3891343f};
+static float row20[] = {0.4109577f};
+static float row21[] = {0.4341664f};
+static float row22[] = {0.4588719f};
+static float row23[] = {0.4851981f};
+static float row24[] = {0.5132827f};
+static float row25[] = {0.5432795f};
+static float row26[] = {0.5753605f};
+static float row27[] = {0.6097189f};
+static float row28[] = {0.6465725f};
+static float row29[] = {0.6861671f};
+static float row30[] = {0.7287817f};
+static float row31[] = {0.7747335f};
+static float row32[] = {0.8243847f};
+static float row33[] = {0.8781503f};
+static float row34[] = {0.9365078f};
+static float row35[] = {0.0000000f};
+static float row36[] = {0.0000000f};
+static float row37[] = {0.0000000f};
+static float row38[] = {0.0000000f};
+static float row39[] = {0.0000000f};
+static float row40[] = {0.0000000f};
 
 /* tv */
 float** tv_PureEndowment() {
@@ -105,7 +105,7 @@ float** tv_PureEndowment() {
 }
 
 static int n = 35;
-static float bdeath = 1;
+static float bdeath = 1.0f;
 
 static float b_0(float t) {
     return 0.0f;

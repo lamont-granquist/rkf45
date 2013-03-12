@@ -1085,9 +1085,8 @@ class CalculationSpecifications {
 
   static void Print(float[][] result) {
     for (int y=0; y<result.Length; y++) {
-      Console.Write("{0,3}:", y);
       for (int i=0; i<result[y].Length; i++)
-	Console.Write("  {0,20:F16}", result[y][i]);
+	Console.Write("{0,20:F16}", result[y][i]);
       Console.WriteLine();
     }
   }

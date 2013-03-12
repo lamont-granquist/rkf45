@@ -10,13 +10,13 @@
 #include "RK_Library.h"
 #include <math.h>
 
-float age = 30;
+float age = 30.0f;
 float interestrate = 0.05f;
 float bpension = 1;
 float pensiontime = 35;
 
 float GM(float t) {
-    return 0.0005f + pow(10.0f, 5.728f - 10.0f + 0.038f*(age + t));
+    return 0.0005f + powf(10.0f, 5.728f - 10.0f + 0.038f*(age + t));
 }
 
 // Interest
