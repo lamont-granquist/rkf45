@@ -132,6 +132,8 @@ class Rkf45 {
     Output, float S[NEQN], the estimate of the solution at T+H.
   */
   {
+    Console.WriteLine("yp"+yp[0]+"y: "+y[0]+"t: "+t);
+
     float ch;
     ch = h / 4.0f;
     for (int i = 0; i < neqn; i++ )
@@ -760,6 +762,8 @@ class Rkf45 {
 	y[i] = f1[i];
       }
       f ( t, y, yp );
+
+
       nfe = nfe + 1;
   /*
     Choose the next stepsize.  The increase is limited to a factor of 5.
@@ -965,12 +969,12 @@ class CalculationSpecifications {
 
   public static void ComputeAll() {
     // Compute and print reserves
-    Print(PureEndowment.Compute());
+    //Print(PureEndowment.Compute());
     Print(DeferredTemporaryLifeAnnuity.Compute());
-    Print(TemporaryLifeAnnuityPremium.Compute());
+    /*Print(TemporaryLifeAnnuityPremium.Compute());
     Print(TermInsurance.Compute());
     Print(DisabilityAnnuity.Compute());
-    Print(DisabilityTermInsurance.Compute());
+    Print(DisabilityTermInsurance.Compute());*/
   }
 
   // Gompertz-Makeham mortality intensities for Danish women

@@ -133,7 +133,6 @@ static float b_0(float t) {
 }
 
 static float b_1(float t) {
-  //printf("b_1: %.16f t: %.16f\n",bdisabled * indicator(t > 0) * indicator(t < n),t);
   return bdisabled * indicator(t > 0) * indicator(t < n);
 }
 
@@ -189,5 +188,5 @@ void bj_ii_DisabilityAnnuity(float t, float* result) {
 void dy_DisabilityAnnuity(float t, float* V,float* result)
 {
   result[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (V[1] - V[0] + bj_01(t)) - mu_02(t) * (0 - V[0] + bj_02(t));
-  //result[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t)); 
+  result[1] = r(t) * V[1] - b_1(t) - mu_12(t) * (0 - V[1] + bj_12(t)); 
 }

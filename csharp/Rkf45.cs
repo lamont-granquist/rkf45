@@ -349,7 +349,9 @@ class CalculationSpecifications {
 
   public static void Main(String[] args) {
     //TimeAll(82288);
-    TestAll();
+    //TestAll();
+    DeferredTemporaryLifeAnnuity.Print_dy();
+    PureEndowment.Print_dy();
   }
 
   public static readonly double err = 1e-11;

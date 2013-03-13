@@ -124,12 +124,15 @@ float** tv_DeferredTemporaryLifeAnnuity() {
   return matrix;
 }
 
-static int n = 10;
-static int m = 35;
+//static int n = 10;
+//static int m = 35;
+static float n = 10.0;
+static float m = 35.0;
 static float bdeath = 1.0f;
 
 static float b_0(float t) {
     return bpension * indicator(t > m) * indicator(t < m + n);
+    //return 0.0f;
 }
 
 static float mu_01(float t) {
@@ -137,6 +140,7 @@ static float mu_01(float t) {
 }
 
 static float bj_00(float t) {
+    //return t == pensiontime ? bpension: 0.0f;
     return 0.0f;
 }
 

@@ -10,7 +10,7 @@
 
 #ifndef RK_C_RK_Library_h
 #define RK_C_RK_Library_h
-
+#include "Boolean.h"
 
 extern float age, interestrate, bpension, pensiontime;
 extern int states;
@@ -18,7 +18,7 @@ extern int states;
 
 float GM(float t);
 float r(float t);
-float indicator(int b);
+float indicator(bool b);
 
 
 void sax(float a, float* x, float* result);

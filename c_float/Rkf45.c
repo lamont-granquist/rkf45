@@ -101,6 +101,7 @@ static void calculate_solutions() {
 
   float lcd_stepsize = stepsize / 4.0f; //lowest common denominator of stepsize
 
+  printf("yp: %.7f, y: %.7f t: %.7f\n",y_diff[0],y[0],t);
   //f1
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + lcd_stepsize * y_diff[i];
@@ -223,6 +224,8 @@ static void local_estimate() {
     //Update y_diff
     dy ( t, y, y_diff );
 
+
+
     //Apply scale to stepsize
     float scale = scale_from_error(error,stepsize_descresed);
     stepsize = sign ( stepsize ) * max ( scale * fabsf( stepsize ), hmin );
@@ -264,7 +267,7 @@ static float calculate_initial_stepsize()
     if ( 0.0f < tol )
     {
       float ypk = fabsf( y_diff[k] );
-      if ( tol < ypk * powf( stepsize, 5 ) )
+      if ( tol < ypk * powf( stepsize, 5.0f ) )
       {
         stepsize = powf( ( tol / ypk ), 0.2f );
         printf("this should not happen.\n");

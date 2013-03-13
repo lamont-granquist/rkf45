@@ -228,14 +228,15 @@ void all_timing(int customers) {
 /********************* Main ********************/
 
 static char* all_tests() {
-  mu_run_test(test_PureEndowment_dy);
+  /*mu_run_test(test_PureEndowment_dy);
   mu_run_test(test_DisabilityAnnuity_dy);
+  mu_run_test(test_DeferredTemporaryLifeAnnuity_dy);
   mu_run_test(test_PureEndowment);
   mu_run_test(test_DeferredTemporaryLifeAnnuity);
   mu_run_test(test_TemporaryLifeAnnuityPremium);
   mu_run_test(test_TermInsurance);
   mu_run_test(test_DisabilityAnnuity);
-  mu_run_test(test_DisabilityTermInsurance);
+  mu_run_test(test_DisabilityTermInsurance);*/
   return 0;
 }
 

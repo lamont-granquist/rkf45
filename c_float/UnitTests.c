@@ -151,7 +151,9 @@ static char* test_DisabilityTermInsurance() {
 
 static char* test_PureEndowment_dy() {
   float V[1];
+  V[0] = 0.0f;
   float result[1];
+  result[0] = 0.0f;
   policy = 1;
   neqn = 1;
 
@@ -173,17 +175,45 @@ static char* test_PureEndowment_dy() {
   return 0;
 }
 
+static char* test_DeferredTemporaryLifeAnnuity_dy() {
+  float V[1];
+  V[0] = 0.0f;
+  float result[1];
+  result[0] = 0.0f;
+  policy = 2;
+  neqn = 1;
+
+  V[0] = 0.0f;
+  dy(0,V,result); 
+  mu_assert("DeferredTemporaryLifeAnnuity failed",floats_ewt(result[0],0.0f));
+
+  V[0] = 1.0f;
+  dy(0,V,result); 
+  mu_assert("DeferredTemporaryLifeAnnuity failed",floats_ewt(result[0],0.0512379042301291f));
+
+  V[0] = 1.0f;
+  dy(1,V,result); 
+  mu_assert("DeferredTemporaryLifeAnnuity failed",floats_ewt(result[0],0.0513053784411991f));
+  
+  V[0] = -2.0f;
+  dy(1,V,result); 
+  mu_assert("DeferredTemporaryLifeAnnuity failed",floats_ewt(result[0],-0.102610756882398f));
+  return 0;
+}
+
 static char* test_DisabilityAnnuity_dy() {
   float V[2];
+  V[0] = 0.0f;
+  V[1] = 0.0f;
   float result[2];
-  result[0] = 99.0f;
-  result[1] = 99.0f;
+  result[0] = 0.0f;
+  result[1] = 0.0f;
   policy = 5;
   neqn = 2;
   V[1] = 0;
 
   dy(0,V,result); 
-  mu_assert("DisabilityAnnuity_dy1 failed",floats_ewt_print(result[0],0.0f));
+  mu_assert("DisabilityAnnuity_dy1 failed",floats_ewt(result[0],0.0f));
 
   V[0] = 1.0f;
   dy(0,V,result); 
@@ -231,14 +261,15 @@ void all_timing(int customers) {
 /********************* Main ********************/
 
 static char* all_tests() {
-  mu_run_test(test_PureEndowment_dy);
-  mu_run_test(test_DisabilityAnnuity_dy);
-  mu_run_test(test_PureEndowment);
+  //mu_run_test(test_PureEndowment_dy);
+  //mu_run_test(test_DisabilityAnnuity_dy);
+  //mu_run_test(test_DeferredTemporaryLifeAnnuity_dy);
+  //mu_run_test(test_PureEndowment);
   mu_run_test(test_DeferredTemporaryLifeAnnuity);
-  mu_run_test(test_TemporaryLifeAnnuityPremium);
+  /*mu_run_test(test_TemporaryLifeAnnuityPremium);
   mu_run_test(test_TermInsurance);
   mu_run_test(test_DisabilityAnnuity);
-  mu_run_test(test_DisabilityTermInsurance);
+  mu_run_test(test_DisabilityTermInsurance);*/
   return 0;
 }
 

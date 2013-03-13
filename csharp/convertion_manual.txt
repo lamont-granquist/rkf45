@@ -1,0 +1,18 @@
+53
+768
+924
+933
+947
+978
+990
+993
+
+:%s/\.\d\+/\="".submatch(0)."f"/gc
+
+double -> float
+Math.Pow -> (float) Math.Pow
+Math.Log -> (float) Math.Log
+
+
+pow -> powf
+fabs -> fabsf
