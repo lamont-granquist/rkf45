@@ -38,7 +38,7 @@ class Estimator {
 
   /***** TESTED *****/
   public int TESTED_NUMBER = 0;
-  public int TESTED_MAX    = 15;
+  public int TESTED_MAX    = 5;
 
   public void TESTED() {
     TESTED_NUMBER++;
@@ -88,24 +88,15 @@ class Estimator {
       f_swap[i] = y[i] + lcd_stepsize * y_diff[i];
     dy ( t + lcd_stepsize, f_swap, f1 );
 
-    /*
-    Console.WriteLine("f_swap         " + f_swap[1]); 
-    Console.WriteLine("t         " + (t + 3.0f * stepsize / 8.0f));
-
-    float[] result = new float[2];
-    float[] W      = new float[2];
-    dy(t + lcd_stepsize,W,result);
-    Console.WriteLine("TEMP:" +  result[1]);
-    */
-
     //f2
     lcd_stepsize = 3.0f * stepsize / 32.0f;
     for (int i = 0; i < neqn; i++ )
       f_swap[i] = y[i] + lcd_stepsize * ( y_diff[i] + 3.0f * f1[i] );
     dy ( t + 3.0f * stepsize / 8.0f, f_swap, f2 );
 
-
-
+    /*Console.WriteLine("f_swap!:             " + f_swap[0]);
+    Console.WriteLine("!:             " + (t + 3.0f * stepsize / 8.0f));*/
+    
     //f3
     lcd_stepsize = stepsize / 2197.0f;
     for (int i = 0; i < neqn; i++ )
@@ -136,18 +127,19 @@ class Estimator {
     for (int i = 0; i < neqn; i++ )
       y_plus_one_alternative[i] = ( -2090.0f * y_diff[i] + ( 21970.0f * f3[i] - 15048.0f * f4[i] ) ) + ( 22528.0f * f2[i] - 27360.0f * f5[i] );
 
-      /*Console.WriteLine("y              " + y[1]);
-      Console.WriteLine("y_diff         " + y_diff[1]);
+
+      /*Console.WriteLine("y              " + y[0]);
+      Console.WriteLine("y_diff         " + y_diff[0]);
       Console.WriteLine("t+lcd_stepsize " + (t+lcd_stepsize));
-      Console.WriteLine("f1[0]:         " + f1[1]);
-      Console.WriteLine("f2[0]:         " + f2[1]);
-      Console.WriteLine("f3[0]:         " + f3[1]);
-      Console.WriteLine("f4[0]:         " + f4[1]);
-      Console.WriteLine("f5[0]:         " + f5[1]);
-      Console.WriteLine("s [0]:         " + y_plus_one[1]);
-      Console.WriteLine("sa[0]:         " + y_plus_one_alternative[1]);
-      Console.WriteLine("");
-      TESTED();*/
+      Console.WriteLine("f1[0]:         " + f1[0]);
+      Console.WriteLine("f2[0]:         " + f2[0]);
+      Console.WriteLine("f3[0]:         " + f3[0]);
+      Console.WriteLine("f4[0]:         " + f4[0]);
+      Console.WriteLine("f5[0]:         " + f5[0]);
+      Console.WriteLine("s [0]:         " + y_plus_one[0]);
+      Console.WriteLine("sa[0]:         " + y_plus_one_alternative[0]);
+      Console.WriteLine("");*/
+      //TESTED();
   }
 
   /* Calculate the error of the solution */
@@ -200,7 +192,7 @@ class Estimator {
         local_start_year_reached = false;
 
         //Scale down.
-        stepsize *= Math.Max(0.1f,0.9f / (float) Math.Pow( error, 0.2f ));  
+        stepsize *= Math.Max(0.1f,0.9f / (float) Math.Round(Math.Pow( error, 0.2f ),7));
         stepsize_decreased = true;
 
         //Try again.
@@ -257,9 +249,9 @@ class Estimator {
       if ( 0.0f < tol )
       {
         float y_diff_k = Math.Abs( y_diff[k] );
-        if ( tol < y_diff_k * (float) Math.Pow( stepsize, 5 ) ) //We never really get in here...
+        if ( tol < y_diff_k * (float) Math.Round(Math.Pow( stepsize, 5 ),7) ) //We never really get in here...
         {
-          stepsize = (float) Math.Pow( ( tol / y_diff_k ), 0.2f );
+          stepsize = (float) Math.Round(Math.Pow( ( tol / y_diff_k ), 0.2f ),7);
           throw new Exception("initial stepsize calculation gone wrong");
         }
       }
@@ -270,7 +262,7 @@ class Estimator {
 
   /* Scale from error calculations */
   public float scale_from_error(float error,bool stepsize_decreased) {
-    float scale = Math.Min(5.0f,0.9f / (float) Math.Pow( error, 0.2f ));
+    float scale = Math.Min(5.0f,0.9f / (float) Math.Round(Math.Pow( error, 0.2f ),7));
 
     if (stepsize_decreased)
       scale = Math.Min ( scale, 1.0f );
@@ -393,12 +385,12 @@ class CalculationSpecifications {
 
 
   public static void PrintAll() {
-    Print(PureEndowment.Compute());
+    //Print(PureEndowment.Compute());
     Print(DeferredTemporaryLifeAnnuity.Compute());
-    Print(TemporaryLifeAnnuityPremium.Compute());
+    /*Print(TemporaryLifeAnnuityPremium.Compute());
     Print(TermInsurance.Compute());
     Print(DisabilityAnnuity.Compute());
-    Print(DisabilityTermInsurance.Compute());
+    Print(DisabilityTermInsurance.Compute());*/
   }
 
   public static void TestAll() {
@@ -413,7 +405,12 @@ class CalculationSpecifications {
 
   // Gompertz-Makeham mortality intensities for Danish women
   static float GM(float t) {
-    return 0.0005f + (float) Math.Pow(10, 5.728f - 10 + 0.038f*(age + t));
+    //float r = 0.0005f + (float) Math.Round(Math.Pow(10.0f, 5.728f - 10.0f + 0.038f*(age + t));
+    //Console.WriteLine("t: " + t + "GM(t): " + Math.Round(r,7)); 
+    //return 0.5f;
+    
+    return 0.0005f + (float) Math.Round(Math.Pow(10.0f, 5.728f - 10.0f + 0.038f*(age + t)),7);
+
   }
 
   static float r(float t) { 
@@ -452,7 +449,7 @@ class CalculationSpecifications {
     for (int y=0; y<result.Length; y++) {
       Console.Write("{0,3}:", y);
       for (int i=0; i<result[y].Length; i++)
-        Console.Write("  {0,20:F16}", result[y][i]);
+        Console.Write("  {0,20:F7}", result[y][i]);
       Console.WriteLine();
     }
   }
@@ -981,7 +978,7 @@ class CalculationSpecifications {
     }
 
     static float GM01(float t) {
-      return 0.0006f + (float) Math.Pow(10, 4.71609f - 10 + 0.06f*(age + t));
+      return 0.0006f + (float) Math.Round(Math.Pow(10, 4.71609f - 10 + 0.06f*(age + t)),7);
     }
 
     static float GM02(float t) {
@@ -1152,7 +1149,7 @@ class CalculationSpecifications {
     }
 
     static float GM01(float t) {
-      return 0.0006f + (float) Math.Pow(10, 4.71609f - 10 + 0.06f*(age + t));
+      return 0.0006f + (float) Math.Round(Math.Pow(10, 4.71609f - 10 + 0.06f*(age + t)),7);
     }
 
     static float GM02(float t) {

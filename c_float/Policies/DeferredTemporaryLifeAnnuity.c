@@ -155,4 +155,12 @@ void bj_ii_DeferredTemporaryLifeAnnuity(float t, float* result) {
 void dy_DeferredTemporaryLifeAnnuity(float t, float* V,float* result)
 {
     result[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
+
+    /*
+    printf("t:       %.7f\n" ,t);
+    printf("dy:       %.7f\n",result[0]);
+    printf("r(t):     %.7f\n",r(t));
+    printf("V[0]:     %.7f\n",V[0]);
+    printf("my_01(t): %.7f\n",mu_01(t));
+    */
 }

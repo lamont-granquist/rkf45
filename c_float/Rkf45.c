@@ -101,29 +101,20 @@ static void calculate_solutions() {
 
   float lcd_stepsize = stepsize / 4.0f; //lowest common denominator of stepsize
 
-  printf("yp: %.7f, y: %.7f t: %.7f\n",y_diff[0],y[0],t);
   //f1
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + lcd_stepsize * y_diff[i];
   dy ( t + lcd_stepsize, f_swap, f1 );
-
-  //if(f1[0] != 0) {
-  
-  /*
-    printf("y     :           %.16f\n",y[0]);
-    printf("y_diff:           %.16f\n",y_diff[0]);
-    printf("f_swap:           %.16f\n",f_swap[0]);
-    printf("t + lcd_stepsize: %.16f\n",t + lcd_stepsize);
-    printf("f1[0]:            %.16f\n",f1[0]);
-  */
- 
- // }
 
   //f2
   lcd_stepsize = 3.0f * stepsize / 32.0f;
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + lcd_stepsize * ( y_diff[i] + 3.0f * f1[i] );
   dy ( t + 3.0f * stepsize / 8.0f, f_swap, f2 );
+
+
+  /*printf("f_swap!   :           %.7f\n",f_swap[0]);
+  printf("!     :               %.7f\n",t + 3.0f * stepsize / 8.0f);*/
 
   //f3
   lcd_stepsize = stepsize / 2197.0f;
@@ -155,6 +146,18 @@ static void calculate_solutions() {
   for (int i = 0; i < neqn; i++ )
     y_plus_one_alternative[i] = ( -2090.0f * y_diff[i] + ( 21970.0f * f3[i] - 15048.0f * f4[i] ) ) + ( 22528.0f * f2[i] - 27360.0f * f5[i] );
 
+  /*if(f1[0] != 0) {
+    printf("y     :           %.7f\n",y[0]);
+    printf("y_diff:           %.7f\n",y_diff[0]);
+    printf("f_swap:           %.7f\n",f_swap[0]);
+    printf("t + lcd_stepsize: %.7f\n",t + lcd_stepsize);
+    printf("t:                %.7f\n",t);
+    printf("f1[0]:            %.7f\n",f1[0]);
+    printf("f2[0]:            %.7f\n",f2[0]);
+    printf("f3[0]:            %.7f\n",f3[0]);
+    printf("f4[0]:            %.7f\n",f4[0]);
+    exit(0);
+  }*/
 }
 
 /* Calculate the error of the solution */

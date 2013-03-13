@@ -14,7 +14,7 @@ int tests_run = 0;
 /*************** Help functions *************/
 
 bool floats_ewt_print(float a,float b) { //Equal within tolerance
-  printf("%.16f = %.16f\n",a,b);
+  printf("%.8f = %.8f\n",a,b);
   return fabs(a - b) < err;
 }
 
@@ -187,9 +187,9 @@ static char* test_DeferredTemporaryLifeAnnuity_dy() {
   dy(0,V,result); 
   mu_assert("DeferredTemporaryLifeAnnuity failed",floats_ewt(result[0],0.0f));
 
-  V[0] = 1.0f;
-  dy(0,V,result); 
-  mu_assert("DeferredTemporaryLifeAnnuity failed",floats_ewt(result[0],0.0512379042301291f));
+  V[0] = 0.28125f;
+  dy(44.6250f,V,result); 
+  mu_assert("DeferredTemporaryLifeAnnuity failed",floats_ewt_print(result[0],-0.9754968f));
 
   V[0] = 1.0f;
   dy(1,V,result); 
