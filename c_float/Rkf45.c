@@ -33,41 +33,17 @@ static float time_one();
 static bool local_start_to_be_reached(float t,int local_start_year,float* stepsize);
 static void allocate_equation_space();
 static void xpy();
-static void calculate_solutions(int neqn,float t,float stepsize,float *y_diff);
-static void local_estimate(int neqn,int local_end_year,int local_start_year,float* stepsize,float* y_diff);
-static float calculate_initial_stepsize(int neqn,int start_year,float t,float* y_diff);
+static void calculate_solutions(int neqn,float t,float stepsize,float* y, float *y_diff,float* y_plus_one, float* y_plus_one_alternative);
+static void local_estimate(int neqn,int local_end_year,int local_start_year,float* stepsize,float* y,float* y_diff);
+static float calculate_initial_stepsize(int neqn,int start_year,float t,float* y, float* y_diff);
 static float scale_from_error(float error,bool stepsize_decreased);
 static float FindFloatEpsilon();
-
-//Declare Estimator variables
-
-//Private variables
-static float* y;
-static float* y_plus_one;
-static float* y_plus_one_alternative;
-
-/******************* Constructor *********************/
-
-/* Construct */
-void construct(int n) {
-  allocate_equation_space();
-}
-
-/* Allocate equation space */
-static void allocate_equation_space() {
-
-  //Global for the class
-  y_plus_one             = malloc(sizeof(float)*MAX_NEQN);
-  y_plus_one_alternative = malloc(sizeof(float)*MAX_NEQN);
-  y                      = malloc(sizeof(float)*MAX_NEQN);
-
-}
 
 /********************** Solve *********************/
 
 /* Calculate the actual and the alternative solutions */
 //y_plus_one and y_plus_one_alternative will be set
-static void calculate_solutions(int neqn,float t,float stepsize,float* y_diff) {
+static void calculate_solutions(int neqn,float t,float stepsize,float* y,float* y_diff,float* y_plus_one,float* y_plus_one_alternative) {
 
   float f1[MAX_NEQN];
   float f2[MAX_NEQN];
@@ -139,7 +115,7 @@ static void calculate_solutions(int neqn,float t,float stepsize,float* y_diff) {
 
 /* Calculate the error of the solution */
 //Pure
-static float calculate_solution_error(int neqn,float stepsize) {
+static float calculate_solution_error(int neqn,float stepsize,float* y,float* y_plus_one, float* y_plus_one_alternative) {
 
   //Used in calculations
   float scale = 2.0f / relerr;
@@ -162,7 +138,7 @@ static float calculate_solution_error(int neqn,float stepsize) {
 
 /* Move from current position to local_start_year, and update all values */
 // Updates y, h
-static void local_estimate(int neqn,int local_end_year,int local_start_year,float *stepsize,float* y_diff) {
+static void local_estimate(int neqn,int local_end_year,int local_start_year,float *stepsize,float* y,float* y_diff) {
   float t = (float)local_end_year;
   
   //Step by step integration.
@@ -175,8 +151,11 @@ static void local_estimate(int neqn,int local_end_year,int local_start_year,floa
 
     local_start_reached = local_start_to_be_reached(t,local_start_year,stepsize);
 
-    calculate_solutions(neqn,t,*stepsize,y_diff);
-    float error = calculate_solution_error(neqn,*stepsize);
+    float y_plus_one[MAX_NEQN];
+    float y_plus_one_alternative[MAX_NEQN];
+
+    calculate_solutions(neqn,t,*stepsize,y,y_diff,y_plus_one,y_plus_one_alternative);
+    float error = calculate_solution_error(neqn,*stepsize,y,y_plus_one,y_plus_one_alternative);
 
     //Integreate 1 step
     while(error > 1.0f)
@@ -189,8 +168,8 @@ static void local_estimate(int neqn,int local_end_year,int local_start_year,floa
       *stepsize = s * *stepsize;  
 
       //Try again.
-      calculate_solutions(neqn,t,*stepsize,y_diff);
-      error = calculate_solution_error(neqn,*stepsize);
+      calculate_solutions(neqn,t,*stepsize,y,y_diff,y_plus_one,y_plus_one_alternative);
+      error = calculate_solution_error(neqn,*stepsize,y,y_plus_one,y_plus_one_alternative);
     }
 
     //Advance in time
@@ -232,7 +211,7 @@ static bool local_start_to_be_reached(float t,int local_start_year,float* stepsi
 }
 
 /* Calculate stepsize's startvalue */
-static float calculate_initial_stepsize(int neqn,int start_year,float t,float *y_diff)
+static float calculate_initial_stepsize(int neqn,int start_year,float t,float* y,float *y_diff)
 {
   //Calculate the start value of stepsize
   float s = fabsf( start_year - t );
@@ -268,12 +247,12 @@ static float scale_from_error(float error,bool stepsize_decreased) {
 /*********************** Estimate **************************/
 
 /* Estimate range */
-float** estimate(int neqn, int end_year, int start_year,float* yy) { //TODO: yy
+float** estimate(int neqn, int end_year, int start_year,float* y) { //TODO: yy
 
   float t = (float) end_year;                   // t
   float y_diff[MAX_NEQN];
   dy( t, y, y_diff);                       // y_diff
-  float stepsize = calculate_initial_stepsize(neqn,start_year,t,y_diff); // stepsize
+  float stepsize = calculate_initial_stepsize(neqn,start_year,t,y,y_diff); // stepsize
 
   //Allocate result matrix, calculate (length of result)
   float** result = allocate_float_matrix(end_year-start_year+1,neqn);
@@ -285,7 +264,7 @@ float** estimate(int neqn, int end_year, int start_year,float* yy) { //TODO: yy
     bj_ii(year,y);
 
     // Integrate over [year,year-1]
-    local_estimate(neqn,year,year-1,&stepsize,y_diff);
+    local_estimate(neqn,year,year-1,&stepsize,y,y_diff);
 
     //Copy y to results
     for(int i=0;i<neqn;i++)

@@ -6,6 +6,5 @@ extern const int MAX_NEQN;
 // bj_ii
 
 float** estimate();
-void construct(int n);
 
 #endif

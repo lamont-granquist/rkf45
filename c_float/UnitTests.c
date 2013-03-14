@@ -249,7 +249,6 @@ int start_testing() {
 }
 
 int main(int argc, char **argv) {
-  construct(2);
   int r = 0;
   r = start_testing();
   //all_timing(42000);
