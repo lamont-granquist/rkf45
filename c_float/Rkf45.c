@@ -37,22 +37,19 @@ static void calculate_solutions(int neqn,float t,float stepsize,float *y_diff);
 static void local_estimate(int neqn,int local_end_year,int local_start_year,float* stepsize,float* y_diff);
 static float calculate_initial_stepsize(int neqn,int start_year,float t,float* y_diff);
 static float scale_from_error(float error,bool stepsize_decreased);
-static float FindDoubleEpsilon();
+static float FindFloatEpsilon();
 
 //Declare Estimator variables
 
 //Private variables
-static float* f_swap;
 static float* y;
 static float* y_plus_one;
 static float* y_plus_one_alternative;
-static float DoubleEpsilon;
 
 /******************* Constructor *********************/
 
 /* Construct */
 void construct(int n) {
-  DoubleEpsilon = FindDoubleEpsilon();
   allocate_equation_space();
 }
 
@@ -174,7 +171,7 @@ static void local_estimate(int neqn,int local_end_year,int local_start_year,floa
   {
     //Variables used in calculations
     bool stepsize_descresed = false;
-    float hmin = 26.0f * DoubleEpsilon * fabsf( t );
+    float hmin = 26.0f * FloatEpsilon * fabsf( t );
 
     local_start_reached = local_start_to_be_reached(t,local_start_year,stepsize);
 
@@ -196,7 +193,6 @@ static void local_estimate(int neqn,int local_end_year,int local_start_year,floa
       error = calculate_solution_error(neqn,*stepsize);
     }
 
-
     //Advance in time
     t = t + *stepsize; 
 
@@ -204,11 +200,8 @@ static void local_estimate(int neqn,int local_end_year,int local_start_year,floa
     for (int i = 0; i < neqn; i++ )
       y[i] = y_plus_one[i];
 
-
     //Update y_diff
     dy ( t, y, y_diff );
-
-
 
     //Apply scale to stepsize
     float scale = scale_from_error(error,stepsize_descresed);
@@ -259,7 +252,7 @@ static float calculate_initial_stepsize(int neqn,int start_year,float t,float *y
     }
   }
 
-  return  max( s, 26.0f * DoubleEpsilon * max( fabsf( t ), fabsf( start_year - t ) ) );
+  return  max( s, 26.0f * FloatEpsilon * max( fabsf( t ), fabsf( start_year - t ) ) );
 }
 
 /* Scale from error calculations */
@@ -305,7 +298,7 @@ float** estimate(int neqn, int end_year, int start_year,float* yy) { //TODO: yy
 /*************************** Auxiliaries ****************************/
 
 /* Find float epsilon */
-static float FindDoubleEpsilon() {
+static float FindFloatEpsilon() {
   float r = 1.0f;
   while (1.0f < (1.0f + r))
     r = r / 2.0f;
