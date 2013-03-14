@@ -36,7 +36,7 @@ static void xpy();
 static void calculate_solutions(int neqn,float t,float stepsize,float* y, float *y_diff,float* y_plus_one, float* y_plus_one_alternative);
 static float calculate_solution_error(int neqn,float stepsize,float* y,float* y_plus_one, float* y_plus_one_alternative);
 static void local_estimate(int neqn,int local_end_year,int local_start_year,float* stepsize,float* y,float* y_diff);
-static float calculate_initial_stepsize(int neqn,int start_year,float t,float* y, float* y_diff);
+static float calculate_initial_stepsize(int neqn,int start_year,int end_year,float* y, float* y_diff);
 static float scale_from_error(float error,bool stepsize_decreased);
 static float FindFloatEpsilon();
 
@@ -212,10 +212,10 @@ static bool local_start_to_be_reached(float t,int local_start_year,float* stepsi
 }
 
 /* Calculate stepsize's startvalue */
-static float calculate_initial_stepsize(int neqn,int start_year,float t,float* y,float *y_diff)
+static float calculate_initial_stepsize(int neqn,int start_year,int end_year,float* y,float *y_diff)
 {
   //Calculate the start value of stepsize
-  float s = fabsf( start_year - t );
+  float s = fabsf( start_year - end_year );
 
 
   for (int k = 0; k < neqn; k++ )
@@ -232,7 +232,7 @@ static float calculate_initial_stepsize(int neqn,int start_year,float t,float* y
     }
   }
 
-  return  max( s, 26.0f * FloatEpsilon * max( fabsf( t ), fabsf( start_year - t ) ) );
+  return  max( s, 26.0f * FloatEpsilon * max( fabsf( end_year ), fabsf( start_year - end_year ) ) );
 }
 
 /* Scale from error calculations */
@@ -248,15 +248,11 @@ static float scale_from_error(float error,bool stepsize_decreased) {
 /*********************** Estimate **************************/
 
 /* Estimate range */
-float** estimate(int neqn, int end_year, int start_year,float* y) { //TODO: yy
+void estimate(int neqn, int end_year, int start_year,float* y,float* result0) { //TODO: yy
 
-  float t = (float) end_year;                   // t
   float y_diff[MAX_NEQN];
-  dy( t, y, y_diff);                       // y_diff
-  float stepsize = calculate_initial_stepsize(neqn,start_year,t,y,y_diff); // stepsize
-
-  //Allocate result matrix, calculate (length of result)
-  float** result = allocate_float_matrix(end_year-start_year+1,neqn);
+  dy((float) end_year, y, y_diff);                       // y_diff
+  float stepsize = calculate_initial_stepsize(neqn,start_year,end_year,y,y_diff); // stepsize
 
   //Solve for one year at a time
   for (int year=end_year; year>start_year; year--) {
@@ -268,11 +264,8 @@ float** estimate(int neqn, int end_year, int start_year,float* y) { //TODO: yy
     local_estimate(neqn,year,year-1,&stepsize,y,y_diff);
 
     //Copy y to results
-    for(int i=0;i<neqn;i++)
-      result[year-start_year-1][i] = y[i];
+    result0[year-start_year-1] = y[0];
   }
-
-  return result;
 }
 
 /*************************** Auxiliaries ****************************/
