@@ -44,7 +44,6 @@ static float FindDoubleEpsilon();
 //Public variables
 // dy       //policy
 // bj_ii
-float* end_year_y; 
 
 //Private variables
 static float stepsize;
@@ -78,7 +77,6 @@ static void allocate_equation_space() {
   //Global for the class
   y_plus_one             = malloc(sizeof(float)*MAX_NEQN);
   y_plus_one_alternative = malloc(sizeof(float)*MAX_NEQN);
-  end_year_y             = malloc(sizeof(float)*MAX_NEQN);
   y                      = malloc(sizeof(float)*MAX_NEQN);
   y_diff                 = malloc(sizeof(float)*MAX_NEQN);
 
@@ -293,10 +291,8 @@ static float scale_from_error(float error,bool stepsize_decreased) {
 /*********************** Estimate **************************/
 
 /* Estimate range */
-float** estimate(int neqn, int end_year, int start_year) {
+float** estimate(int neqn, int end_year, int start_year,float* yy) {
 
-  for(int i = 0;i<neqn;i++)                // y
-    y[i] = end_year_y[i];
   float t = (float) end_year;                   // t
   dy( t, y, y_diff);                       // y_diff
   stepsize = calculate_initial_stepsize(neqn,start_year,t); // stepsize
