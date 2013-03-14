@@ -2,6 +2,11 @@
  * C implementation of the Rkf45 algoritm.
  */
 
+const int MAX_NEQN = 2;
+const float relerr = 1e-7;
+const float abserr = 1e-7;
+const float FloatEpsilon = 0.00000011920928955078125000f; //TODO: Calculate this constant
+
 /********************* INIT *******************/
 
 //Library inclusion
@@ -42,8 +47,6 @@ int start_year;
 int end_year;
 // dy       //policy
 // bj_ii
-float relerr;
-float abserr;
 float* end_year_y; 
 
 //Private variables
