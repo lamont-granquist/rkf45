@@ -34,6 +34,7 @@ static bool local_start_to_be_reached(float t,int local_start_year,float* stepsi
 static void allocate_equation_space();
 static void xpy();
 static void calculate_solutions(int neqn,float t,float stepsize,float* y, float *y_diff,float* y_plus_one, float* y_plus_one_alternative);
+static float calculate_solution_error(int neqn,float stepsize,float* y,float* y_plus_one, float* y_plus_one_alternative);
 static void local_estimate(int neqn,int local_end_year,int local_start_year,float* stepsize,float* y,float* y_diff);
 static float calculate_initial_stepsize(int neqn,int start_year,float t,float* y, float* y_diff);
 static float scale_from_error(float error,bool stepsize_decreased);

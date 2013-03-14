@@ -78,7 +78,7 @@ static char* test_PureEndowment() {
   test_case_PureEndowment();
   float y[MAX_NEQN];
   y[0] = 0.0f;
-  mu_assert("PureEndowment failed",matrix_ewt_print(test_values(),estimate(1,40,0,y),41,1));
+  mu_assert("PureEndowment failed",matrix_ewt(test_values(),estimate(1,40,0,y),41,1));
   return 0;
 }
 
