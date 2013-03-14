@@ -71,13 +71,6 @@ static void allocate_equation_space() {
   y                      = malloc(sizeof(float)*MAX_NEQN);
   y_diff                 = malloc(sizeof(float)*MAX_NEQN);
 
-  //Temporary for the solve method
-  f1                     = malloc(sizeof(float)*MAX_NEQN);
-  f2                     = malloc(sizeof(float)*MAX_NEQN);
-  f3                     = malloc(sizeof(float)*MAX_NEQN);
-  f4                     = malloc(sizeof(float)*MAX_NEQN);
-  f5                     = malloc(sizeof(float)*MAX_NEQN);
-  f_swap                 = malloc(sizeof(float)*MAX_NEQN);
 }
 
 /********************** Solve *********************/
@@ -85,6 +78,13 @@ static void allocate_equation_space() {
 /* Calculate the actual and the alternative solutions */
 //y_plus_one and y_plus_one_alternative will be set
 static void calculate_solutions(int neqn,float t,float stepsize) {
+
+  float f1[MAX_NEQN];
+  float f2[MAX_NEQN];
+  float f3[MAX_NEQN];
+  float f4[MAX_NEQN];
+  float f5[MAX_NEQN];
+  float f_swap[MAX_NEQN];
 
   float lcd_stepsize = stepsize / 4.0f; //lowest common denominator of stepsize
 
@@ -288,7 +288,7 @@ float** estimate(int neqn, int end_year, int start_year,float* yy) { //TODO: yy
   dy( t, y, y_diff);                       // y_diff
   float stepsize = calculate_initial_stepsize(neqn,start_year,t); // stepsize
 
-  //Allocate result matrix, calculate m (length of result)
+  //Allocate result matrix, calculate (length of result)
   float** result = allocate_float_matrix(end_year-start_year+1,neqn);
 
   //Solve for one year at a time
