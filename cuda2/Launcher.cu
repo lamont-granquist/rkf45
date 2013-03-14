@@ -31,6 +31,7 @@ int main(int argc, char const *argv[]) {
     customers[i].neqn = 1;
     customers[i].policy = 1;
     customers[i].end_year = 40;
+    customers[i].start_year = 0;
   }
 
   // Allocate memory on the device

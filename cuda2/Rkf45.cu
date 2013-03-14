@@ -297,24 +297,23 @@ __global__ void test_kernel(CUSTOMERS *customers,float *result0) {
   for(int i = 0;i<MAX_NEQN;i++)
     y[i] = 0.0f;
 
-  /*estimate(
-           customers[id].neqn,
-           customers[id].policy,
-           customers[id].end_year,
-           y
-          );*/
 
-  result0[0] = 0.6f;
-  result0[1] = 0.7f;
-  result0[2] = 0.8f;
 };
 
 void cpu_kernel(CUSTOMERS *customers,float *result0) {
+  int id = 0;
 
-  result0[0] = 0.6f;
-  result0[1] = 0.7f;
-  result0[2] = 0.8f;
+  float y[MAX_NEQN];
+  for(int i = 0;i<MAX_NEQN;i++)
+    y[i] = 0.0f;
 
+  estimate(
+           customers[id].neqn,
+           customers[id].end_year,
+           customers[id].start_year,
+           y,
+           result0
+          );
 }
 
 /**************** RK_LIBRARY *****************/
