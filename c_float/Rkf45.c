@@ -42,14 +42,8 @@ static float FindDoubleEpsilon();
 //Declare Estimator variables
 
 //Private variables
-static float* f1;
-static float* f2;
-static float* f3;
-static float* f4;
-static float* f5;
 static float* f_swap;
 static float* y;
-static float* y_diff;
 static float* y_plus_one;
 static float* y_plus_one_alternative;
 static float DoubleEpsilon;
@@ -69,7 +63,6 @@ static void allocate_equation_space() {
   y_plus_one             = malloc(sizeof(float)*MAX_NEQN);
   y_plus_one_alternative = malloc(sizeof(float)*MAX_NEQN);
   y                      = malloc(sizeof(float)*MAX_NEQN);
-  y_diff                 = malloc(sizeof(float)*MAX_NEQN);
 
 }
 
@@ -77,7 +70,7 @@ static void allocate_equation_space() {
 
 /* Calculate the actual and the alternative solutions */
 //y_plus_one and y_plus_one_alternative will be set
-static void calculate_solutions(int neqn,float t,float stepsize) {
+static void calculate_solutions(int neqn,float t,float stepsize,float* y_diff) {
 
   float f1[MAX_NEQN];
   float f2[MAX_NEQN];
@@ -246,7 +239,7 @@ static bool local_start_to_be_reached(float t,int local_start_year,float* stepsi
 }
 
 /* Calculate stepsize's startvalue */
-static float calculate_initial_stepsize(int neqn,int start_year,float t)
+static float calculate_initial_stepsize(int neqn,int start_year,float t,float *y_diff)
 {
   //Calculate the start value of stepsize
   float s = fabsf( start_year - t );
@@ -285,6 +278,7 @@ static float scale_from_error(float error,bool stepsize_decreased) {
 float** estimate(int neqn, int end_year, int start_year,float* yy) { //TODO: yy
 
   float t = (float) end_year;                   // t
+  float* y_diff[MAX_NEQN];
   dy( t, y, y_diff);                       // y_diff
   float stepsize = calculate_initial_stepsize(neqn,start_year,t); // stepsize
 
@@ -298,7 +292,7 @@ float** estimate(int neqn, int end_year, int start_year,float* yy) { //TODO: yy
     bj_ii(year,y);
 
     // Integrate over [year,year-1]
-    local_estimate(neqn,year,year-1,&stepsize);
+    local_estimate(neqn,year,year-1,&stepsize,y_diff);
 
     //Copy y to results
     for(int i=0;i<neqn;i++)
