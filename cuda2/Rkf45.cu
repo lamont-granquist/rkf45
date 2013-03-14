@@ -305,12 +305,14 @@ __device__ int get_n_device(void) {
 }
 /***** DEVICE ******/
 
-__global__ void test_kernel(CUSTOMERS *customers,float *result0) {
+__global__ void test_kernel(CUSTOMERS *customers,float *result) {
   int id = get_id();
 
   float y[MAX_NEQN];
   for(int i = 0;i<MAX_NEQN;i++)
     y[i] = 0.0f;
+
+  float result0[41];
 
   estimate(
            customers[id].neqn,
@@ -319,6 +321,8 @@ __global__ void test_kernel(CUSTOMERS *customers,float *result0) {
            y,
            result0
           );
+
+  result[id] = result0[0];
 
 };
 
