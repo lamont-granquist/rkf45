@@ -53,7 +53,7 @@ int main(int argc, char const *argv[]) {
   cudaMemcpy(result0, dev_result0, sizeof(float) * 41, cudaMemcpyDeviceToHost);
 
   // Print the result: "0 5 20 45 80 125 180 245 320 405"
-  for(int i = 0; i < 40; i++) {
+  for(int i = 0; i < 41; i++) {
     printf("%.7f\n", result0[i]);
   }
 
