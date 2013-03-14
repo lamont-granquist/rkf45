@@ -42,7 +42,6 @@ static float FindDoubleEpsilon();
 //Declare Estimator variables
 
 //Public variables
-int neqn;
 int start_year;
 int end_year;
 // dy       //policy
@@ -72,7 +71,6 @@ static int m; //Result length;
 
 /* Construct */
 void construct(int n) {
-  neqn = n;
   DoubleEpsilon = FindDoubleEpsilon();
   allocate_equation_space();
 }
@@ -81,26 +79,26 @@ void construct(int n) {
 static void allocate_equation_space() {
 
   //Global for the class
-  y_plus_one             = malloc(sizeof(float)*neqn);
-  y_plus_one_alternative = malloc(sizeof(float)*neqn);
-  end_year_y             = malloc(sizeof(float)*neqn);
-  y                      = malloc(sizeof(float)*neqn);
-  y_diff                 = malloc(sizeof(float)*neqn);
+  y_plus_one             = malloc(sizeof(float)*MAX_NEQN);
+  y_plus_one_alternative = malloc(sizeof(float)*MAX_NEQN);
+  end_year_y             = malloc(sizeof(float)*MAX_NEQN);
+  y                      = malloc(sizeof(float)*MAX_NEQN);
+  y_diff                 = malloc(sizeof(float)*MAX_NEQN);
 
   //Temporary for the solve method
-  f1                     = malloc(sizeof(float)*neqn);
-  f2                     = malloc(sizeof(float)*neqn);
-  f3                     = malloc(sizeof(float)*neqn);
-  f4                     = malloc(sizeof(float)*neqn);
-  f5                     = malloc(sizeof(float)*neqn);
-  f_swap                 = malloc(sizeof(float)*neqn);
+  f1                     = malloc(sizeof(float)*MAX_NEQN);
+  f2                     = malloc(sizeof(float)*MAX_NEQN);
+  f3                     = malloc(sizeof(float)*MAX_NEQN);
+  f4                     = malloc(sizeof(float)*MAX_NEQN);
+  f5                     = malloc(sizeof(float)*MAX_NEQN);
+  f_swap                 = malloc(sizeof(float)*MAX_NEQN);
 }
 
 /********************** Solve *********************/
 
 /* Calculate the actual and the alternative solutions */
 //y_plus_one and y_plus_one_alternative will be set
-static void calculate_solutions() {
+static void calculate_solutions(int neqn) {
 
   float lcd_stepsize = stepsize / 4.0f; //lowest common denominator of stepsize
 
@@ -165,7 +163,7 @@ static void calculate_solutions() {
 
 /* Calculate the error of the solution */
 //Pure
-static float calculate_solution_error() {
+static float calculate_solution_error(int neqn) {
 
   //Used in calculations
   float scale = 2.0f / relerr;
@@ -188,7 +186,7 @@ static float calculate_solution_error() {
 
 /* Move from current position to local_start_year, and update all values */
 // Updates y, h
-static void local_estimate() {
+static void local_estimate(int neqn) {
   
   //Step by step integration.
   bool local_start_reached = false;
@@ -200,8 +198,8 @@ static void local_estimate() {
 
     local_start_reached = local_start_to_be_reached();
 
-    calculate_solutions();
-    float error = calculate_solution_error();
+    calculate_solutions(neqn);
+    float error = calculate_solution_error(neqn);
 
     //Integreate 1 step
     while(error > 1.0f)
@@ -214,8 +212,8 @@ static void local_estimate() {
       stepsize = s * stepsize;  
 
       //Try again.
-      calculate_solutions();
-      error = calculate_solution_error();
+      calculate_solutions(neqn);
+      error = calculate_solution_error(neqn);
     }
 
 
@@ -261,7 +259,7 @@ static bool local_start_to_be_reached() {
 }
 
 /* Calculate stepsize's startvalue */
-static float calculate_initial_stepsize()
+static float calculate_initial_stepsize(int neqn)
 {
   //Calculate the start value of stepsize
   float stepsize = fabsf( start_year - t );
@@ -297,13 +295,13 @@ static float scale_from_error(float error,bool stepsize_decreased) {
 /*********************** Estimate **************************/
 
 /* Estimate range */
-float** estimate() {
+float** estimate(int neqn) {
 
   for(int i = 0;i<neqn;i++)                // y
     y[i] = end_year_y[i];
   t = (float) end_year;                   // t
   dy( t, y, y_diff);                       // y_diff
-  stepsize = calculate_initial_stepsize(); // stepsize
+  stepsize = calculate_initial_stepsize(neqn); // stepsize
 
   //Allocate result matrix, calculate m (length of result)
   m = end_year-start_year+1;
@@ -318,7 +316,7 @@ float** estimate() {
     // Integrate over [year,year-1]
     local_start_year = year;
     local_end_year = year-1;
-    local_estimate();
+    local_estimate(neqn);
 
     //Copy y to results
     for(int i=0;i<neqn;i++)

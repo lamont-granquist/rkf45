@@ -1,7 +1,6 @@
 #ifndef Rkf45_h
 #define Rkf45_h
 
-extern int neqn;
 extern int MAX_NEQN;
 extern int start_year;
 extern int end_year;
