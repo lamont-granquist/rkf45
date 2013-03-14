@@ -1,9 +1,7 @@
 #ifndef Rkf45_h
 #define Rkf45_h
 
-extern int MAX_NEQN;
-extern int start_year;
-extern int end_year;
+extern const int MAX_NEQN;
 // dy
 // bj_ii
 extern float* end_year_y; 

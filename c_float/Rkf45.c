@@ -42,8 +42,6 @@ static float FindDoubleEpsilon();
 //Declare Estimator variables
 
 //Public variables
-int start_year;
-int end_year;
 // dy       //policy
 // bj_ii
 float* end_year_y; 
@@ -259,7 +257,7 @@ static bool local_start_to_be_reached() {
 }
 
 /* Calculate stepsize's startvalue */
-static float calculate_initial_stepsize(int neqn)
+static float calculate_initial_stepsize(int neqn,int start_year)
 {
   //Calculate the start value of stepsize
   float stepsize = fabsf( start_year - t );
@@ -295,13 +293,13 @@ static float scale_from_error(float error,bool stepsize_decreased) {
 /*********************** Estimate **************************/
 
 /* Estimate range */
-float** estimate(int neqn) {
+float** estimate(int neqn, int end_year, int start_year) {
 
   for(int i = 0;i<neqn;i++)                // y
     y[i] = end_year_y[i];
   t = (float) end_year;                   // t
   dy( t, y, y_diff);                       // y_diff
-  stepsize = calculate_initial_stepsize(neqn); // stepsize
+  stepsize = calculate_initial_stepsize(neqn,start_year); // stepsize
 
   //Allocate result matrix, calculate m (length of result)
   m = end_year-start_year+1;

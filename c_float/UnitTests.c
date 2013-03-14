@@ -51,44 +51,32 @@ bool matrix_ewt_print(float** a,float** b,int m,int n) {
 
 static void test_case_PureEndowment() {
   policy = 1;
-  start_year = 0;
-  end_year = 40;
   end_year_y[0] = 0.0f;
 }
 
 static void test_case_DeferredTemporaryLifeAnnuity() {
   policy = 2;
-  start_year = 0;
-  end_year = 50;
   end_year_y[0] = 0.0f;
 }
 
 static void test_case_TemporaryLifeAnnuityPremium() {
   policy = 3;
-  start_year = 0;
-  end_year = 50;
   end_year_y[0] = 0.0f;
 }
 
 static void test_case_TermInsurance() {
   policy = 4;
-  start_year = 0;
-  end_year = 50;
   end_year_y[0] = 0.0f;
 }
 
 static void test_case_DisabilityAnnuity() {
   policy = 5;
-  start_year = 0;
-  end_year = 50;
   end_year_y[0] = 0.0f;
   end_year_y[1] = 0.0f;
 }
 
 static void test_case_DisabilityTermInsurance() {
   policy = 6;
-  start_year = 0;
-  end_year = 50;
   end_year_y[0] = 0.0f;
   end_year_y[1] = 0.0f;
 }
@@ -98,7 +86,7 @@ static char* test_PureEndowment() {
   test_case_PureEndowment();
   float y[MAX_NEQN];
   y[0] = 0.0f;
-  mu_assert("PureEndowment failed",matrix_ewt(test_values(),estimate(1),41,1));
+  mu_assert("PureEndowment failed",matrix_ewt(test_values(),estimate(1,40,0),41,1));
   return 0;
 }
 
