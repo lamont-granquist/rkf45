@@ -41,10 +41,6 @@ static float FindDoubleEpsilon();
 
 //Declare Estimator variables
 
-//Public variables
-// dy       //policy
-// bj_ii
-
 //Private variables
 static float* f1;
 static float* f2;
@@ -57,8 +53,6 @@ static float* y_diff;
 static float* y_plus_one;
 static float* y_plus_one_alternative;
 static float DoubleEpsilon;
-
-static int m; //Result length;
 
 /******************* Constructor *********************/
 
@@ -295,8 +289,7 @@ float** estimate(int neqn, int end_year, int start_year,float* yy) { //TODO: yy
   float stepsize = calculate_initial_stepsize(neqn,start_year,t); // stepsize
 
   //Allocate result matrix, calculate m (length of result)
-  m = end_year-start_year+1;
-  float** result = allocate_float_matrix(m,neqn);
+  float** result = allocate_float_matrix(end_year-start_year+1,neqn);
 
   //Solve for one year at a time
   for (int year=end_year; year>start_year; year--) {
