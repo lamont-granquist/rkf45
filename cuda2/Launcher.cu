@@ -54,7 +54,7 @@ int main(int argc, char const *argv[]) {
 
   // Print the result: "0 5 20 45 80 125 180 245 320 405"
   for(int i = 0; i < 41; i++) {
-    printf("%.7f\n", result0[i]);
+    printf("%i: %.7f\n",i, result0[i]);
   }
 
   printf("\n");
