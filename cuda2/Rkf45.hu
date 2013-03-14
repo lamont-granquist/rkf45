@@ -1,0 +1,10 @@
+#ifndef Rkf45_h
+#define Rkf45_h
+
+#include "Customers.hu"
+
+__global__ void test_kernel(CUSTOMERS *customers,float *result);
+
+void cpu_kernel(CUSTOMERS *customers,float *result);
+
+#endif
