@@ -19,13 +19,14 @@ int main(int argc, char const *argv[]) {
   // Data on the host and the device, respectively
   float result[nsize];
   float result0[41];
-  float result0cpu[41];
+  //float result0cpu[41];
   float *dev_result;
   float *dev_result0;
   CUSTOMERS *dev_customers; 
   CUSTOMERS *customers;
 
   customers = (CUSTOMERS*) malloc(sizeof(CUSTOMERS)*nsize);
+
 
   for(int i = 0;i < nsize;i++) {
     customers[i].neqn = 1;
@@ -44,8 +45,8 @@ int main(int argc, char const *argv[]) {
 
   // Launch the kernel with 10 blocks, each with 1 thread
   //kernel <<<grid_dim, block_dim>>>(dev_customers,dev_result);
-  //test_kernel <<<grid_dim, block_dim>>>(dev_customers, dev_result0);
-  cpu_kernel(customers,result0cpu);
+  test_kernel <<<grid_dim, block_dim>>>(dev_customers, dev_result0);
+  //cpu_kernel(customers,result0cpu);
 
   // Copy the result back from the device
   cudaMemcpy(result, dev_result, sizeof(float) * nsize, cudaMemcpyDeviceToHost);
@@ -53,7 +54,7 @@ int main(int argc, char const *argv[]) {
 
   // Print the result: "0 5 20 45 80 125 180 245 320 405"
   for(int i = 0; i < 40; i++) {
-    printf("%.7f\n", result0cpu[i]);
+    printf("%.7f\n", result0[i]);
   }
 
   printf("\n");
