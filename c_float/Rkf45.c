@@ -26,13 +26,8 @@ const float FloatEpsilon = 0.00000011920928955078125000f; //TODO: Calculate this
 #define sign(x)  ((x > 0) - ( x < 0))
 
 //Declare functions
-bool is_equal();
-static void test_all();
-static void time_all();
-static float time_one();
 static bool local_start_to_be_reached(float t,int local_start_year,float* stepsize);
 static void allocate_equation_space();
-static void xpy();
 static void calculate_solutions(int neqn,float t,float stepsize,float* y, float *y_diff,float* y_plus_one, float* y_plus_one_alternative);
 static float calculate_solution_error(int neqn,float stepsize,float* y,float* y_plus_one, float* y_plus_one_alternative);
 static void local_estimate(int neqn,int local_end_year,int local_start_year,float* stepsize,float* y,float* y_diff);
@@ -251,8 +246,8 @@ static float scale_from_error(float error,bool stepsize_decreased) {
 void estimate(int neqn, int end_year, int start_year,float* y,float* result0) { //TODO: yy
 
   float y_diff[MAX_NEQN];
-  dy((float) end_year, y, y_diff);                       // y_diff
-  float stepsize = calculate_initial_stepsize(neqn,start_year,end_year,y,y_diff); // stepsize
+  dy((float) end_year, y, y_diff);
+  float stepsize = calculate_initial_stepsize(neqn,start_year,end_year,y,y_diff); 
 
   //Solve for one year at a time
   for (int year=end_year; year>start_year; year--) {
