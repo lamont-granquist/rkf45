@@ -1,52 +1,52 @@
 /************** TODO NEXT *************/
 
-Cuda c
-
-  - cSharp, modify: Convert to float precition
-  - c = make as cuda code.
-
   NOTES:
   - 124 registers per thread.
-  - Vars really needed:
-    neqn;
-    end_year
-    relerr;
-    abserr;
-    policy;
-
-  //HOST:
-  //construct (decide neqn)
-
-  //Set public vars.
-  //(Must be viewable from device)
-
-  //Start kernel
-  //(estimate);
 
 Finde ud af hvordan man timer forskellige customers
 
 Lave unittests i csharp
   - Få testværdier til dy og GM.
 
+/************* Møde ******************/
+
+  rel og abs error vigtigt.
+
+  RAPPORT: Arbejdsprocess: Cuda, process, hvorfor fejl?
+  float.
+  Vigtige pointer.
+
+  Processafsnit.
+
 /************** QUESTIONS *************/
-NICOLAI / CHRISTIAN:
-
-Skal alle variable i device gå igennem kernel fncitonen?
-
-Er det kun y[0] som er interessant? skal y[0..neqn] returners?
-kun y[0] er interessant.
-
+asdfl
 VEJLEDER:
 y_diff (gammel yp) er previous_d_diff. Er det en fejl? Stemmer ikke overens.
 med udregninger.
 stepsize scales ned ved years afslutninger. Er det et problem?
 
+  Et produktskunder.
+
+  Random kunder - når man vil finde ud af om resultat er rigtigt: Og
+  tidstagning: Seeds.
+
+
+  Benchmarking på de 6 kunder:
+
+Hypoteser:
+  - Det vigtigt at søge for at ting der ligger sammen. Sortering?
+  - Sorter efter sammme alder inden for hvert produkt.
+  - KLS: memory access. GLOBAL MEMORY!
+
+
+float problemer, presision.
+What is next
+threaddivergence og modeling
+What is different customers, how many are needed etc.
+
 /************** HACK SETUP **************/
 Iterm2 mouse copy fix
 Iterm2 cmd hotkey remove. 
-lola command show max of 16 lines..
-vim undo last jump
-Iterm2 copy paste easier
 
 /************** WORKFLOW ***************/
 Workflow:
