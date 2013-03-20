@@ -34,7 +34,7 @@ int main(int argc, char const *argv[]) {
     customers[i].start_year = 0;
   }
 
-  customers[0].policy = 4;
+  customers[0].policy = 5;
   customers[1].start_year = 1;
   customers[2].start_year = 2;
   customers[3].start_year = 3;
