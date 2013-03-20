@@ -18,10 +18,8 @@ int main(int argc, char const *argv[]) {
 
   // Data on the host and the device, respectively
   float result[nsize];
-  //float result0[41];
-  //float result0cpu[41];
+  float result_cpu[41];
   float *dev_result;
-  //float *dev_result0;
   CUSTOMERS *dev_customers; 
   CUSTOMERS *customers;
 
@@ -44,23 +42,25 @@ int main(int argc, char const *argv[]) {
   // Allocate memory on the device
   cudaMalloc((void**)&dev_customers, sizeof(CUSTOMERS) * nsize);
   cudaMalloc((void**)&dev_result, sizeof(float) * nsize);
-  //cudaMalloc((void**)&dev_result0, sizeof(float) * 41);
 
   // Copy data to the device
   cudaMemcpy(dev_customers, customers, sizeof(CUSTOMERS) * nsize, cudaMemcpyHostToDevice);
 
   // Launch the kernel with 10 blocks, each with 1 thread
-  test_kernel <<<grid_dim, block_dim>>>(dev_customers,dev_result);
-  //test_kernel <<<grid_dim, block_dim>>>(dev_customers, dev_result0);
-  //cpu_kernel(customers,result0cpu);
+  //test_kernel <<<grid_dim, block_dim>>>(dev_customers,dev_result); // GPU
+  cpu_kernel(customers,result_cpu); //CPU
 
   // Copy the result back from the device
   cudaMemcpy(result, dev_result, sizeof(float) * nsize, cudaMemcpyDeviceToHost);
-  //cudaMemcpy(result0, dev_result0, sizeof(float) * 41, cudaMemcpyDeviceToHost);
 
-  // Print the result: "0 5 20 45 80 125 180 245 320 405"
+  // Print the result
+  /*
   for(int i = 0; i < nsize; i++) {
     printf("%i: %.7f\n",i, result[i]);
+  }
+  */
+  for(int i = 0; i < 41; i++) {
+    printf("%i: %.7f\n",i, result_cpu[i]);
   }
 
   printf("\n");

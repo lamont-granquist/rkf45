@@ -316,6 +316,8 @@ void test_kernel(CUSTOMERS *customers,float *result) {
     y[i] = 0.0f;
 
   float result0[41];
+  for(int i = 0;i<41;i++)
+    result0[i] = 0.0f;
 
   estimate(
            customers[id].policy,
@@ -328,23 +330,27 @@ void test_kernel(CUSTOMERS *customers,float *result) {
 
   result[id] = result0[0];
 
-};
+}
 
-/*void cpu_kernel(CUSTOMERS *customers,float *result0) {
-  int id = 0;
+int cpu_id = 0;
+
+void cpu_kernel(CUSTOMERS *customers,float *result0) {
 
   float y[MAX_NEQN];
   for(int i = 0;i<MAX_NEQN;i++)
     y[i] = 0.0f;
 
   estimate(
-           customers[id].neqn,
-           customers[id].end_year,
-           customers[id].start_year,
+           customers[cpu_id].policy,
+           customers[cpu_id].neqn,
+           customers[cpu_id].end_year,
+           customers[cpu_id].start_year,
            y,
            result0
           );
-}*/
+
+  cpu_id++;
+}
 
 /**************** RK_LIBRARY *****************/
 
