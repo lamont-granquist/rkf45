@@ -23,18 +23,18 @@ const float FloatEpsilon = 0.00000011920928955078125000f; //TODO: Calculate this
 #define sign(x)  ((x > 0) - ( x < 0))
 
 __device__ __host__
-void dy(int policy,float t, float* V,float* result);
+void dy(int policy,int age,float t, float* V,float* result);
 __device__ __host__
 void bj_ii(int policy, float t, float* result);
 //Declare functions
 __device__ __host__
 static bool local_start_to_be_reached(float t,int local_start_year,float* stepsize);
 __device__ __host__
-static void calculate_solutions(int policy, int neqn,float t,float stepsize,float* y, float *y_diff,float* y_plus_one, float* y_plus_one_alternative);
+static void calculate_solutions(int policy,int age, int neqn,float t,float stepsize,float* y, float *y_diff,float* y_plus_one, float* y_plus_one_alternative);
 __device__ __host__
 static float calculate_solution_error(int neqn,float stepsize,float* y,float* y_plus_one, float* y_plus_one_alternative);
 __device__ __host__
-static void local_estimate(int policy, int neqn,int local_end_year,int local_start_year,float* stepsize,float* y,float* y_diff);
+static void local_estimate(int policy,int age, int neqn,int local_end_year,int local_start_year,float* stepsize,float* y,float* y_diff);
 __device__ __host__
 static float calculate_initial_stepsize(int neqn,int start_year,int end_year,float* y, float* y_diff);
 __device__ __host__
@@ -46,7 +46,7 @@ static float scale_from_error(float error,bool stepsize_decreased);
 /* Calculate the actual and the alternative solutions */
 //y_plus_one and y_plus_one_alternative will be set
 __device__ __host__
-static void calculate_solutions(int policy, int neqn,float t,float stepsize,float* y,float* y_diff,float* y_plus_one,float* y_plus_one_alternative) {
+static void calculate_solutions(int policy,int age, int neqn,float t,float stepsize,float* y,float* y_diff,float* y_plus_one,float* y_plus_one_alternative) {
 
   float f1[MAX_NEQN];
   float f2[MAX_NEQN];
@@ -60,13 +60,13 @@ static void calculate_solutions(int policy, int neqn,float t,float stepsize,floa
   //f1
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + lcd_stepsize * y_diff[i];
-  dy (policy, t + lcd_stepsize, f_swap, f1 );
+  dy (policy,age, t + lcd_stepsize, f_swap, f1 );
 
   //f2
   lcd_stepsize = 3.0f * stepsize / 32.0f;
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + lcd_stepsize * ( y_diff[i] + 3.0f * f1[i] );
-  dy (policy, t + 3.0f * stepsize / 8.0f, f_swap, f2 );
+  dy (policy,age, t + 3.0f * stepsize / 8.0f, f_swap, f2 );
 
 
   /*printf("f_swap!   :           %.7f\n",f_swap[0]);
@@ -76,21 +76,21 @@ static void calculate_solutions(int policy, int neqn,float t,float stepsize,floa
   lcd_stepsize = stepsize / 2197.0f;
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + lcd_stepsize * ( 1932.0f * y_diff[i] + ( 7296.0f * f2[i] - 7200.0f * f1[i] ) );
-  dy (policy, t + 12.0f * stepsize / 13.0f, f_swap, f3 );
+  dy (policy,age, t + 12.0f * stepsize / 13.0f, f_swap, f3 );
 
   //f4
   lcd_stepsize = stepsize / 4104.0f;
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + lcd_stepsize * ( ( 8341.0f * y_diff[i] - 845.0f * f3[i] ) + 
         ( 29440.0f * f2[i] - 32832.0f * f1[i] ) );
-  dy (policy, t + stepsize, f_swap, f4 );
+  dy (policy,age, t + stepsize, f_swap, f4 );
 
   //f5
   lcd_stepsize = stepsize / 20520.0f;
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + lcd_stepsize * ( ( -6080.0f * y_diff[i] + 
           ( 9295.0f * f3[i] - 5643.0f * f4[i] ) ) + ( 41040.0f * f1[i] - 28352.0f * f2[i] ) );
-  dy (policy, t + stepsize / 2.0f, f_swap, f5 );
+  dy (policy,age, t + stepsize / 2.0f, f_swap, f5 );
 
   //Calculate solution
   lcd_stepsize = stepsize / 7618050.0f;
@@ -143,7 +143,7 @@ static float calculate_solution_error(int neqn,float stepsize,float* y,float* y_
 /* Move from current position to local_start_year, and update all values */
 // Updates y, h
 __device__ __host__
-static void local_estimate(int policy, int neqn,int local_end_year,int local_start_year,float *stepsize,float* y,float* y_diff) {
+static void local_estimate(int policy,int age, int neqn,int local_end_year,int local_start_year,float *stepsize,float* y,float* y_diff) {
   float t = (float)local_end_year;
   
   //Step by step integration.
@@ -159,7 +159,7 @@ static void local_estimate(int policy, int neqn,int local_end_year,int local_sta
     float y_plus_one[MAX_NEQN];
     float y_plus_one_alternative[MAX_NEQN];
 
-    calculate_solutions(policy,neqn,t,*stepsize,y,y_diff,y_plus_one,y_plus_one_alternative);
+    calculate_solutions(policy,age,neqn,t,*stepsize,y,y_diff,y_plus_one,y_plus_one_alternative);
     float error = calculate_solution_error(neqn,*stepsize,y,y_plus_one,y_plus_one_alternative);
 
     //Integreate 1 step
@@ -173,7 +173,7 @@ static void local_estimate(int policy, int neqn,int local_end_year,int local_sta
       *stepsize = s * *stepsize;  
 
       //Try again.
-      calculate_solutions(policy,neqn,t,*stepsize,y,y_diff,y_plus_one,y_plus_one_alternative);
+      calculate_solutions(policy,age,neqn,t,*stepsize,y,y_diff,y_plus_one,y_plus_one_alternative);
       error = calculate_solution_error(neqn,*stepsize,y,y_plus_one,y_plus_one_alternative);
     }
 
@@ -185,7 +185,7 @@ static void local_estimate(int policy, int neqn,int local_end_year,int local_sta
       y[i] = y_plus_one[i];
 
     //Update y_diff
-    dy (policy, t, y, y_diff );
+    dy (policy,age, t, y, y_diff );
 
     //Apply scale to stepsize
     float scale = scale_from_error(error,stepsize_descresed);
@@ -256,10 +256,10 @@ static float scale_from_error(float error,bool stepsize_decreased) {
 
 /* Estimate range */
 __device__ __host__
-void estimate(int policy, int neqn, int end_year, int start_year,float* y,float* result0, float* result1) {
+void estimate(int policy,int age, int neqn, int end_year, int start_year,float* y,float* result0, float* result1) {
 
   float y_diff[MAX_NEQN];
-  dy(policy, (float) end_year, y, y_diff);
+  dy(policy,age, (float) end_year, y, y_diff);
   float stepsize = calculate_initial_stepsize(neqn,start_year,end_year,y,y_diff); 
 
   //Solve for one year at a time
@@ -269,7 +269,7 @@ void estimate(int policy, int neqn, int end_year, int start_year,float* y,float*
     bj_ii(policy,year,y);
 
     // Integrate over [year,year-1]
-    local_estimate(policy,neqn,year,year-1,&stepsize,y,y_diff);
+    local_estimate(policy,age,neqn,year,year-1,&stepsize,y,y_diff);
 
     //Copy y to results
     result0[year-start_year-1] = y[0];
@@ -326,6 +326,7 @@ void test_kernel(CUSTOMERS *customers,float *result) {
 
   estimate(
            customers[id].policy,
+           customers[id].age,
            customers[id].neqn,
            customers[id].end_year,
            customers[id].start_year,
@@ -356,6 +357,7 @@ void cpu_kernel(CUSTOMERS *customers,float *result) {
 
   estimate(
            customers[cpu_id].policy,
+           customers[cpu_id].age,
            customers[cpu_id].neqn,
            customers[cpu_id].end_year,
            customers[cpu_id].start_year,
@@ -371,9 +373,8 @@ void cpu_kernel(CUSTOMERS *customers,float *result) {
 /**************** RK_LIBRARY *****************/
 
 __device__ __host__
-float GM(float t) {
-    float age = 30.0f;
-    return 0.0005f + powf(10.0f, 5.728f - 10.0f + 0.038f*(age + t));
+float GM(int age, float t) {
+    return 0.0005f + powf(10.0f, 5.728f - 10.0f + 0.038f*((float)age + t));
 }
 
 // Interest
@@ -395,8 +396,8 @@ static float b_0_PureEndowment(float t) {
 }
 
 __device__ __host__
-static float mu_01_PureEndowment(float t) {
-    return GM(t);
+static float mu_01_PureEndowment(int age,float t) {
+    return GM(age,t);
 }
 
 __device__ __host__
@@ -417,9 +418,9 @@ void bj_ii_PureEndowment(float t, float* result) {
 }
 
 __device__ __host__
-void dy_PureEndowment(float t, float* V,float* result)
+void dy_PureEndowment(int age, float t, float* V,float* result)
 {
-    result[0] = r(t) * V[0] - b_0_PureEndowment(t) - mu_01_PureEndowment(t) * (0 - V[0] + bj_01_PureEndowment(t));
+    result[0] = r(t) * V[0] - b_0_PureEndowment(t) - mu_01_PureEndowment(age,t) * (0 - V[0] + bj_01_PureEndowment(t));
 }
 
 /**************** PRODUCT, DEFFEREDLIFEANNUITY ***************************/
@@ -432,8 +433,8 @@ static float b_0_DeferredTemporaryLifeAnnuity(float t) {
 }
 
 __device__ __host__
-static float mu_01_DeferredTemporaryLifeAnnuity(float t) {
-    return GM(t);
+static float mu_01_DeferredTemporaryLifeAnnuity(int age, float t) {
+    return GM(age,t);
 }
 
 __device__ __host__
@@ -452,9 +453,9 @@ void bj_ii_DeferredTemporaryLifeAnnuity(float t, float* result) {
 }
 
 __device__ __host__
-void dy_DeferredTemporaryLifeAnnuity(float t, float* V,float* result)
+void dy_DeferredTemporaryLifeAnnuity(int age, float t, float* V,float* result)
 {
-    result[0] = r(t) * V[0] - b_0_DeferredTemporaryLifeAnnuity(t) - mu_01_DeferredTemporaryLifeAnnuity(t) * (0 - V[0] + bj_01_DeferredTemporaryLifeAnnuity(t));
+    result[0] = r(t) * V[0] - b_0_DeferredTemporaryLifeAnnuity(t) - mu_01_DeferredTemporaryLifeAnnuity(age,t) * (0 - V[0] + bj_01_DeferredTemporaryLifeAnnuity(t));
 }
 
 /**************** PRODUCT, TemporaryLifeAnnuityPremium ***************************/
@@ -466,8 +467,8 @@ static float b_0_TemporaryLifeAnnuityPremium(float t) {
 }
 
 __device__ __host__
-static float mu_01_TemporaryLifeAnnuityPremium(float t) {
-    return GM(t);
+static float mu_01_TemporaryLifeAnnuityPremium(int age, float t) {
+    return GM(age,t);
 }
 
 __device__ __host__
@@ -486,9 +487,9 @@ void bj_ii_TemporaryLifeAnnuityPremium(float t, float* result) {
 }
 
 __device__ __host__
-void dy_TemporaryLifeAnnuityPremium(float t, float* V,float* result)
+void dy_TemporaryLifeAnnuityPremium(int age, float t, float* V,float* result)
 {
-    result[0] = r(t) * V[0] - b_0_TemporaryLifeAnnuityPremium(t) - mu_01_TemporaryLifeAnnuityPremium(t) * (0 - V[0] + bj_01_TemporaryLifeAnnuityPremium(t));
+    result[0] = r(t) * V[0] - b_0_TemporaryLifeAnnuityPremium(t) - mu_01_TemporaryLifeAnnuityPremium(age,t) * (0 - V[0] + bj_01_TemporaryLifeAnnuityPremium(t));
 }
 
 /**************** PRODUCT, TermInsurance ***************************/
@@ -498,8 +499,8 @@ static float b_0_TermInsurance(float t) {
 }
 
 __device__ __host__
-static float mu_01_TermInsurance(float t) {
-    return GM(t);
+static float mu_01_TermInsurance(int age, float t) {
+    return GM(age,t);
 }
 
 __device__ __host__
@@ -520,9 +521,9 @@ void bj_ii_TermInsurance(float t, float* result) {
 }
 
 __device__ __host__
-void dy_TermInsurance(float t, float* V,float* result)
+void dy_TermInsurance(int age, float t, float* V,float* result)
 {
-    result[0] = r(t) * V[0] - b_0_TermInsurance(t) - mu_01_TermInsurance(t) * (0 - V[0] + bj_01_TermInsurance(t));
+    result[0] = r(t) * V[0] - b_0_TermInsurance(t) - mu_01_TermInsurance(age,t) * (0 - V[0] + bj_01_TermInsurance(t));
 }
 
 /**************** PRODUCT, DisabilityAnnuity ***************************/
@@ -540,34 +541,33 @@ static float b_1_DisabilityAnnuity(float t) {
 }
 
 __device__ __host__
-static float GM01_DisabilityAnnuity(float t) {
-  float age = 30.0f;
-  return 0.0006f + powf(10.0f, 4.71609f - 10.0f + 0.06f*(age + t));
+static float GM01_DisabilityAnnuity(int age, float t) {
+  return 0.0006f + powf(10.0f, 4.71609f - 10.0f + 0.06f*((float)age + t));
 }
 
 __device__ __host__
-static float GM02_DisabilityAnnuity(float t) {
-  return GM(t);
+static float GM02_DisabilityAnnuity(int age, float t) {
+  return GM(age,t);
 }
 
 __device__ __host__
-static float GM12_DisabilityAnnuity(float t) {
-  return GM(t);
+static float GM12_DisabilityAnnuity(int age, float t) {
+  return GM(age,t);
 }
 
 __device__ __host__
-static float mu_01_DisabilityAnnuity(float t) {
-    return GM01_DisabilityAnnuity(t);
+static float mu_01_DisabilityAnnuity(int age, float t) {
+    return GM01_DisabilityAnnuity(age,t);
 }
 
 __device__ __host__
-static float mu_02_DisabilityAnnuity(float t) {
-    return GM02_DisabilityAnnuity(t);
+static float mu_02_DisabilityAnnuity(int age, float t) {
+    return GM02_DisabilityAnnuity(age,t);
 }
 
 __device__ __host__
-static float mu_12_DisabilityAnnuity(float t) {
-    return GM12_DisabilityAnnuity(t);
+static float mu_12_DisabilityAnnuity(int age, float t) {
+    return GM12_DisabilityAnnuity(age,t);
 }
 
 __device__ __host__
@@ -605,10 +605,10 @@ void bj_ii_DisabilityAnnuity(float t, float* result) {
 }
 
 __device__ __host__
-void dy_DisabilityAnnuity(float t, float* V,float* result)
+void dy_DisabilityAnnuity(int age, float t, float* V,float* result)
 {
-  result[0] = r(t) * V[0] - b_0_DisabilityAnnuity(t) - mu_01_DisabilityAnnuity(t) * (V[1] - V[0] + bj_01_DisabilityAnnuity(t)) - mu_02_DisabilityAnnuity(t) * (0 - V[0] + bj_02_DisabilityAnnuity(t));
-  result[1] = r(t) * V[1] - b_1_DisabilityAnnuity(t) - mu_12_DisabilityAnnuity(t) * (0 - V[1] + bj_12_DisabilityAnnuity(t)); 
+  result[0] = r(t) * V[0] - b_0_DisabilityAnnuity(t) - mu_01_DisabilityAnnuity(age,t) * (V[1] - V[0] + bj_01_DisabilityAnnuity(t)) - mu_02_DisabilityAnnuity(age,t) * (0 - V[0] + bj_02_DisabilityAnnuity(t));
+  result[1] = r(t) * V[1] - b_1_DisabilityAnnuity(t) - mu_12_DisabilityAnnuity(age,t) * (0 - V[1] + bj_12_DisabilityAnnuity(t)); 
 }
 
 /**************** PRODUCT, DisabilityTermInsurance ***************************/
@@ -623,34 +623,33 @@ static float b_1_DisabilityTermInsurance(float t) {
 }
 
 __device__ __host__
-static float GM01_DisabilityTermInsurance(float t) {
-  float age = 30.0f;
-  return 0.0006f + powf(10.0f, 4.71609f - 10.0f + 0.06f*(age + t));
+static float GM01_DisabilityTermInsurance(int age, float t) {
+  return 0.0006f + powf(10.0f, 4.71609f - 10.0f + 0.06f*((float)age + t));
 }
 
 __device__ __host__
-static float GM02_DisabilityTermInsurance(float t) {
-  return GM(t);
+static float GM02_DisabilityTermInsurance(int age,float t) {
+  return GM(age,t);
 }
 
 __device__ __host__
-static float GM12_DisabilityTermInsurance(float t) {
-  return GM(t);
+static float GM12_DisabilityTermInsurance(int age, float t) {
+  return GM(age,t);
 }
 
 __device__ __host__
-static float mu_01_DisabilityTermInsurance(float t) {
-    return GM01_DisabilityTermInsurance(t);
+static float mu_01_DisabilityTermInsurance(int age, float t) {
+    return GM01_DisabilityTermInsurance(age,t);
 }
 
 __device__ __host__
-static float mu_02_DisabilityTermInsurance(float t) {
-    return GM02_DisabilityTermInsurance(t);
+static float mu_02_DisabilityTermInsurance(int age, float t) {
+    return GM02_DisabilityTermInsurance(age,t);
 }
 
 __device__ __host__
-static float mu_12_DisabilityTermInsurance(float t) {
-    return GM12_DisabilityTermInsurance(t);
+static float mu_12_DisabilityTermInsurance(int age, float t) {
+    return GM12_DisabilityTermInsurance(age,t);
 }
 
 __device__ __host__
@@ -687,35 +686,35 @@ void bj_ii_DisabilityTermInsurance(float t, float* result) {
 }
 
 __device__ __host__
-void dy_DisabilityTermInsurance(float t, float* V,float* result)
+void dy_DisabilityTermInsurance(int age, float t, float* V,float* result)
 {
-  result[0] = r(t) * V[0] - b_0_DisabilityTermInsurance(t) - mu_01_DisabilityTermInsurance(t) * (V[1] - V[0] + bj_01_DisabilityTermInsurance(t)) - mu_02_DisabilityTermInsurance(t) * (0 - V[0] + bj_02_DisabilityTermInsurance(t));
-  result[1] = r(t) * V[1] - b_1_DisabilityTermInsurance(t) - mu_12_DisabilityTermInsurance(t) * (0 - V[1] + bj_12_DisabilityTermInsurance(t)); 
+  result[0] = r(t) * V[0] - b_0_DisabilityTermInsurance(t) - mu_01_DisabilityTermInsurance(age,t) * (V[1] - V[0] + bj_01_DisabilityTermInsurance(t)) - mu_02_DisabilityTermInsurance(age,t) * (0 - V[0] + bj_02_DisabilityTermInsurance(t));
+  result[1] = r(t) * V[1] - b_1_DisabilityTermInsurance(t) - mu_12_DisabilityTermInsurance(age,t) * (0 - V[1] + bj_12_DisabilityTermInsurance(t)); 
 }
 
 /**** Policy distributor ****/
 
 __device__ __host__
-void dy(int policy, float t, float* V, float* result) {
+void dy(int policy,int age, float t, float* V, float* result) {
   switch(policy)
   {
     case 1:
-      dy_PureEndowment(t,V,result);
+      dy_PureEndowment(age,t,V,result);
     break;
     case 2:
-      dy_DeferredTemporaryLifeAnnuity(t,V,result);
+      dy_DeferredTemporaryLifeAnnuity(age,t,V,result);
     break;
     case 3:
-      dy_TemporaryLifeAnnuityPremium(t,V,result);
+      dy_TemporaryLifeAnnuityPremium(age,t,V,result);
     break;
     case 4:
-      dy_TermInsurance(t,V,result);
+      dy_TermInsurance(age,t,V,result);
     break;
     case 5:
-      dy_DisabilityAnnuity(t,V,result);
+      dy_DisabilityAnnuity(age,t,V,result);
     break; 
     case 6:
-      dy_DisabilityTermInsurance(t,V,result);
+      dy_DisabilityTermInsurance(age,t,V,result);
     break; 
   };
 }
