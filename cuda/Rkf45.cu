@@ -404,6 +404,40 @@ void dy_PureEndowment(float t, float* V,float* result)
     result[0] = r(t) * V[0] - b_0_PureEndowment(t) - mu_01_PureEndowment(t) * (0 - V[0] + bj_01_PureEndowment(t));
 }
 
+/**************** PRODUCT, DEFFEREDLIFEANNUITY ***************************/
+__device__
+static float b_0_DeferredTemporaryLifeAnnuity(float t) {
+    int m = 35;
+    int n = 10;
+    return bpension * indicator(t > m) * indicator(t < m + n);
+}
+
+__device__
+static float mu_01_DeferredTemporaryLifeAnnuity(float t) {
+    return GM(t);
+}
+
+__device__
+static float bj_00_DeferredTemporaryLifeAnnuity(float t) {
+    return 0.0f;
+}
+
+__device__
+static float bj_01_DeferredTemporaryLifeAnnuity(float t) {
+    return 0.0f; 
+}
+
+__device__
+void bj_ii_DeferredTemporaryLifeAnnuity(float t, float* result) {
+  result[0] += bj_00_DeferredTemporaryLifeAnnuity(t);
+}
+
+__device__
+void dy_DeferredTemporaryLifeAnnuity(float t, float* V,float* result)
+{
+    result[0] = r(t) * V[0] - b_0_DeferredTemporaryLifeAnnuity(t) - mu_01_DeferredTemporaryLifeAnnuity(t) * (0 - V[0] + bj_01_DeferredTemporaryLifeAnnuity(t));
+}
+
 /**** Policy distributor ****/
 
 __device__
@@ -414,7 +448,7 @@ void dy(int policy, float t, float* V, float* result) {
       dy_PureEndowment(t,V,result);
     break;
     case 2:
-      //dy_DeferredTemporaryLifeAnnuity(t,V,result);
+      dy_DeferredTemporaryLifeAnnuity(t,V,result);
     break;
     case 3:
       //dy_TemporaryLifeAnnuityPremium(t,V,result);
@@ -439,7 +473,7 @@ void bj_ii(int policy, float t, float* result) {
       bj_ii_PureEndowment(t,result);
     break;
     case 2:
-      //bj_ii_DeferredTemporaryLifeAnnuity(t,result);
+      bj_ii_DeferredTemporaryLifeAnnuity(t,result);
     break;
     case 3:
       //bj_ii_TemporaryLifeAnnuityPremium(t,result);
