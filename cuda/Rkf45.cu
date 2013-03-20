@@ -23,18 +23,18 @@ const float FloatEpsilon = 0.00000011920928955078125000f; //TODO: Calculate this
 #define sign(x)  ((x > 0) - ( x < 0))
 
 __device__
-void dy(float t, float* V,float* result);
+void dy(int policy,float t, float* V,float* result);
 __device__
-void bj_ii(float t, float* result);
+void bj_ii(int policy, float t, float* result);
 //Declare functions
 __device__
 static bool local_start_to_be_reached(float t,int local_start_year,float* stepsize);
 __device__
-static void calculate_solutions(int neqn,float t,float stepsize,float* y, float *y_diff,float* y_plus_one, float* y_plus_one_alternative);
+static void calculate_solutions(int policy, int neqn,float t,float stepsize,float* y, float *y_diff,float* y_plus_one, float* y_plus_one_alternative);
 __device__
 static float calculate_solution_error(int neqn,float stepsize,float* y,float* y_plus_one, float* y_plus_one_alternative);
 __device__
-static void local_estimate(int neqn,int local_end_year,int local_start_year,float* stepsize,float* y,float* y_diff);
+static void local_estimate(int policy, int neqn,int local_end_year,int local_start_year,float* stepsize,float* y,float* y_diff);
 __device__
 static float calculate_initial_stepsize(int neqn,int start_year,int end_year,float* y, float* y_diff);
 __device__
@@ -46,7 +46,7 @@ static float scale_from_error(float error,bool stepsize_decreased);
 /* Calculate the actual and the alternative solutions */
 //y_plus_one and y_plus_one_alternative will be set
 __device__
-static void calculate_solutions(int neqn,float t,float stepsize,float* y,float* y_diff,float* y_plus_one,float* y_plus_one_alternative) {
+static void calculate_solutions(int policy, int neqn,float t,float stepsize,float* y,float* y_diff,float* y_plus_one,float* y_plus_one_alternative) {
 
   float f1[MAX_NEQN];
   float f2[MAX_NEQN];
@@ -60,13 +60,13 @@ static void calculate_solutions(int neqn,float t,float stepsize,float* y,float* 
   //f1
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + lcd_stepsize * y_diff[i];
-  dy ( t + lcd_stepsize, f_swap, f1 );
+  dy (policy, t + lcd_stepsize, f_swap, f1 );
 
   //f2
   lcd_stepsize = 3.0f * stepsize / 32.0f;
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + lcd_stepsize * ( y_diff[i] + 3.0f * f1[i] );
-  dy ( t + 3.0f * stepsize / 8.0f, f_swap, f2 );
+  dy (policy, t + 3.0f * stepsize / 8.0f, f_swap, f2 );
 
 
   /*printf("f_swap!   :           %.7f\n",f_swap[0]);
@@ -76,21 +76,21 @@ static void calculate_solutions(int neqn,float t,float stepsize,float* y,float* 
   lcd_stepsize = stepsize / 2197.0f;
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + lcd_stepsize * ( 1932.0f * y_diff[i] + ( 7296.0f * f2[i] - 7200.0f * f1[i] ) );
-  dy ( t + 12.0f * stepsize / 13.0f, f_swap, f3 );
+  dy (policy, t + 12.0f * stepsize / 13.0f, f_swap, f3 );
 
   //f4
   lcd_stepsize = stepsize / 4104.0f;
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + lcd_stepsize * ( ( 8341.0f * y_diff[i] - 845.0f * f3[i] ) + 
         ( 29440.0f * f2[i] - 32832.0f * f1[i] ) );
-  dy ( t + stepsize, f_swap, f4 );
+  dy (policy, t + stepsize, f_swap, f4 );
 
   //f5
   lcd_stepsize = stepsize / 20520.0f;
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + lcd_stepsize * ( ( -6080.0f * y_diff[i] + 
           ( 9295.0f * f3[i] - 5643.0f * f4[i] ) ) + ( 41040.0f * f1[i] - 28352.0f * f2[i] ) );
-  dy ( t + stepsize / 2.0f, f_swap, f5 );
+  dy (policy, t + stepsize / 2.0f, f_swap, f5 );
 
   //Calculate solution
   lcd_stepsize = stepsize / 7618050.0f;
@@ -143,7 +143,7 @@ static float calculate_solution_error(int neqn,float stepsize,float* y,float* y_
 /* Move from current position to local_start_year, and update all values */
 // Updates y, h
 __device__
-static void local_estimate(int neqn,int local_end_year,int local_start_year,float *stepsize,float* y,float* y_diff) {
+static void local_estimate(int policy, int neqn,int local_end_year,int local_start_year,float *stepsize,float* y,float* y_diff) {
   float t = (float)local_end_year;
   
   //Step by step integration.
@@ -159,7 +159,7 @@ static void local_estimate(int neqn,int local_end_year,int local_start_year,floa
     float y_plus_one[MAX_NEQN];
     float y_plus_one_alternative[MAX_NEQN];
 
-    calculate_solutions(neqn,t,*stepsize,y,y_diff,y_plus_one,y_plus_one_alternative);
+    calculate_solutions(policy,neqn,t,*stepsize,y,y_diff,y_plus_one,y_plus_one_alternative);
     float error = calculate_solution_error(neqn,*stepsize,y,y_plus_one,y_plus_one_alternative);
 
     //Integreate 1 step
@@ -173,7 +173,7 @@ static void local_estimate(int neqn,int local_end_year,int local_start_year,floa
       *stepsize = s * *stepsize;  
 
       //Try again.
-      calculate_solutions(neqn,t,*stepsize,y,y_diff,y_plus_one,y_plus_one_alternative);
+      calculate_solutions(policy,neqn,t,*stepsize,y,y_diff,y_plus_one,y_plus_one_alternative);
       error = calculate_solution_error(neqn,*stepsize,y,y_plus_one,y_plus_one_alternative);
     }
 
@@ -185,7 +185,7 @@ static void local_estimate(int neqn,int local_end_year,int local_start_year,floa
       y[i] = y_plus_one[i];
 
     //Update y_diff
-    dy ( t, y, y_diff );
+    dy (policy, t, y, y_diff );
 
     //Apply scale to stepsize
     float scale = scale_from_error(error,stepsize_descresed);
@@ -256,20 +256,20 @@ static float scale_from_error(float error,bool stepsize_decreased) {
 
 /* Estimate range */
 __device__
-void estimate(int neqn, int end_year, int start_year,float* y,float* result0) { //TODO: yy
+void estimate(int policy, int neqn, int end_year, int start_year,float* y,float* result0) { //TODO: yy
 
   float y_diff[MAX_NEQN];
-  dy((float) end_year, y, y_diff);
+  dy(policy, (float) end_year, y, y_diff);
   float stepsize = calculate_initial_stepsize(neqn,start_year,end_year,y,y_diff); 
 
   //Solve for one year at a time
   for (int year=end_year; year>start_year; year--) {
 
     //Add this years benefit to y
-    bj_ii(year,y);
+    bj_ii(policy,year,y);
 
     // Integrate over [year,year-1]
-    local_estimate(neqn,year,year-1,&stepsize,y,y_diff);
+    local_estimate(policy,neqn,year,year-1,&stepsize,y,y_diff);
 
     //Copy y to results
     result0[year-start_year-1] = y[0];
@@ -317,6 +317,7 @@ void test_kernel(CUSTOMERS *customers,float *result) {
   float result0[41];
 
   estimate(
+           customers[id].policy,
            customers[id].neqn,
            customers[id].end_year,
            customers[id].start_year,
@@ -406,8 +407,7 @@ void dy_PureEndowment(float t, float* V,float* result)
 /**** Policy distributor ****/
 
 __device__
-void dy(float t, float* V, float* result) {
-  int policy = 1;
+void dy(int policy, float t, float* V, float* result) {
   switch(policy)
   {
     case 1:
@@ -432,8 +432,7 @@ void dy(float t, float* V, float* result) {
 }
 
 __device__
-void bj_ii(float t, float* result) {
-  int policy = 1;
+void bj_ii(int policy, float t, float* result) {
   switch(policy)
   {
     case 1:
