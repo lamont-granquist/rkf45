@@ -32,7 +32,7 @@ int main(int argc, char const *argv[]) {
     customers[i].start_year = 0;
   }
 
-  customers[0].policy = 2;
+  customers[0].policy = 1;
 
   customers[1].policy = 2;
   customers[2].policy = 3;
@@ -48,21 +48,21 @@ int main(int argc, char const *argv[]) {
   cudaMemcpy(dev_customers, customers, sizeof(CUSTOMERS) * nsize, cudaMemcpyHostToDevice);
 
   // Launch the kernel with 10 blocks, each with 1 thread
-  //test_kernel <<<grid_dim, block_dim>>>(dev_customers,dev_result); // GPU
-  cpu_kernel(customers,result_cpu); //CPU
+  test_kernel <<<grid_dim, block_dim>>>(dev_customers,dev_result); // GPU
+  //cpu_kernel(customers,result_cpu); //CPU
 
   // Copy the result back from the device
   cudaMemcpy(result, dev_result, sizeof(float) * nsize, cudaMemcpyDeviceToHost);
 
   // Print the result
-  /*
   for(int i = 0; i < nsize; i++) {
     printf("%i: %.7f\n",i, result[i]);
   }
-  */
+  /*
   for(int i = 0; i < 51; i++) {
     printf("%i: %.7f\n",i, result_cpu[i]);
   }
+  */
 
   printf("\n");
 

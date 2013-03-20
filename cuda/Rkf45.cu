@@ -256,7 +256,7 @@ static float scale_from_error(float error,bool stepsize_decreased) {
 
 /* Estimate range */
 __device__ __host__
-void estimate(int policy, int neqn, int end_year, int start_year,float* y,float* result0) {
+void estimate(int policy, int neqn, int end_year, int start_year,float* y,float* result0, float* result1) {
 
   float y_diff[MAX_NEQN];
   dy(policy, (float) end_year, y, y_diff);
@@ -273,6 +273,7 @@ void estimate(int policy, int neqn, int end_year, int start_year,float* y,float*
 
     //Copy y to results
     result0[year-start_year-1] = y[0];
+    result1[year-start_year-1] = y[1];
   }
 }
 
@@ -315,9 +316,13 @@ void test_kernel(CUSTOMERS *customers,float *result) {
   for(int i = 0;i<MAX_NEQN;i++)
     y[i] = 0.0f;
 
-  float result0[41];
-  for(int i = 0;i<41;i++)
+  float result0[51];
+  for(int i = 0;i<51;i++)
     result0[i] = 0.0f;
+
+  float result1[51];
+  for(int i = 0;i<51;i++)
+    result1[i] = 0.0f;
 
   estimate(
            customers[id].policy,
@@ -325,7 +330,8 @@ void test_kernel(CUSTOMERS *customers,float *result) {
            customers[id].end_year,
            customers[id].start_year,
            y,
-           result0
+           result0,
+           result1
           );
 
   result[id] = result0[0];
@@ -340,9 +346,13 @@ void cpu_kernel(CUSTOMERS *customers,float *result) {
   for(int i = 0;i<MAX_NEQN;i++)
     y[i] = 0.0f;
 
-  float result0[41];
-  for(int i = 0;i<41;i++)
+  float result0[51];
+  for(int i = 0;i<51;i++)
     result0[i] = 0.0f;
+
+  float result1[51];
+  for(int i = 0;i<51;i++)
+    result1[i] = 0.0f;
 
   estimate(
            customers[cpu_id].policy,
@@ -350,10 +360,12 @@ void cpu_kernel(CUSTOMERS *customers,float *result) {
            customers[cpu_id].end_year,
            customers[cpu_id].start_year,
            y,
-           result0
+           result0,
+           result1
           );
   
-  result[cpu_id] = result0[0];
+  for(int i = 0;i<51;i++)
+    result[i] = result0[i];
 }
 
 /**************** RK_LIBRARY *****************/
