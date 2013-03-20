@@ -1,0 +1,9 @@
+#ifndef linktest_h
+#define linktest_h
+
+#include "Customers.hu"
+
+__device__
+void linktester();
+
+#endif

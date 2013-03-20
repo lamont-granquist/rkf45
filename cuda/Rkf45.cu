@@ -16,6 +16,7 @@ const float FloatEpsilon = 0.00000011920928955078125000f; //TODO: Calculate this
 
 #include "Customers.hu"
 #include "Rkf45.hu"
+#include "LinkTest.hu"
 
 //Max,min,sign functions
 /*#define max(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b);_a > _b ? _a : _b; })
@@ -307,6 +308,11 @@ __device__ int get_n_device(void) {
 
 __global__
 void test_kernel(CUSTOMERS *customers,float *result) {
+
+
+  linktester();
+  
+
   int id = get_id();
 
   float y[MAX_NEQN];
@@ -344,7 +350,6 @@ void test_kernel(CUSTOMERS *customers,float *result) {
 }*/
 
 /**************** RK_LIBRARY *****************/
-
 
 __device__
 float age = 30.0f;
