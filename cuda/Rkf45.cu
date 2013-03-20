@@ -256,7 +256,7 @@ static float scale_from_error(float error,bool stepsize_decreased) {
 
 /* Estimate range */
 __device__ __host__
-void estimate(int policy, int neqn, int end_year, int start_year,float* y,float* result0) { //TODO: yy
+void estimate(int policy, int neqn, int end_year, int start_year,float* y,float* result0) {
 
   float y_diff[MAX_NEQN];
   dy(policy, (float) end_year, y, y_diff);
@@ -332,13 +332,17 @@ void test_kernel(CUSTOMERS *customers,float *result) {
 
 }
 
-int cpu_id = 0;
 
-void cpu_kernel(CUSTOMERS *customers,float *result0) {
-
+void cpu_kernel(CUSTOMERS *customers,float *result) {
+  int cpu_id = 0;
+  
   float y[MAX_NEQN];
   for(int i = 0;i<MAX_NEQN;i++)
     y[i] = 0.0f;
+
+  float result0[41];
+  for(int i = 0;i<41;i++)
+    result0[i] = 0.0f;
 
   estimate(
            customers[cpu_id].policy,
@@ -348,8 +352,8 @@ void cpu_kernel(CUSTOMERS *customers,float *result0) {
            y,
            result0
           );
-
-  cpu_id++;
+  
+  result[cpu_id] = result0[0];
 }
 
 /**************** RK_LIBRARY *****************/

@@ -18,7 +18,7 @@ int main(int argc, char const *argv[]) {
 
   // Data on the host and the device, respectively
   float result[nsize];
-  float result_cpu[41];
+  float result_cpu[51];
   float *dev_result;
   CUSTOMERS *dev_customers; 
   CUSTOMERS *customers;
@@ -32,7 +32,8 @@ int main(int argc, char const *argv[]) {
     customers[i].start_year = 0;
   }
 
-  customers[0].policy = 1;
+  customers[0].policy = 2;
+
   customers[1].policy = 2;
   customers[2].policy = 3;
   customers[3].policy = 4;
@@ -59,7 +60,7 @@ int main(int argc, char const *argv[]) {
     printf("%i: %.7f\n",i, result[i]);
   }
   */
-  for(int i = 0; i < 41; i++) {
+  for(int i = 0; i < 51; i++) {
     printf("%i: %.7f\n",i, result_cpu[i]);
   }
 
