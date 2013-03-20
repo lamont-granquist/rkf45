@@ -29,7 +29,7 @@ int main(int argc, char const *argv[]) {
 
   for(int i = 0;i < nsize;i++) {
     customers[i].neqn = 1;
-    customers[i].policy = 2;
+    customers[i].policy = 3;
     customers[i].end_year = 50;
     customers[i].start_year = 0;
   }
