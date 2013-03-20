@@ -29,7 +29,7 @@ int main(int argc, char const *argv[]) {
 
   for(int i = 0;i < nsize;i++) {
     customers[i].neqn = 1;
-    customers[i].policy = 3;
+    customers[i].policy = 2;
     customers[i].end_year = 50;
     customers[i].start_year = 0;
   }
@@ -37,6 +37,11 @@ int main(int argc, char const *argv[]) {
   customers[1].start_year = 1;
   customers[2].start_year = 2;
   customers[3].start_year = 3;
+  customers[4].policy = 3;
+  customers[5].policy = 3;
+  customers[5].start_year = 1;
+  customers[6].policy = 3;
+  customers[6].start_year = 2;
 
   // Allocate memory on the device
   cudaMalloc((void**)&dev_customers, sizeof(CUSTOMERS) * nsize);
