@@ -303,6 +303,7 @@ __device__ int get_id(void) {
 __device__ int get_n_device(void) {
   return blockDim.x * blockDim.y * blockDim.z * gridDim.x * gridDim.y * gridDim.z;
 }
+
 /***** DEVICE ******/
 
 __global__
