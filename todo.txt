@@ -19,17 +19,12 @@ Lave unittests i csharp
   Processafsnit.
 
 /************** QUESTIONS *************/
-asdfl
 VEJLEDER:
 y_diff (gammel yp) er previous_d_diff. Er det en fejl? Stemmer ikke overens.
 med udregninger.
-stepsize scales ned ved years afslutninger. Er det et problem?
-
-  Et produktskunder.
 
   Random kunder - når man vil finde ud af om resultat er rigtigt: Og
   tidstagning: Seeds.
-
 
   Benchmarking på de 6 kunder:
 
@@ -37,7 +32,7 @@ Hypoteser:
   - Det vigtigt at søge for at ting der ligger sammen. Sortering?
   - Sorter efter sammme alder inden for hvert produkt.
   - KLS: memory access. GLOBAL MEMORY!
-
+  - stepsize scales ned ved years afslutninger
 
 float problemer, presision.
 What is next
@@ -55,7 +50,6 @@ Iterm2 cmd hotkey remove.
 double -> float
 Math.Pow -> (float) Math.Pow
 Math.Log -> (float) Math.Log
-
 
 pow -> powf
 fabs -> fabsf

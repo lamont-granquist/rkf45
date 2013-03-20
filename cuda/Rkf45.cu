@@ -309,10 +309,6 @@ __device__ int get_n_device(void) {
 __global__
 void test_kernel(CUSTOMERS *customers,float *result) {
 
-
-  linktester();
-  
-
   int id = get_id();
 
   float y[MAX_NEQN];
@@ -329,7 +325,11 @@ void test_kernel(CUSTOMERS *customers,float *result) {
            result0
           );
 
-  result[id] = result0[0];
+  result[0] = 100;
+
+  //result[id] = result0[0];
+  
+  //result[id] = 4 + linktester();
 
 };
 

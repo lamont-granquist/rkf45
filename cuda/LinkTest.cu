@@ -1,3 +1,5 @@
 #include "LinkTest.hu"
 __device__
-void linktester();
+int linktester() {
+  return 101;
+}
