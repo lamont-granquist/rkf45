@@ -12,8 +12,8 @@ int get_n_host(dim3 block_dim,dim3 grid_dim) {
 // Host code
 int main(int argc, char const *argv[]) {
 
-  dim3 block_dim(1,2,2); //Number of threads per block
-  dim3 grid_dim(2,1,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
+  dim3 block_dim(8,3,6); //Number of threads per block
+  dim3 grid_dim(5,4,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
   int nsize = get_n_host(block_dim,grid_dim); 
 
   // Data on the host and the device, respectively
@@ -25,21 +25,18 @@ int main(int argc, char const *argv[]) {
 
   customers = (CUSTOMERS*) malloc(sizeof(CUSTOMERS)*nsize);
 
+  srand(19); //seed
+
   for(int i = 0;i < nsize;i++) {
-    customers[i].neqn = 2;
-    customers[i].policy = 2;
-    customers[i].age = 30;
+    customers[i].policy = 1+rand()%6;
+    customers[i].neqn = 1;
+    if (customers[i].policy >= 5) {
+      customers[i].neqn = 2;
+    }
+    customers[i].age = 5 + rand()%30;
     customers[i].end_year = 50;
     customers[i].start_year = 0;
   }
-
-  customers[0].policy = 6;
-
-  customers[1].policy = 2;
-  customers[2].policy = 3;
-  customers[3].policy = 4;
-  customers[4].policy = 5;
-  customers[5].policy = 6;
 
   // Allocate memory on the device
   cudaMalloc((void**)&dev_customers, sizeof(CUSTOMERS) * nsize);
@@ -57,7 +54,7 @@ int main(int argc, char const *argv[]) {
 
   // Print the result
   for(int i = 0; i < nsize; i++) {
-    printf("%i: %.7f\n",i, result[i]);
+    printf("%i: %11.7f, policy: %i, age: %i \n",i, result[i],customers[i].policy,customers[i].age);
   }
   /*
   for(int i = 0; i < 51; i++) {
