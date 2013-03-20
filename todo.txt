@@ -10,7 +10,7 @@ Lave unittests i csharp
 
 /************* Møde ******************/
 
-  rel og abs error vigtigt.
+  rel og abs error vigtigt at forstå godt.
 
   RAPPORT: Arbejdsprocess: Cuda, process, hvorfor fejl?
   float.
