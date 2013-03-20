@@ -1,8 +1,0 @@
-#ifndef Policy_Distributor_h
-#define Policy_Distributor_h
-
-__device__ void dy(int policy, float t, float* V, float* result);
-__device__ void bj_ii(int policy, float t, float* result);
-__device__ float** test_values(int policy);
-
-#endif

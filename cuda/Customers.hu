@@ -6,6 +6,7 @@ typedef struct
   int neqn;
   int policy;
   int end_year;
+  int start_year;
 } CUSTOMERS;
 
 #endif

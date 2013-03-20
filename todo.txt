@@ -48,6 +48,18 @@ What is different customers, how many are needed etc.
 Iterm2 mouse copy fix
 Iterm2 cmd hotkey remove. 
 
+/*********** FLOAT CONVERTION **********/
+
+:%s/\.\d\+/\="".submatch(0)."f"/gc
+
+double -> float
+Math.Pow -> (float) Math.Pow
+Math.Log -> (float) Math.Log
+
+
+pow -> powf
+fabs -> fabsf
+
 /************** WORKFLOW ***************/
 Workflow:
 Start of the day:
