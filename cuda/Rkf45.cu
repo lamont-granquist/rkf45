@@ -514,7 +514,10 @@ static float b_0_DisabilityAnnuity(float t) {
 
 __device__
 static float b_1_DisabilityAnnuity(float t) {
-    return 0.0f;
+  int n = 35;
+  int bdisabled = 1;
+  //return 0.0f;
+  return bdisabled * indicator(t > 0) * indicator(t < n);
 }
 
 __device__
@@ -556,7 +559,8 @@ __device__
 static float bj_01_DisabilityAnnuity(float t) {
   int n = 35;
   int bdisabled = 1;
-  return bdisabled * indicator(t > 0) * indicator(t < n);
+  //return bdisabled * indicator(t > 0) * indicator(t < n);
+  return 0.0f;
 }
 
 __device__
@@ -587,6 +591,87 @@ void dy_DisabilityAnnuity(float t, float* V,float* result)
   result[1] = r(t) * V[1] - b_1_DisabilityAnnuity(t) - mu_12_DisabilityAnnuity(t) * (0 - V[1] + bj_12_DisabilityAnnuity(t)); 
 }
 
+/**************** PRODUCT, DisabilityTermInsurance ***************************/
+__device__
+static float b_0_DisabilityTermInsurance(float t) {
+    return 0.0f;
+}
+
+__device__
+static float b_1_DisabilityTermInsurance(float t) {
+    return 0.0f;
+}
+
+__device__
+static float GM01_DisabilityTermInsurance(float t) {
+  return 0.0006f + powf(10.0f, 4.71609f - 10.0f + 0.06f*(age + t));
+}
+
+__device__
+static float GM02_DisabilityTermInsurance(float t) {
+  return GM(t);
+}
+
+__device__
+static float GM12_DisabilityTermInsurance(float t) {
+  return GM(t);
+}
+
+__device__
+static float mu_01_DisabilityTermInsurance(float t) {
+    return GM01_DisabilityTermInsurance(t);
+}
+
+__device__
+static float mu_02_DisabilityTermInsurance(float t) {
+    return GM02_DisabilityTermInsurance(t);
+}
+
+__device__
+static float mu_12_DisabilityTermInsurance(float t) {
+    return GM12_DisabilityTermInsurance(t);
+}
+
+__device__
+static float bj_00_DisabilityTermInsurance(float t) {
+    return 0.0f;
+}
+
+__device__
+static float bj_01_DisabilityTermInsurance(float t) {
+  int n = 35;
+  int bdisabled = 1;
+  return bdisabled * indicator(t > 0) * indicator(t < n);
+}
+
+__device__
+static float bj_02_DisabilityTermInsurance(float t) {
+  return 0.0f;
+}
+
+__device__
+static float bj_11_DisabilityTermInsurance(float t) {
+  return 0.0f;
+}
+
+__device__
+static float bj_12_DisabilityTermInsurance(float t) {
+  return 0.0f;
+}
+
+__device__
+void bj_ii_DisabilityTermInsurance(float t, float* result) {
+  result[0] += bj_00_DisabilityTermInsurance(t);
+  result[1] += bj_11_DisabilityTermInsurance(t);
+}
+
+__device__
+void dy_DisabilityTermInsurance(float t, float* V,float* result)
+{
+  result[0] = r(t) * V[0] - b_0_DisabilityTermInsurance(t) - mu_01_DisabilityTermInsurance(t) * (V[1] - V[0] + bj_01_DisabilityTermInsurance(t)) - mu_02_DisabilityTermInsurance(t) * (0 - V[0] + bj_02_DisabilityTermInsurance(t));
+  result[1] = r(t) * V[1] - b_1_DisabilityTermInsurance(t) - mu_12_DisabilityTermInsurance(t) * (0 - V[1] + bj_12_DisabilityTermInsurance(t)); 
+}
+
 /**** Policy distributor ****/
 
 __device__
@@ -609,7 +694,7 @@ void dy(int policy, float t, float* V, float* result) {
       dy_DisabilityAnnuity(t,V,result);
     break; 
     case 6:
-      //dy_DisabilityTermInsurance(t,V,result);
+      dy_DisabilityTermInsurance(t,V,result);
     break; 
   };
 }
@@ -634,7 +719,7 @@ void bj_ii(int policy, float t, float* result) {
       bj_ii_DisabilityAnnuity(t,result);
     break;
     case 6:
-      //bj_ii_DisabilityTermInsurance(t,result);
+      bj_ii_DisabilityTermInsurance(t,result);
     break;
 
   };

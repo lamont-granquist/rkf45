@@ -34,15 +34,12 @@ int main(int argc, char const *argv[]) {
     customers[i].start_year = 0;
   }
 
-  customers[0].policy = 5;
-  customers[1].start_year = 1;
-  customers[2].start_year = 2;
-  customers[3].start_year = 3;
-  customers[4].policy = 3;
-  customers[5].policy = 3;
-  customers[5].start_year = 1;
-  customers[6].policy = 3;
-  customers[6].start_year = 2;
+  customers[0].policy = 1;
+  customers[1].policy = 2;
+  customers[2].policy = 3;
+  customers[3].policy = 4;
+  customers[4].policy = 5;
+  customers[5].policy = 6;
 
   // Allocate memory on the device
   cudaMalloc((void**)&dev_customers, sizeof(CUSTOMERS) * nsize);
