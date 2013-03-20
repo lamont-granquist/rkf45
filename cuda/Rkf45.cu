@@ -373,32 +373,87 @@ float indicator(int b) {
 
 /**************** PRODUCT, PURE ENDOWMENT ***************************/
 __device__
-static float b_0(float t) {
+static float b_0_PureEndowment(float t) {
     return 0.0f;
 }
 
 __device__
-static float mu_01(float t) {
+static float mu_01_PureEndowment(float t) {
     return GM(t);
 }
 
 __device__
-static float bj_00(float t) {
+static float bj_00_PureEndowment(float t) {
     return t == pensiontime ? bpension: 0.0f;
 }
 
 __device__
-static float bj_01(float t) {
+static float bj_01_PureEndowment(float t) {
     return 0.0f; 
 }
 
 __device__
-void bj_ii(float t, float* result) {
-  result[0] += bj_00(t);
+void bj_ii_PureEndowment(float t, float* result) {
+  result[0] += bj_00_PureEndowment(t);
 }
 
 __device__
-void dy(float t, float* V,float* result)
+void dy_PureEndowment(float t, float* V,float* result)
 {
-    result[0] = r(t) * V[0] - b_0(t) - mu_01(t) * (0 - V[0] + bj_01(t));
+    result[0] = r(t) * V[0] - b_0_PureEndowment(t) - mu_01_PureEndowment(t) * (0 - V[0] + bj_01_PureEndowment(t));
+}
+
+/**** Policy distributor ****/
+
+__device__
+void dy(float t, float* V, float* result) {
+  int policy = 1;
+  switch(policy)
+  {
+    case 1:
+      dy_PureEndowment(t,V,result);
+    break;
+    case 2:
+      //dy_DeferredTemporaryLifeAnnuity(t,V,result);
+    break;
+    case 3:
+      //dy_TemporaryLifeAnnuityPremium(t,V,result);
+    break;
+    case 4:
+      //dy_TermInsurance(t,V,result);
+    break;
+    case 5:
+      //dy_DisabilityAnnuity(t,V,result);
+    break; 
+    case 6:
+      //dy_DisabilityTermInsurance(t,V,result);
+    break; 
+  };
+}
+
+__device__
+void bj_ii(float t, float* result) {
+  int policy = 1;
+  switch(policy)
+  {
+    case 1:
+      bj_ii_PureEndowment(t,result);
+    break;
+    case 2:
+      //bj_ii_DeferredTemporaryLifeAnnuity(t,result);
+    break;
+    case 3:
+      //bj_ii_TemporaryLifeAnnuityPremium(t,result);
+    break;
+    case 4:
+      //bj_ii_TermInsurance(t,result);
+    break;
+    case 5:
+      //bj_ii_DisabilityAnnuity(t,result);
+    break;
+    case 6:
+      //bj_ii_DisabilityTermInsurance(t,result);
+    break;
+
+  };
 }
