@@ -26,13 +26,13 @@ int main(int argc, char const *argv[]) {
   customers = (CUSTOMERS*) malloc(sizeof(CUSTOMERS)*nsize);
 
   for(int i = 0;i < nsize;i++) {
-    customers[i].neqn = 1;
+    customers[i].neqn = 2;
     customers[i].policy = 2;
     customers[i].end_year = 50;
     customers[i].start_year = 0;
   }
 
-  customers[0].policy = 1;
+  customers[0].policy = 6;
 
   customers[1].policy = 2;
   customers[2].policy = 3;
