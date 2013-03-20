@@ -438,7 +438,7 @@ void dy_DeferredTemporaryLifeAnnuity(float t, float* V,float* result)
     result[0] = r(t) * V[0] - b_0_DeferredTemporaryLifeAnnuity(t) - mu_01_DeferredTemporaryLifeAnnuity(t) * (0 - V[0] + bj_01_DeferredTemporaryLifeAnnuity(t));
 }
 
-/**************** PRODUCT, DEFFEREDLIFEANNUITY ***************************/
+/**************** PRODUCT, TemporaryLifeAnnuityPremium ***************************/
 __device__
 static float b_0_TemporaryLifeAnnuityPremium(float t) {
     int n = 35;
@@ -472,6 +472,40 @@ void dy_TemporaryLifeAnnuityPremium(float t, float* V,float* result)
     result[0] = r(t) * V[0] - b_0_TemporaryLifeAnnuityPremium(t) - mu_01_TemporaryLifeAnnuityPremium(t) * (0 - V[0] + bj_01_TemporaryLifeAnnuityPremium(t));
 }
 
+/**************** PRODUCT, TermInsurance ***************************/
+__device__
+static float b_0_TermInsurance(float t) {
+    return 0.0f;
+}
+
+__device__
+static float mu_01_TermInsurance(float t) {
+    return GM(t);
+}
+
+__device__
+static float bj_00_TermInsurance(float t) {
+    return 0.0f;
+}
+
+__device__
+static float bj_01_TermInsurance(float t) {
+    int bdeath = 1;
+    int n = 35;
+    return bdeath * indicator(t > 0) * indicator(t < n);
+}
+
+__device__
+void bj_ii_TermInsurance(float t, float* result) {
+  result[0] += bj_00_TermInsurance(t);
+}
+
+__device__
+void dy_TermInsurance(float t, float* V,float* result)
+{
+    result[0] = r(t) * V[0] - b_0_TermInsurance(t) - mu_01_TermInsurance(t) * (0 - V[0] + bj_01_TermInsurance(t));
+}
+
 /**** Policy distributor ****/
 
 __device__
@@ -488,7 +522,7 @@ void dy(int policy, float t, float* V, float* result) {
       dy_TemporaryLifeAnnuityPremium(t,V,result);
     break;
     case 4:
-      //dy_TermInsurance(t,V,result);
+      dy_TermInsurance(t,V,result);
     break;
     case 5:
       //dy_DisabilityAnnuity(t,V,result);
@@ -513,7 +547,7 @@ void bj_ii(int policy, float t, float* result) {
       bj_ii_TemporaryLifeAnnuityPremium(t,result);
     break;
     case 4:
-      //bj_ii_TermInsurance(t,result);
+      bj_ii_TermInsurance(t,result);
     break;
     case 5:
       //bj_ii_DisabilityAnnuity(t,result);
