@@ -85,6 +85,8 @@ Merge:
 Git add all:
   git add .
 
+Undo commit (no files or index changes)
+git reset --soft HEAD~1
 /************ FOR THE REPORT ***********/
 
      * y er startværdi(erne)
