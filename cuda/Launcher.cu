@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "Rkf45.hu"
 #include "Customers.hu"
+#include <time.h>
 
 /**************************** HOST ******************************/
 
@@ -12,8 +13,8 @@ int get_n_host(dim3 block_dim,dim3 grid_dim) {
 // Host code
 int main(int argc, char const *argv[]) {
 
-  dim3 block_dim(8,7,6); //Number of threads per block
-  dim3 grid_dim(9,8,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
+  dim3 block_dim(8,8,8); //Number of threads per block
+  dim3 grid_dim(64,24,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
   int nsize = get_n_host(block_dim,grid_dim); 
 
   // Data on the host and the device, respectively
@@ -45,6 +46,7 @@ int main(int argc, char const *argv[]) {
   // Copy data to the device
   cudaMemcpy(dev_customers, customers, sizeof(CUSTOMERS) * nsize, cudaMemcpyHostToDevice);
 
+  clock_t start = clock();
   // Launch the kernel with 10 blocks, each with 1 thread
   test_kernel <<<grid_dim, block_dim>>>(dev_customers,dev_result); // GPU
   //cpu_kernel(customers,result_cpu); //CPU
@@ -52,8 +54,11 @@ int main(int argc, char const *argv[]) {
   // Copy the result back from the device
   cudaMemcpy(result, dev_result, sizeof(float) * nsize, cudaMemcpyDeviceToHost);
 
+  clock_t end = clock();
+  float time = (float) (end - start) * 1000.0f / CLOCKS_PER_SEC;
+
   // Print the result
-  for(int i = 0; i < nsize; i++) {
+  for(int i = nsize-10; i < nsize; i++) {
     printf("%i: %11.7f, policy: %i, age: %i \n",i, result[i],customers[i].policy,customers[i].age);
   }
   /*
@@ -62,7 +67,7 @@ int main(int argc, char const *argv[]) {
   }
   */
 
-  printf("\n");
+  printf("TIME: %f\n",time);
 
   cudaFree(dev_result);
 
