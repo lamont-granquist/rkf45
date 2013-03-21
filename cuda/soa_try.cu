@@ -5,7 +5,7 @@ typedef struct
   int *policy;
 } CUSTOMERS;
 
-const int MAX_KERNELS = 72;
+const int N = 12;
 
 __device__ int get_id(void) {
   // Find the ID for this thread, based on which block it is in.
@@ -23,17 +23,12 @@ __device__ int get_n(void) {
   return blockDim.x * blockDim.y * blockDim.z * gridDim.x * gridDim.y * gridDim.z;
 }
 
-__device__ int id;
-__device__ int gpu_array[MAX_KERNELS];
-
 // Device code
-__global__ void kernel(CUSTOMERS customers, int *dev_b, int *result) {
+__global__ void kernel(CUSTOMERS customers, int *result) {
   int tid = get_id();
 
   result[tid] = customers.policy[tid]*customers.neqn[tid];
 }
-
-const int N = 12;
 
 // Host code
 int main(int argc, char const *argv[]) {
@@ -46,15 +41,11 @@ int main(int argc, char const *argv[]) {
 
   /********** 1. MALLOC HOST  **********/
   // Data on the host and the device, respectively
-  int b[nsize], result[nsize]; // host
+  int result[nsize]; // host
   int neqn[N];
   int policy[N];
 
   // Fill the arrays on the host
-  for(int i = 0; i < nsize; i++) {
-    b[i] = 2;
-  }
-
   for(int i=0;i<N;i++) {
     neqn[i] = i;
     policy[i] = N-i;
@@ -62,19 +53,17 @@ int main(int argc, char const *argv[]) {
   
   /********** 2. MALLOC DEVICE  **********/
   // Allocate memory on the device
-  int *dev_b , *dev_result;     // device
+  int *dev_result;     // device
   int *dev_neqn;
   int *dev_policy;
   cudaMalloc((void**)&dev_neqn, sizeof(int) * N);
   cudaMalloc((void**)&dev_policy, sizeof(int) * N);
-  cudaMalloc((void**)&dev_b, sizeof(int) * nsize);
   cudaMalloc((void**)&dev_result, sizeof(int) * nsize);
 
   /********** 3. COPY HOST TO DEVICE  **********/
   // Copy data to the device
   cudaMemcpy(dev_neqn, neqn, sizeof(int) * nsize, cudaMemcpyHostToDevice);
   cudaMemcpy(dev_policy, policy, sizeof(int) * nsize, cudaMemcpyHostToDevice);
-  cudaMemcpy(dev_b, b, sizeof(int) * nsize, cudaMemcpyHostToDevice);
 
   /********** 4. CUSTOMERS HOLDS POINTERS TO DEVICE **********/
   //Used to hold the pointers
@@ -84,7 +73,7 @@ int main(int argc, char const *argv[]) {
 
   /********** 5. LAUNCH WITH CUSTOMERS AND RESULT *********/
   // Launch the kernel with 10 blocks, each with 1 thread
-  kernel <<<grid_dim, block_dim>>>(customers, dev_b, dev_result);
+  kernel <<<grid_dim, block_dim>>>(customers, dev_result);
 
   /********** 6. COPY RESULT FROM DEVICE TO HOST *********/
   // Copy the result back from the device
@@ -101,7 +90,6 @@ int main(int argc, char const *argv[]) {
   /********** 8. FREE DEVICE MEMORY *********/
   cudaFree(dev_neqn);
   cudaFree(dev_policy);
-  cudaFree(dev_b);
   cudaFree(dev_result);
 
   return 0;
