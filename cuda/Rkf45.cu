@@ -308,7 +308,7 @@ __device__ int get_n_device(void) {
 /***** DEVICE ******/
 
 __global__
-void gpu_kernel(CUSTOMERS *customers,float *result) {
+void gpu_kernel(CUSTOMERS customers,float *result) {
 
   int id = get_id();
 
@@ -325,11 +325,11 @@ void gpu_kernel(CUSTOMERS *customers,float *result) {
     result1[i] = 0.0f;
 
   estimate(
-           customers[id].policy,
-           customers[id].age,
-           customers[id].neqn,
-           customers[id].end_year,
-           customers[id].start_year,
+           customers.policy[id],
+           customers.age[id],
+           customers.neqn[id],
+           customers.end_year[id],
+           customers.start_year[id],
            y,
            result0,
            result1
@@ -340,7 +340,7 @@ void gpu_kernel(CUSTOMERS *customers,float *result) {
 }
 
 
-void cpu_kernel(CUSTOMERS *customers,float *result) {
+void cpu_kernel(CUSTOMERS customers,float *result) {
   int cpu_id = 0;
   
   float y[MAX_NEQN];
@@ -356,11 +356,11 @@ void cpu_kernel(CUSTOMERS *customers,float *result) {
     result1[i] = 0.0f;
 
   estimate(
-           customers[cpu_id].policy,
-           customers[cpu_id].age,
-           customers[cpu_id].neqn,
-           customers[cpu_id].end_year,
-           customers[cpu_id].start_year,
+           customers.policy[cpu_id],
+           customers.age[cpu_id],
+           customers.neqn[cpu_id],
+           customers.end_year[cpu_id],
+           customers.start_year[cpu_id],
            y,
            result0,
            result1

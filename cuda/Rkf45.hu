@@ -4,8 +4,8 @@
 #include "Customers.hu"
 
 __global__
-void gpu_kernel(CUSTOMERS *customers,float *result);
+void gpu_kernel(CUSTOMERS customers,float *result);
 
-void cpu_kernel(CUSTOMERS *customers,float *result);
+void cpu_kernel(CUSTOMERS customers,float *result);
 
 #endif
