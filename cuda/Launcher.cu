@@ -63,10 +63,6 @@ int main(int argc, char const *argv[]) {
   gpu_kernel <<<grid_dim, block_dim>>>(dev_customers,dev_result); // GPU
   //cpu_kernel(customers,result_cpu); //CPU
 
-  //Normal timing
-  clock_t end = clock();
-  float time = (float) (end - start) * 1000.0f / CLOCKS_PER_SEC;
-
   //Cuda timing
   cudaEventRecord( cuda_stop, 0 );
   cudaEventSynchronize( cuda_stop );
@@ -76,6 +72,10 @@ int main(int argc, char const *argv[]) {
   
   // Copy the result back from the device
   cudaMemcpy(result, dev_result, sizeof(float) * nsize, cudaMemcpyDeviceToHost);
+
+  //Normal timing
+  clock_t end = clock();
+  float time = (float) (end - start) * 1000.0f / CLOCKS_PER_SEC;
 
   // Print the result
   for(int i = nsize-10; i < nsize; i++) {
