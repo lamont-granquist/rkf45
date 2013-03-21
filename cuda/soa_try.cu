@@ -2,6 +2,7 @@
 typedef struct
 {
   int *neqn;
+  int *policy;
 } CUSTOMERS;
 
 const int MAX_KERNELS = 72;
@@ -29,7 +30,7 @@ __device__ int gpu_array[MAX_KERNELS];
 __global__ void kernel(CUSTOMERS customers, int *dev_b, int *result) {
   int tid = get_id();
 
-  result[tid] = customers.neqn[tid];//id;
+  result[tid] = customers.policy[tid];//id;
 }
 
 const int N = 12;
@@ -37,18 +38,23 @@ const int N = 12;
 // Host code
 int main(int argc, char const *argv[]) {
 
+  /********** 0. SETUP **********/
   dim3 block_dim(2,1,1); //Number of threads per block
   dim3 grid_dim(2,3,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
   //Number of kernels:
   int nsize = grid_dim.x * grid_dim.y * grid_dim.z * block_dim.x * block_dim.y * block_dim.z; 
 
-  CUSTOMERS customers;
+  /********** 1. MALLOC  **********/
+
+
 
   // Data on the host and the device, respectively
-  int b[nsize], c[nsize]; // host
+  int b[nsize], result[nsize]; // host
   int neqn[N];
-  int *dev_b , *result;     // device
+  int policy[N];
+  int *dev_b , *dev_result;     // device
   int *dev_neqn;
+  int *dev_policy;
 
   // Fill the arrays on the host
   for(int i = 0; i < nsize; i++) {
@@ -57,36 +63,47 @@ int main(int argc, char const *argv[]) {
 
   for(int i=0;i<N;i++) {
     neqn[i] = i;
+    policy[i] = N-i;
   }
   
+  /********** 2. MALLOC DEVICE  **********/
   // Allocate memory on the device
   cudaMalloc((void**)&dev_neqn, sizeof(int) * N);
+  cudaMalloc((void**)&dev_policy, sizeof(int) * N);
   cudaMalloc((void**)&dev_b, sizeof(int) * nsize);
-  cudaMalloc((void**)&result, sizeof(int) * nsize);
+  cudaMalloc((void**)&dev_result, sizeof(int) * nsize);
 
+  /********** 3. COPY TO DEVICE  **********/
   // Copy data to the device
   cudaMemcpy(dev_neqn, neqn, sizeof(int) * nsize, cudaMemcpyHostToDevice);
+  cudaMemcpy(dev_policy, policy, sizeof(int) * nsize, cudaMemcpyHostToDevice);
   cudaMemcpy(dev_b, b, sizeof(int) * nsize, cudaMemcpyHostToDevice);
 
-  //Point device pointer in host struct
+  /********** 4. CUSTOMERS STRUCT **********/
+  //Used to hold the pointers
+  CUSTOMERS customers;
   customers.neqn = dev_neqn;
+  customers.policy = dev_policy;
 
+  /********** 5. LAUNCH *********/
   // Launch the kernel with 10 blocks, each with 1 thread
-  kernel <<<grid_dim, block_dim>>>(customers, dev_b, result);
+  kernel <<<grid_dim, block_dim>>>(customers, dev_b, dev_result);
 
+  /********** 5. COPY RESULT *********/
   // Copy the result back from the device
-  cudaMemcpy(c, result, sizeof(int) * nsize, cudaMemcpyDeviceToHost);
+  cudaMemcpy(result, dev_result, sizeof(int) * nsize, cudaMemcpyDeviceToHost);
 
   // Print the result: "0 5 20 45 80 125 180 245 320 405"
   for(int i = 0; i < nsize; i++) {
-    printf("%d ", c[i]);
+    printf("%d ", result[i]);
   }
 
   printf("\n");
 
   cudaFree(dev_neqn);
+  cudaFree(dev_policy);
   cudaFree(dev_b);
-  cudaFree(result);
+  cudaFree(dev_result);
 
   return 0;
 }
