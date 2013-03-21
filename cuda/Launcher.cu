@@ -15,6 +15,9 @@ int main(int argc, char const *argv[]) {
 
   dim3 block_dim(8,8,8); //Number of threads per block
   dim3 grid_dim(64,24,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
+  //dim3 block_dim(2,2,1); //Number of threads per block
+  //dim3 grid_dim(2,1,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
+
   int nsize = get_n_host(block_dim,grid_dim); 
 
   // Data on the host and the device, respectively
@@ -46,28 +49,46 @@ int main(int argc, char const *argv[]) {
   // Copy data to the device
   cudaMemcpy(dev_customers, customers, sizeof(CUSTOMERS) * nsize, cudaMemcpyHostToDevice);
 
+  //Normal timing
   clock_t start = clock();
-  // Launch the kernel with 10 blocks, each with 1 thread
-  test_kernel <<<grid_dim, block_dim>>>(dev_customers,dev_result); // GPU
+
+  //Cuda timing
+  cudaEvent_t cuda_start, cuda_stop;
+  float cuda_time;
+  cudaEventCreate(&cuda_start);
+  cudaEventCreate(&cuda_stop);
+  cudaEventRecord( cuda_start, 0 );
+
+  //***************** LAUNCH *****************/
+  gpu_kernel <<<grid_dim, block_dim>>>(dev_customers,dev_result); // GPU
   //cpu_kernel(customers,result_cpu); //CPU
 
-  // Copy the result back from the device
-  cudaMemcpy(result, dev_result, sizeof(float) * nsize, cudaMemcpyDeviceToHost);
-
+  //Normal timing
   clock_t end = clock();
   float time = (float) (end - start) * 1000.0f / CLOCKS_PER_SEC;
+
+  //Cuda timing
+  cudaEventRecord( cuda_stop, 0 );
+  cudaEventSynchronize( cuda_stop );
+  cudaEventElapsedTime( &cuda_time, cuda_start, cuda_stop );
+  cudaEventDestroy( cuda_start );
+  cudaEventDestroy( cuda_stop );
+  
+  // Copy the result back from the device
+  cudaMemcpy(result, dev_result, sizeof(float) * nsize, cudaMemcpyDeviceToHost);
 
   // Print the result
   for(int i = nsize-10; i < nsize; i++) {
     printf("%i: %11.7f, policy: %i, age: %i \n",i, result[i],customers[i].policy,customers[i].age);
   }
+
   /*
   for(int i = 0; i < 51; i++) {
     printf("%i: %.7f\n",i, result_cpu[i]);
   }
   */
 
-  printf("TIME: %f\n",time);
+  printf("TIME: %f, CUDA_TIME: %f\n",time,cuda_time);
 
   cudaFree(dev_result);
 

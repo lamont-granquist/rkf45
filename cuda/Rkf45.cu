@@ -308,7 +308,7 @@ __device__ int get_n_device(void) {
 /***** DEVICE ******/
 
 __global__
-void test_kernel(CUSTOMERS *customers,float *result) {
+void gpu_kernel(CUSTOMERS *customers,float *result) {
 
   int id = get_id();
 

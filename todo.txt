@@ -3,11 +3,6 @@
   NOTES:
   - 124 registers per thread.
 
-Finde ud af hvordan man timer forskellige customers
-
-Lave unittests i csharp
-  - Få testværdier til dy og GM.
-
 /************* Møde ******************/
 
   rel og abs error vigtigt at forstå godt.
@@ -17,6 +12,8 @@ Lave unittests i csharp
   Vigtige pointer.
 
   Processafsnit.
+
+/**** Better timing? ****/
 
 /************** QUESTIONS *************/
 VEJLEDER:
