@@ -30,7 +30,7 @@ __device__ int gpu_array[MAX_KERNELS];
 __global__ void kernel(CUSTOMERS customers, int *dev_b, int *result) {
   int tid = get_id();
 
-  result[tid] = customers.policy[tid];//id;
+  result[tid] = customers.policy[tid]*customers.neqn[tid];
 }
 
 const int N = 12;
@@ -44,17 +44,11 @@ int main(int argc, char const *argv[]) {
   //Number of kernels:
   int nsize = grid_dim.x * grid_dim.y * grid_dim.z * block_dim.x * block_dim.y * block_dim.z; 
 
-  /********** 1. MALLOC  **********/
-
-
-
+  /********** 1. MALLOC HOST  **********/
   // Data on the host and the device, respectively
   int b[nsize], result[nsize]; // host
   int neqn[N];
   int policy[N];
-  int *dev_b , *dev_result;     // device
-  int *dev_neqn;
-  int *dev_policy;
 
   // Fill the arrays on the host
   for(int i = 0; i < nsize; i++) {
@@ -68,31 +62,35 @@ int main(int argc, char const *argv[]) {
   
   /********** 2. MALLOC DEVICE  **********/
   // Allocate memory on the device
+  int *dev_b , *dev_result;     // device
+  int *dev_neqn;
+  int *dev_policy;
   cudaMalloc((void**)&dev_neqn, sizeof(int) * N);
   cudaMalloc((void**)&dev_policy, sizeof(int) * N);
   cudaMalloc((void**)&dev_b, sizeof(int) * nsize);
   cudaMalloc((void**)&dev_result, sizeof(int) * nsize);
 
-  /********** 3. COPY TO DEVICE  **********/
+  /********** 3. COPY HOST TO DEVICE  **********/
   // Copy data to the device
   cudaMemcpy(dev_neqn, neqn, sizeof(int) * nsize, cudaMemcpyHostToDevice);
   cudaMemcpy(dev_policy, policy, sizeof(int) * nsize, cudaMemcpyHostToDevice);
   cudaMemcpy(dev_b, b, sizeof(int) * nsize, cudaMemcpyHostToDevice);
 
-  /********** 4. CUSTOMERS STRUCT **********/
+  /********** 4. CUSTOMERS HOLDS POINTERS TO DEVICE **********/
   //Used to hold the pointers
   CUSTOMERS customers;
   customers.neqn = dev_neqn;
   customers.policy = dev_policy;
 
-  /********** 5. LAUNCH *********/
+  /********** 5. LAUNCH WITH CUSTOMERS AND RESULT *********/
   // Launch the kernel with 10 blocks, each with 1 thread
   kernel <<<grid_dim, block_dim>>>(customers, dev_b, dev_result);
 
-  /********** 5. COPY RESULT *********/
+  /********** 6. COPY RESULT FROM DEVICE TO HOST *********/
   // Copy the result back from the device
   cudaMemcpy(result, dev_result, sizeof(int) * nsize, cudaMemcpyDeviceToHost);
 
+  /********** 7. PRINT HOST RESULT *********/
   // Print the result: "0 5 20 45 80 125 180 245 320 405"
   for(int i = 0; i < nsize; i++) {
     printf("%d ", result[i]);
@@ -100,6 +98,7 @@ int main(int argc, char const *argv[]) {
 
   printf("\n");
 
+  /********** 8. FREE DEVICE MEMORY *********/
   cudaFree(dev_neqn);
   cudaFree(dev_policy);
   cudaFree(dev_b);
