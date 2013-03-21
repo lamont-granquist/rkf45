@@ -5,8 +5,6 @@ typedef struct
   int *policy;
 } CUSTOMERS;
 
-const int N = 12;
-
 __device__ int get_id(void) {
   // Find the ID for this thread, based on which block it is in.
   int idx = threadIdx.x + blockIdx.x * blockDim.x; //thread x coordinate
@@ -42,13 +40,13 @@ int main(int argc, char const *argv[]) {
   /********** 1. MALLOC HOST  **********/
   // Data on the host and the device, respectively
   int result[nsize]; // host
-  int neqn[N];
-  int policy[N];
+  int neqn[nsize];
+  int policy[nsize];
 
   // Fill the arrays on the host
-  for(int i=0;i<N;i++) {
+  for(int i=0;i<nsize;i++) {
     neqn[i] = i;
-    policy[i] = N-i;
+    policy[i] = nsize-i;
   }
   
   /********** 2. MALLOC DEVICE  **********/
@@ -56,8 +54,8 @@ int main(int argc, char const *argv[]) {
   int *dev_result;     // device
   int *dev_neqn;
   int *dev_policy;
-  cudaMalloc((void**)&dev_neqn, sizeof(int) * N);
-  cudaMalloc((void**)&dev_policy, sizeof(int) * N);
+  cudaMalloc((void**)&dev_neqn, sizeof(int) * nsize);
+  cudaMalloc((void**)&dev_policy, sizeof(int) * nsize);
   cudaMalloc((void**)&dev_result, sizeof(int) * nsize);
 
   /********** 3. COPY HOST TO DEVICE  **********/
