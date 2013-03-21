@@ -3,6 +3,9 @@
   NOTES:
   - 124 registers per thread.
 
+Better timing?
+Staged concurrent copy and execute, look up, kunne være spændende.
+
 /************* Møde ******************/
 
   rel og abs error vigtigt at forstå godt.
@@ -12,8 +15,6 @@
   Vigtige pointer.
 
   Processafsnit.
-
-/**** Better timing? ****/
 
 /************** QUESTIONS *************/
 VEJLEDER:
@@ -30,6 +31,7 @@ Hypoteser:
   - Sorter efter sammme alder inden for hvert produkt.
   - KLS: memory access. GLOBAL MEMORY!
   - stepsize scales ned ved years afslutninger
+  - __powf vs powf __ = fast math
 
 float problemer, presision.
 What is next
