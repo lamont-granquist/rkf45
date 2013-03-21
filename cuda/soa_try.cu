@@ -26,10 +26,10 @@ __device__ int id;
 __device__ int gpu_array[MAX_KERNELS];
 
 // Device code
-__global__ void kernel(int *dev_neqn, int *dev_b, int *result) {
+__global__ void kernel(CUSTOMERS customers, int *dev_b, int *result) {
   int tid = get_id();
 
-  result[tid] = dev_neqn[tid];//id;
+  result[tid] = customers.neqn[tid];//id;
 }
 
 const int N = 12;
@@ -68,8 +68,11 @@ int main(int argc, char const *argv[]) {
   cudaMemcpy(dev_neqn, neqn, sizeof(int) * nsize, cudaMemcpyHostToDevice);
   cudaMemcpy(dev_b, b, sizeof(int) * nsize, cudaMemcpyHostToDevice);
 
+  //Point device pointer in host struct
+  customers.neqn = dev_neqn;
+
   // Launch the kernel with 10 blocks, each with 1 thread
-  kernel <<<grid_dim, block_dim>>>(dev_neqn, dev_b, result);
+  kernel <<<grid_dim, block_dim>>>(customers, dev_b, result);
 
   // Copy the result back from the device
   cudaMemcpy(c, result, sizeof(int) * nsize, cudaMemcpyDeviceToHost);
