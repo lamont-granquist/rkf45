@@ -46,7 +46,7 @@ static float scale_from_error(float error,bool stepsize_decreased);
 /* Calculate the actual and the alternative solutions */
 //y_plus_one and y_plus_one_alternative will be set
 __device__ __host__
-static void calculate_solutions(int policy,int age, int neqn,float t,float stepsize,float* y,float* y_diff,float* y_plus_one,float* y_plus_one_alternative) {
+static void calculate_solutions(int policy,int age, int neqn,float t,float h,float* y,float* y_diff,float* y_plus_one,float* y_plus_one_alternative) {
 
   float f1[MAX_NEQN];
   float f2[MAX_NEQN];
@@ -55,45 +55,44 @@ static void calculate_solutions(int policy,int age, int neqn,float t,float steps
   float f5[MAX_NEQN];
   float f_swap[MAX_NEQN];
 
-  float lcd_stepsize = stepsize / 4.0f; //lowest common denominator of stepsize
+  float lcd_stepsize; //lowest common denominator of stepsize
 
   //f1
   for (int i = 0; i < neqn; i++ )
-    f_swap[i] = y[i] + lcd_stepsize * y_diff[i];
-  dy (policy,age, t + lcd_stepsize, f_swap, f1 );
+    f_swap[i] = y[i] + h*(1.0f/4.0f)*y_diff[i];
+  dy (policy,age, t + (1.0f/4.0f)*h, f_swap, f1 );
 
   //f2
-  lcd_stepsize = 3.0f * stepsize / 32.0f;
   for (int i = 0; i < neqn; i++ )
-    f_swap[i] = y[i] + lcd_stepsize * ( y_diff[i] + 3.0f * f1[i] );
-  dy (policy,age, t + 3.0f * stepsize / 8.0f, f_swap, f2 );
-
-
-  /*printf("f_swap!   :           %.7f\n",f_swap[0]);
-  printf("!     :               %.7f\n",t + 3.0f * stepsize / 8.0f);*/
+    f_swap[i] = y[i] + h*(3.0f/32.0f)*y_diff[i]+
+                       h*(9.0f/32.0f)*f1[i];
+  dy (policy,age, t + (3.0f/8.0f)*h, f_swap, f2 );
 
   //f3
-  lcd_stepsize = stepsize / 2197.0f;
   for (int i = 0; i < neqn; i++ )
-    f_swap[i] = y[i] + lcd_stepsize * ( 1932.0f * y_diff[i] + ( 7296.0f * f2[i] - 7200.0f * f1[i] ) );
-  dy (policy,age, t + 12.0f * stepsize / 13.0f, f_swap, f3 );
+    f_swap[i] = y[i] + h*(1932.0f/2197.0f)* y_diff[i]-
+                       h*(7200.0f/2197.0f)* f1[i]+
+                       h*(7296.0f/2197.0f)* f2[i];
+  dy (policy,age, t + (12.0f/13.0f)* h, f_swap, f3 );
 
   //f4
-  lcd_stepsize = stepsize / 4104.0f;
+  lcd_stepsize = h / 4104.0f;
   for (int i = 0; i < neqn; i++ )
-    f_swap[i] = y[i] + lcd_stepsize * ( ( 8341.0f * y_diff[i] - 845.0f * f3[i] ) + 
-        ( 29440.0f * f2[i] - 32832.0f * f1[i] ) );
-  dy (policy,age, t + stepsize, f_swap, f4 );
+    f_swap[i] = y[i] + h*(439.0f/216.0f) * y_diff[i] -
+                       h*(8.0f/1.0f)     * f1[i] + 
+                       h*(3680.0f/513.0f)* f2[i] -
+                       h*(845.0f/4104.0f)* f3[i];
+  dy (policy,age, t + h, f_swap, f4 );
 
   //f5
-  lcd_stepsize = stepsize / 20520.0f;
+  lcd_stepsize = h / 20520.0f;
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + lcd_stepsize * ( ( -6080.0f * y_diff[i] + 
           ( 9295.0f * f3[i] - 5643.0f * f4[i] ) ) + ( 41040.0f * f1[i] - 28352.0f * f2[i] ) );
-  dy (policy,age, t + stepsize / 2.0f, f_swap, f5 );
+  dy (policy,age, t + h / 2.0f, f_swap, f5 );
 
   //Calculate solution
-  lcd_stepsize = stepsize / 7618050.0f;
+  lcd_stepsize = h / 7618050.0f;
   for (int i = 0; i < neqn; i++ )
     y_plus_one[i] = y[i] + lcd_stepsize * ( ( 902880.0f * y_diff[i] + 
           ( 3855735.0f * f3[i] - 1371249.0f * f4[i] ) ) + ( 3953664.0f * f2[i] + 277020.0f * f5[i] ) );
