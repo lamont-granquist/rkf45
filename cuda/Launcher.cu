@@ -12,8 +12,8 @@ int compare(const void *l,const void *r)
   CUS* lv = (CUS*)l;
   CUS* rv = (CUS*)r;
   int value = lv->policy - rv->policy;
-  if (value == 0)
-    value = lv->age - rv->age;
+  if (value == 0)               // Out comment to take away age sorting
+    value = lv->age - rv->age;  //
   return value;
 }
 
@@ -52,7 +52,7 @@ int main(int argc, char const *argv[]) {
   }
 
   /********* -1. SORT DATA *******/
-  sort(cuses,nsize);
+  sort(cuses,nsize);// Out comment to take away sorting
 
 
   /********** 1. MALLOC HOST  **********/

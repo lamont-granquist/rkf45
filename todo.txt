@@ -32,8 +32,8 @@ med udregninger.
 Hypoteser:
   - 0       | Large numbers problem? Find by unittesting.z
   - 1. NEJ  | KLS: memory access. GLOBAL MEMORY!
-  - 2.  ?   | Det vigtigt at søge for at ting der ligger sammen. Sortering?
-  - 3.  ?   | Sorter efter sammme alder inden for hvert produkt.
+  - 2. JA   | Det vigtigt at søge for at ting der ligger sammen. Sortering?
+  - 3. NEJ  | Sorter efter sammme alder inden for hvert produkt.
   - 4.  ?   | Lowest common demonimator betyder noget.
   - 5.  ?   | __powf vs powf __ = fast math
   - 6. VENT | //stepsize scales ned ved years afslutninger
