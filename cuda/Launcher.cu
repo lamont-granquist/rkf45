@@ -29,8 +29,8 @@ int get_n_host(dim3 block_dim,dim3 grid_dim) {
 // Host code
 int main(int argc, char const *argv[]) {
   /********** 0. SETUP **********/
-  dim3 block_dim(8,8,5); //Number of threads per block // 320 seems to be best
-  dim3 grid_dim(32,32,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
+  dim3 block_dim(1,1,1); //Number of threads per block // 320 seems to be best
+  dim3 grid_dim(592*320+536,1,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
   //dim3 block_dim(2,2,1); //Number of threads per block
   //dim3 grid_dim(2,1,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
 
@@ -38,7 +38,7 @@ int main(int argc, char const *argv[]) {
 
   /********* -2. GENERATE DATA ***/
 
-  srand(19); //seed
+  srand(time(NULL)); //seed
   CUS cuses[nsize];
   for(int i = 0;i < nsize;i++) {
     cuses[i].policy = 1+rand()%6;
@@ -138,8 +138,12 @@ int main(int argc, char const *argv[]) {
 
   /********** 9. PRINT HOST RESULT  *********/
   // Print the result
-  for(int i = nsize-7; i < nsize; i++) {
-    printf("%i: %11.7f, policy: %i, age: %i \n",i, result[i],policy[i],age[i]);
+  int pa=0;
+  for(int i = 0; i < nsize; i++) {
+    if (age[i] != pa) {
+      printf("%i: %11.7f, policy: %i, age: %i \n",i, result[i],policy[i],age[i]);
+      pa = age[i];
+    }
   }
 
   /*
