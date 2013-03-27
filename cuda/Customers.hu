@@ -10,5 +10,14 @@ typedef struct
   int* start_year;
 } CUSTOMERS;
 
+typedef struct
+{
+  int neqn;
+  int policy;
+  int age;
+  int end_year;
+  int start_year;
+} CUS;
+
 #endif
 

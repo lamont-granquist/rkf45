@@ -1,9 +1,25 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "Rkf45.hu"
 #include "Customers.hu"
 #include <time.h>
 
 /**************************** HOST ******************************/
+
+//Sorting
+int compare(const void *l,const void *r)
+{
+  CUS* lv = (CUS*)l;
+  CUS* rv = (CUS*)r;
+  int value = lv->policy - rv->policy;
+  if (value == 0)
+    value = lv->age - rv->age;
+  return value;
+}
+
+void sort(CUS *c,int l) {
+  qsort(c,l,sizeof(CUS),compare);
+}
 
 //Calculate the number of kernels
 int get_n_host(dim3 block_dim,dim3 grid_dim) {
@@ -12,14 +28,32 @@ int get_n_host(dim3 block_dim,dim3 grid_dim) {
 
 // Host code
 int main(int argc, char const *argv[]) {
-
   /********** 0. SETUP **********/
-  //dim3 block_dim(8,8,5); //Number of threads per block // 320 seems to be best
-  //dim3 grid_dim(32,16,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
-  dim3 block_dim(2,2,1); //Number of threads per block
-  dim3 grid_dim(2,1,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
+  dim3 block_dim(8,8,5); //Number of threads per block // 320 seems to be best
+  dim3 grid_dim(32,16,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
+  //dim3 block_dim(2,2,1); //Number of threads per block
+  //dim3 grid_dim(2,1,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
 
   int nsize = get_n_host(block_dim,grid_dim); 
+
+  /********* -2. GENERATE DATA ***/
+
+  srand(19); //seed
+  CUS cuses[nsize];
+  for(int i = 0;i < nsize;i++) {
+    cuses[i].policy = 1+rand()%6;
+    cuses[i].neqn = 1;
+    if (cuses[i].policy >= 5) {
+      cuses[i].neqn = 2;
+    }
+    cuses[i].age = 5 + rand()%30;
+    cuses[i].end_year = 50;
+    cuses[i].start_year = 0;
+  }
+
+  /********* -1. SORT DATA *******/
+  sort(cuses,nsize);
+
 
   /********** 1. MALLOC HOST  **********/
   // Data on the host and the device, respectively
@@ -30,16 +64,13 @@ int main(int argc, char const *argv[]) {
   int end_year[nsize];
   int start_year[nsize];
 
-  srand(19); //seed
+  //Pack
   for(int i = 0;i < nsize;i++) {
-    policy[i] = 1+rand()%6;
-    neqn[i] = 1;
-    if (policy[i] >= 5) {
-      neqn[i] = 2;
-    }
-    age[i] = 5 + rand()%30;
-    end_year[i] = 50;
-    start_year[i] = 0;
+    policy[i] = cuses[i].policy;
+    neqn[i] = cuses[i].neqn;
+    age[i] = cuses[i].age;
+    end_year[i] = cuses[i].end_year;
+    start_year[i] = cuses[i].start_year;
   }
 
   /********** 2. MALLOC DEVICE  **********/
