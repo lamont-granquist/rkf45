@@ -30,7 +30,7 @@ int get_n_host(dim3 block_dim,dim3 grid_dim) {
 int main(int argc, char const *argv[]) {
   /********** 0. SETUP **********/
   dim3 block_dim(8,8,5); //Number of threads per block // 320 seems to be best
-  dim3 grid_dim(32,16,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
+  dim3 grid_dim(32,32,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
   //dim3 block_dim(2,2,1); //Number of threads per block
   //dim3 grid_dim(2,1,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
 
