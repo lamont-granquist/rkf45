@@ -30,16 +30,17 @@ med udregninger.
   Benchmarking på de 6 kunder:
 
 Hypoteser:
-  - Det vigtigt at søge for at ting der ligger sammen. Sortering?
-  - Sorter efter sammme alder inden for hvert produkt.
-  - KLS: memory access. GLOBAL MEMORY!
-  - stepsize scales ned ved years afslutninger
-  - __powf vs powf __ = fast math
+  - 0       | Large numbers problem? Find by unittesting.z
+  - 1. NEJ  | KLS: memory access. GLOBAL MEMORY!
+  - 2.  ?   | Det vigtigt at søge for at ting der ligger sammen. Sortering?
+  - 3.  ?   | Sorter efter sammme alder inden for hvert produkt.
+  - 4.  ?   | Lowest common demonimator betyder noget.
+  - 5.  ?   | __powf vs powf __ = fast math
+  - 6. VENT | //stepsize scales ned ved years afslutninger
 
 float problemer, presision.
 What is next
 threaddivergence og modeling
-What is different customers, how many are needed etc.
 
 /************** HACK SETUP **************/
 Iterm2 mouse copy fix
