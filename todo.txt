@@ -3,11 +3,7 @@
   NOTES:
   - 124 registers per thread.
 
-Better timing?
 Staged concurrent copy and execute, look up, kunne være spændende.
-
-- Many customers problem.
-- Sort customers?
 
 /************* Møde ******************/
 
@@ -24,11 +20,6 @@ VEJLEDER:
 y_diff (gammel yp) er previous_d_diff. Er det en fejl? Stemmer ikke overens.
 med udregninger.
 
-  Random kunder - når man vil finde ud af om resultat er rigtigt: Og
-  tidstagning: Seeds.
-
-  Benchmarking på de 6 kunder:
-
 Hypoteser:
   - 0       | Large numbers problem? Find by unittesting.z
   - 1. NEJ  | KLS: memory access. GLOBAL MEMORY!
@@ -38,13 +29,7 @@ Hypoteser:
   - 5. JA  1000/500 | __powf vs powf __ = fast math
   - 6. VENT | //stepsize scales ned ved years afslutninger
 
-float problemer, presision.
-What is next
-threaddivergence og modeling
-
 /************** HACK SETUP **************/
-Iterm2 mouse copy fix
-Iterm2 cmd hotkey remove. 
 
 /*********** FLOAT CONVERTION **********/
 
@@ -64,7 +49,8 @@ Start of the day:
   
 Regularly:
   git status
-  git commit -am DESCRIPTION
+  git add .
+  git commit -m DESCRIPTION
 
 End of the day:
   Write down the next moves, and status in the todo file.

@@ -298,11 +298,15 @@ __device__ int get_n_device(void) {
 }
 
 /***** DEVICE ******/
+__global__
+void test_kernel(float *result) {
+
+}
 
 __global__
-void gpu_kernel(CUSTOMERS customers,float *result) {
+void gpu_kernel(int offset, CUSTOMERS customers,float *result) {
 
-  int id = get_id();
+  int id = get_id()+offset;
 
   float y[MAX_NEQN];
   for(int i = 0;i<MAX_NEQN;i++)
@@ -333,6 +337,7 @@ void gpu_kernel(CUSTOMERS customers,float *result) {
 
 
 void cpu_kernel(CUSTOMERS customers,float *result) {
+  /*
   int cpu_id = 0;
   
   float y[MAX_NEQN];
@@ -347,7 +352,6 @@ void cpu_kernel(CUSTOMERS customers,float *result) {
   for(int i = 0;i<51;i++)
     result1[i] = 0.0f;
 
-  /*
   estimate(
            customers.policy[cpu_id],
            customers.age[cpu_id],
@@ -358,10 +362,10 @@ void cpu_kernel(CUSTOMERS customers,float *result) {
            result0,
            result1
           );
-  */
   
   for(int i = 0;i<51;i++)
     result[i] = result0[i];
+  */
 }
 
 /**************** RK_LIBRARY *****************/
