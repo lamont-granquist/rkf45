@@ -2,7 +2,7 @@
 
   NOTES:
   - 124 registers per thread.
-  
+
 Staged concurrent copy and execute, look up, kunne være spændende.
 
 /************* Møde ******************/
