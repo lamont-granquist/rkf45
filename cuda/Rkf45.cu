@@ -308,7 +308,7 @@ void test_kernel(float *result) {
 }
 
 __global__
-void gpu_kernel(int offset, CUSTOMERS customers,float *result) {
+void gpu_kernel(int offset,CUS* cuses,float *result) {
 
   int id = get_id()+offset;
 
@@ -325,11 +325,11 @@ void gpu_kernel(int offset, CUSTOMERS customers,float *result) {
     result1[i] = 0.0f;
 
   //To make sure of loading time of variables.
-  int c_policy = customers.policy[id];
-  int c_age = customers.age[id];
-  int c_neqn = customers.neqn[id];
-  int c_end_year = customers.end_year[id];
-  int c_start_year = customers.start_year[id];
+  int c_policy = cuses[id].policy;
+  int c_age = cuses[id].age;
+  int c_neqn = cuses[id].neqn;
+  int c_end_year = cuses[id].end_year;
+  int c_start_year = cuses[id].start_year;
 
   estimate(
            c_policy,

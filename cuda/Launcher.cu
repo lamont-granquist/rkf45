@@ -87,53 +87,26 @@ int main(int argc, char const *argv[]) {
   /********** 1. MALLOC HOST  **********/
   // Data on the host and the device, respectively
   float* result = (float*) malloc(nsize*sizeof(float));
-  int* neqn = (int*) malloc(nsize*sizeof(int));
-  int* policy = (int*) malloc(nsize*sizeof(int));
-  int* age = (int*) malloc(nsize*sizeof(int));
-  int* end_year = (int*) malloc(nsize*sizeof(int));
-  int* start_year = (int*) malloc(nsize*sizeof(int));
 
   //Pack
   for(int i = 0;i < nsize;i++) {
     result[i] = 0.0f;
-    policy[i] = cuses[i].policy;
-    neqn[i] = cuses[i].neqn;
-    age[i] = cuses[i].age;
-    end_year[i] = cuses[i].end_year;
-    start_year[i] = cuses[i].start_year;
   }
 
   ///********** 2. MALLOC DEVICE  **********/
 
   float *dev_result;
-  int *dev_neqn;
-  int *dev_policy;
-  int *dev_age;
-  int *dev_end_year;
-  int *dev_start_year;
+  CUS *dev_cuses;
+  
   gpuErrchk( cudaMalloc((void**)&dev_result, sizeof(float) * nsize));
-  gpuErrchk( cudaMalloc((void**)&dev_neqn, sizeof(int) * nsize));
-  gpuErrchk( cudaMalloc((void**)&dev_policy, sizeof(int) * nsize));
-  gpuErrchk( cudaMalloc((void**)&dev_age, sizeof(int) * nsize));
-  gpuErrchk( cudaMalloc((void**)&dev_end_year, sizeof(int) * nsize));
-  gpuErrchk( cudaMalloc((void**)&dev_start_year, sizeof(int) * nsize));
+  gpuErrchk( cudaMalloc((void**)&dev_cuses, sizeof(CUS) * nsize));
 
   /********** 3. COPY HOST TO DEVICE  **********/
   // Copy data to the device
-  gpuErrchk( cudaMemcpy(dev_neqn, neqn, sizeof(int) * nsize, cudaMemcpyHostToDevice));
-  gpuErrchk( cudaMemcpy(dev_policy, policy, sizeof(int) * nsize, cudaMemcpyHostToDevice));
-  gpuErrchk( cudaMemcpy(dev_age, age, sizeof(int) * nsize, cudaMemcpyHostToDevice));
-  gpuErrchk( cudaMemcpy(dev_end_year, end_year, sizeof(int) * nsize, cudaMemcpyHostToDevice));
-  gpuErrchk( cudaMemcpy(dev_start_year, start_year, sizeof(int) * nsize, cudaMemcpyHostToDevice));
+  gpuErrchk( cudaMemcpy(dev_cuses, cuses, sizeof(CUS) * nsize, cudaMemcpyHostToDevice));
 
   /********** 4. CUSTOMERS HOLDS POINTERS TO DEVICE **********/
   //Used to hold the pointers
-  CUSTOMERS customers;
-  customers.neqn = dev_neqn;
-  customers.policy = dev_policy;
-  customers.age = dev_age;
-  customers.end_year = dev_end_year;
-  customers.start_year = dev_start_year;
 
   //********* 5. TIMING START ************/
   //Normal timing
@@ -149,7 +122,7 @@ int main(int argc, char const *argv[]) {
   int offset = 0;
   /********** 6. LAUNCH WITH CUSTOMERS AND RESULT *********/
   for(int i = 0; i < n_kernels; i++) {
-    gpu_kernel <<<grid_dim, block_dim>>>(offset,customers,dev_result); // GPU
+    gpu_kernel <<<grid_dim, block_dim>>>(offset,dev_cuses,dev_result); // GPU
     offset+=kernel_size;
   }
   //test_kernel <<<grid_dim, block_dim>>>(dev_result); // GPU
@@ -176,9 +149,9 @@ int main(int argc, char const *argv[]) {
   // Print the result
   int pa=0;
   for(int i = 0; i < nsize; i++) {
-    if (age[i] != pa) {
-      printf("%i: %11.7f, policy: %i, age: %i \n",i, result[i],policy[i],age[i]);
-      pa = age[i];
+    if (cuses[i].age != pa) {
+      printf("%i: %11.7f, policy: %i, age: %i \n",i, result[i],cuses[i].policy,cuses[i].age);
+      pa = cuses[i].age;
     }
   }
 
@@ -193,17 +166,9 @@ int main(int argc, char const *argv[]) {
 
   /********** 10. FREE MEMORY   *********/
   free(result);
-  free(policy);
-  free(neqn);
-  free(age);
-  free(end_year);
-  free(start_year);
+  free(cuses);
   gpuErrchk( cudaFree(dev_result));
-  gpuErrchk( cudaFree(dev_policy));
-  gpuErrchk( cudaFree(dev_neqn));
-  gpuErrchk( cudaFree(dev_age));
-  gpuErrchk( cudaFree(dev_end_year));
-  gpuErrchk( cudaFree(dev_start_year));
+  gpuErrchk( cudaFree(dev_cuses));
 
   return 0;
 }
