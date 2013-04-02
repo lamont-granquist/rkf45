@@ -2,9 +2,13 @@
  * C implementation of the Rkf45 algoritm.
  */
 
+__device__
 const int MAX_NEQN = 2;
+__device__
 const float relerr = 1e-7;
+__device__
 const float abserr = 1e-7;
+__device__
 const float FloatEpsilon = 0.00000011920928955078125000f; //TODO: Calculate this constant
 
 /********************* INIT *******************/
