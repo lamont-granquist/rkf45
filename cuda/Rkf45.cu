@@ -165,7 +165,7 @@ static void local_estimate(int policy,int age, int neqn,int local_end_year,int l
       local_start_reached = false;
 
       //Scale down.
-      float s = max(0.1f,0.9f / powf( error, 0.2f ));
+      float s = max(0.1f,0.9f / __powf( error, 0.2f ));
       *stepsize = s * *stepsize;  
 
       //Try again.
@@ -226,9 +226,9 @@ static float calculate_initial_stepsize(int neqn,int start_year,int end_year,flo
     if ( 0.0f < tol )
     {
       float ypk = fabsf( y_diff[k] );
-      if ( tol < ypk * powf( s, 5.0f ) )
+      if ( tol < ypk * __powf( s, 5.0f ) )
       {
-        s = powf( ( tol / ypk ), 0.2f );
+        s = __powf( ( tol / ypk ), 0.2f );
         //printf("this should not happen.\n");
       }
     }
@@ -240,7 +240,7 @@ static float calculate_initial_stepsize(int neqn,int start_year,int end_year,flo
 /* Scale from error calculations */
 __device__ 
 static float scale_from_error(float error,bool stepsize_decreased) {
-  float scale = min(5.0f,0.9f / powf( error, 0.2f ));
+  float scale = min(5.0f,0.9f / __powf( error, 0.2f ));
 
   if (stepsize_decreased)
     scale = min( scale, 1.0f );
@@ -376,7 +376,7 @@ void cpu_kernel(CUSTOMERS customers,float *result) {
 
 __device__ 
 float GM(int age, float t) {
-    return 0.0005f + powf(10.0f, 5.728f - 10.0f + 0.038f*((float)age + t));
+    return 0.0005f + __powf(10.0f, 5.728f - 10.0f + 0.038f*((float)age + t));
 }
 
 // Interest
@@ -544,7 +544,7 @@ static float b_1_DisabilityAnnuity(float t) {
 
 __device__ 
 static float GM01_DisabilityAnnuity(int age, float t) {
-  return 0.0006f + powf(10.0f, 4.71609f - 10.0f + 0.06f*((float)age + t));
+  return 0.0006f + __powf(10.0f, 4.71609f - 10.0f + 0.06f*((float)age + t));
 }
 
 __device__ 
@@ -626,7 +626,7 @@ static float b_1_DisabilityTermInsurance(float t) {
 
 __device__ 
 static float GM01_DisabilityTermInsurance(int age, float t) {
-  return 0.0006f + powf(10.0f, 4.71609f - 10.0f + 0.06f*((float)age + t));
+  return 0.0006f + __powf(10.0f, 4.71609f - 10.0f + 0.06f*((float)age + t));
 }
 
 __device__ 
