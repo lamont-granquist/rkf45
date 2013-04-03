@@ -40,12 +40,27 @@ int get_n_host(dim3 block_dim,dim3 grid_dim) {
 
 // Host code
 int main(int argc, char const *argv[]) {
+  int n_kernels = 1;
+  int gridx = 50;
+  int gridy = 50;
+    
+  if (argc>1) {
+      n_kernels = atoi(argv[1]);
+  }
+
+  if (argc>2) {
+      gridx = atoi(argv[2]);
+  }
+
+  if (argc>3) {
+      gridy = atoi(argv[3]);
+  }
+
   /********** 0. SETUP **********/
   dim3 block_dim(8,8,5); //Number of threads per block // 320 seems to be best
-  dim3 grid_dim(100,50,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
+  dim3 grid_dim(gridx,gridy,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
   //dim3 block_dim(2,2,1); //Number of threads per block
   //dim3 grid_dim(2,1,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
-  int n_kernels = 1;
   int kernel_size = get_n_host(block_dim,grid_dim);
   int nsize = kernel_size*n_kernels; 
 
