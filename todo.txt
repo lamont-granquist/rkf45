@@ -27,7 +27,10 @@ Hypoteser:
   - 3. NEJ  | Sorter efter sammme alder inden for hvert produkt.
   - 4. NEJ  | Lowest common demonimator betyder noget.
   - 5. JA  1000/500 | __powf vs powf __ = fast math
+
   - 6. VENT | //stepsize scales ned ved years afslutninger
+  - 7. VENT |  Betyder y_diff noget?
+  
 
 /************** HACK SETUP **************/
 
