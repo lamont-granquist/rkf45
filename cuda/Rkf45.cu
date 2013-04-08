@@ -324,12 +324,19 @@ void gpu_kernel(int offset, CUSTOMERS customers,float *result) {
   for(int i = 0;i<51;i++)
     result1[i] = 0.0f;
 
+  //To make sure of loading time of variables.
+  int c_policy = customers.policy[id];
+  int c_age = customers.age[id];
+  int c_neqn = customers.neqn[id];
+  int c_end_year = customers.end_year[id];
+  int c_start_year = customers.start_year[id];
+
   estimate(
-           customers.policy[id],
-           customers.age[id],
-           customers.neqn[id],
-           customers.end_year[id],
-           customers.start_year[id],
+           c_policy,
+           c_age,
+           c_neqn,
+           c_end_year,
+           c_start_year,
            y,
            result0,
            result1
