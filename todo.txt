@@ -22,12 +22,15 @@ De nuværende forsikringsselskabers beregninger:
 - Regner med at kundernes policies er uafhængige. -> Det giver dem større krav.
 
 Næste skridt:
+0)  Brug RIGTIGE tal fra fortran implementation, og sikre sig at koden virker
+    rigtigt
 1)	Customers skal kunne have flere policies
+    sol1: split multi-customer in more customers
+    sol2: solve customers in seq (bad for sorting)
 2)	Rentekurver på kunder
-a.	Optimer søgning i rentekurver
-b.	Eventuelt udnytte texture interpolation?
-
-3)	Lav støj med Brown, og regn på mange rentekurver
+    a.	Optimer søgning i rentekurve interpolation
+    b.	Eventuelt udnytte cuda textures ved interpolation?
+3)	Lav støj med Brown, og regn på mange rentekurver for hver customer
 
 Stop ved helår er godt for rentekurver. 
 
