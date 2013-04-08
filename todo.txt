@@ -24,6 +24,14 @@ De nuværende forsikringsselskabers beregninger:
 Næste skridt:
 0)  Brug RIGTIGE tal fra fortran implementation, og sikre sig at koden virker
     rigtigt
+
+    PureEndowment                   0.14379469738
+    DeferredTemporaryLifeAnnuity    1.0265607675
+    TemporaryLifeAnnuityPremium     -15.971767666
+    TermInsurance                   0.057616919318
+    DisabilityAnnuity               0.55552610797, 15.971767666
+    DisabilityTermInsurance         0.071418699003, 0.000000000
+
 1)	Customers skal kunne have flere policies
     sol1: split multi-customer in more customers
     sol2: solve customers in seq (bad for sorting)
