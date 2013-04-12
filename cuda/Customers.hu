@@ -15,6 +15,7 @@ typedef struct
   int neqn;
   int policy;
   int age;
+  int id;
   int end_year;
   int start_year;
 } CUS;
