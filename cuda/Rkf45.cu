@@ -383,31 +383,35 @@ void cpu_kernel(CUSTOMERS customers,float *result) {
 // Data from 2011-11-16 
 
 __device__
+const int yield_curve_size = 32;
+
+__device__
 const float ts[] = { 
     0.25f, 0.5f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 
-        15.0f, 16.0f, 17.0f, 18.0f, 19.0f, 20.0f, 21.0f, 22.0f, 23.0f, 24.0f, 25.0f, 26.0f, 27.0f, 28.0f, 29.0f, 30.0f
+    15.0f, 16.0f, 17.0f, 18.0f, 19.0f, 20.0f, 21.0f, 22.0f, 23.0f, 24.0f, 25.0f, 26.0f, 27.0f, 28.0f, 29.0f, 30.0f
 };
 
 __device__
 const float rs[] = { 
-            1.146677033f, 1.146677033f, 1.146677033f, 1.340669678f, 1.571952911f, 1.803236144f, 
-            2.034519377f, 2.265802610f, 2.497085843f, 2.584085843f, 2.710085843f, 2.805085843f, 
-            2.871485843f, 2.937885843f, 3.004285843f, 3.070685843f, 3.137085843f, 3.136485843f, 
-            3.135885843f, 3.135285843f, 3.134685843f, 3.134085843f, 3.113185843f, 3.092285843f, 
-            3.071385843f, 3.050485843f, 3.029585843f, 3.008685843f, 2.987785843f, 2.966885843f, 
-            2.945985843f, 2.925085843f
+    1.146677033f, 1.146677033f, 1.146677033f, 1.340669678f, 1.571952911f, 1.803236144f, 
+    2.034519377f, 2.265802610f, 2.497085843f, 2.584085843f, 2.710085843f, 2.805085843f, 
+    2.871485843f, 2.937885843f, 3.004285843f, 3.070685843f, 3.137085843f, 3.136485843f, 
+    3.135885843f, 3.135285843f, 3.134685843f, 3.134085843f, 3.113185843f, 3.092285843f, 
+    3.071385843f, 3.050485843f, 3.029585843f, 3.008685843f, 2.987785843f, 2.966885843f, 
+    2.945985843f, 2.925085843f
 };
 
 __device__
 float rFsa(float t) { 
-    return 0.05f;
-    /*
     // Requires ts non-empty and elements strictly increasing.
-    int last = ts.Length-1;
-    if (t <= ts[0])
-        return Math.Log(1 + rs[0]/100);
-    else if (t >= ts[last])
-        return Math.Log(1 + rs[last]/100);
+    int last = yield_curve_size-1;
+
+    if (t <= ts[0]) {
+        return log(1 + rs[0]/100);
+    }
+    else if (t >= ts[last]) {
+        return log(1 + rs[last]/100);
+    }
     else {
         int a = 0, b = last;
         // Now a < b (bcs. ts must have more than 1 element) and ts[a] < t < ts[b]
@@ -421,12 +425,11 @@ float rFsa(float t) {
         }
         // Now a+1>=b and ts[a] <= t < ts[b]; so a!=b and hence a+1 == b <= last
         int m = a;
-        double tm = ts[m], tm1 = ts[m+1];
-        double rm = rs[m] / 100, rm1 = rs[m+1] / 100;
-        double Rt = (rm * (tm1 - t) + rm1 * (t - tm)) / (tm1 - tm);
-        return Math.Log(1 + Rt) + t / (tm1 - tm) * (rm1 - rm) / (1 + Rt);
+        float tm = ts[m], tm1 = ts[m+1];
+        float rm = rs[m] / 100, rm1 = rs[m+1] / 100;
+        float Rt = (rm * (tm1 - t) + rm1 * (t - tm)) / (tm1 - tm);
+        return log(1 + Rt) + t / (tm1 - tm) * (rm1 - rm) / (1 + Rt);
     }
-    */
 }
 /**************** RK_LIBRARY *****************/
 
