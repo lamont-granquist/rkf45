@@ -36,6 +36,14 @@ Næste skridt:
     sol1: split multi-customer in more customers
     sol2: solve customers in seq (bad for sorting)
 2)	Rentekurver på kunder
+
+0.3016580290818680
+2.3671638801343900
+-21.1577071399369000
+0.0883805171364136
+0.9311483673443270
+0.1164113969853670
+
     a.	Optimer søgning i rentekurve interpolation
     b.	Eventuelt udnytte cuda textures ved interpolation?
 3)	Lav støj med Brown, og regn på mange rentekurver for hver customer

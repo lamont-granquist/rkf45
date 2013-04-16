@@ -379,6 +379,55 @@ void cpu_kernel(CUSTOMERS customers,float *result) {
   */
 }
 
+// The Danish FSA yield curve (Finanstilsynets rentekurve).
+// Data from 2011-11-16 
+
+__device__
+const float ts[] = { 
+    0.25f, 0.5f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 
+        15.0f, 16.0f, 17.0f, 18.0f, 19.0f, 20.0f, 21.0f, 22.0f, 23.0f, 24.0f, 25.0f, 26.0f, 27.0f, 28.0f, 29.0f, 30.0f
+};
+
+__device__
+const float rs[] = { 
+            1.146677033f, 1.146677033f, 1.146677033f, 1.340669678f, 1.571952911f, 1.803236144f, 
+            2.034519377f, 2.265802610f, 2.497085843f, 2.584085843f, 2.710085843f, 2.805085843f, 
+            2.871485843f, 2.937885843f, 3.004285843f, 3.070685843f, 3.137085843f, 3.136485843f, 
+            3.135885843f, 3.135285843f, 3.134685843f, 3.134085843f, 3.113185843f, 3.092285843f, 
+            3.071385843f, 3.050485843f, 3.029585843f, 3.008685843f, 2.987785843f, 2.966885843f, 
+            2.945985843f, 2.925085843f
+};
+
+__device__
+float rFsa(float t) { 
+    return 0.05f;
+    /*
+    // Requires ts non-empty and elements strictly increasing.
+    int last = ts.Length-1;
+    if (t <= ts[0])
+        return Math.Log(1 + rs[0]/100);
+    else if (t >= ts[last])
+        return Math.Log(1 + rs[last]/100);
+    else {
+        int a = 0, b = last;
+        // Now a < b (bcs. ts must have more than 1 element) and ts[a] < t < ts[b]
+        while (a+1 < b) {
+            // Now a < b and ts[a] <= t < ts[b]
+            int i = (a+b)/2;
+            if (ts[i] <= t)
+                a = i;
+            else // t < ts[i]
+                b = i;
+        }
+        // Now a+1>=b and ts[a] <= t < ts[b]; so a!=b and hence a+1 == b <= last
+        int m = a;
+        double tm = ts[m], tm1 = ts[m+1];
+        double rm = rs[m] / 100, rm1 = rs[m+1] / 100;
+        double Rt = (rm * (tm1 - t) + rm1 * (t - tm)) / (tm1 - tm);
+        return Math.Log(1 + Rt) + t / (tm1 - tm) * (rm1 - rm) / (1 + Rt);
+    }
+    */
+}
 /**************** RK_LIBRARY *****************/
 
 __device__ 
@@ -389,8 +438,7 @@ float GM(int age, float t) {
 // Interest
 __device__ 
 float r(float t) {
-  float interestrate = 0.05f;
-    return interestrate;
+    return rFsa(t);
 }
 
 __device__ 
@@ -423,10 +471,10 @@ static float bj_01_PureEndowment(float t) {
 
 __device__ 
 void bj_ii_PureEndowment(float t, float* result) {
-  result[0] += bj_00_PureEndowment(t);
+    result[0] += bj_00_PureEndowment(t);
 }
 
-__device__ 
+    __device__ 
 void dy_PureEndowment(int age, float t, float* V,float* result)
 {
     result[0] = r(t) * V[0] - b_0_PureEndowment(t) - mu_01_PureEndowment(age,t) * (0 - V[0] + bj_01_PureEndowment(t));
@@ -458,10 +506,10 @@ static float bj_01_DeferredTemporaryLifeAnnuity(float t) {
 
 __device__ 
 void bj_ii_DeferredTemporaryLifeAnnuity(float t, float* result) {
-  result[0] += bj_00_DeferredTemporaryLifeAnnuity(t);
+    result[0] += bj_00_DeferredTemporaryLifeAnnuity(t);
 }
 
-__device__ 
+    __device__ 
 void dy_DeferredTemporaryLifeAnnuity(int age, float t, float* V,float* result)
 {
     result[0] = r(t) * V[0] - b_0_DeferredTemporaryLifeAnnuity(t) - mu_01_DeferredTemporaryLifeAnnuity(age,t) * (0 - V[0] + bj_01_DeferredTemporaryLifeAnnuity(t));
@@ -492,10 +540,10 @@ static float bj_01_TemporaryLifeAnnuityPremium(float t) {
 
 __device__ 
 void bj_ii_TemporaryLifeAnnuityPremium(float t, float* result) {
-  result[0] += bj_00_TemporaryLifeAnnuityPremium(t);
+    result[0] += bj_00_TemporaryLifeAnnuityPremium(t);
 }
 
-__device__ 
+    __device__ 
 void dy_TemporaryLifeAnnuityPremium(int age, float t, float* V,float* result)
 {
     result[0] = r(t) * V[0] - b_0_TemporaryLifeAnnuityPremium(t) - mu_01_TemporaryLifeAnnuityPremium(age,t) * (0 - V[0] + bj_01_TemporaryLifeAnnuityPremium(t));
@@ -526,10 +574,10 @@ static float bj_01_TermInsurance(float t) {
 
 __device__ 
 void bj_ii_TermInsurance(float t, float* result) {
-  result[0] += bj_00_TermInsurance(t);
+    result[0] += bj_00_TermInsurance(t);
 }
 
-__device__ 
+    __device__ 
 void dy_TermInsurance(int age, float t, float* V,float* result)
 {
     result[0] = r(t) * V[0] - b_0_TermInsurance(t) - mu_01_TermInsurance(age,t) * (0 - V[0] + bj_01_TermInsurance(t));
@@ -543,25 +591,25 @@ static float b_0_DisabilityAnnuity(float t) {
 
 __device__ 
 static float b_1_DisabilityAnnuity(float t) {
-  int n = 35;
-  int bdisabled = 1;
-  //return 0.0f;
-  return bdisabled * indicator(t > 0) * indicator(t < n);
+    int n = 35;
+    int bdisabled = 1;
+    //return 0.0f;
+    return bdisabled * indicator(t > 0) * indicator(t < n);
 }
 
 __device__ 
 static float GM01_DisabilityAnnuity(int age, float t) {
-  return 0.0006f + __powf(10.0f, 4.71609f - 10.0f + 0.06f*((float)age + t));
+    return 0.0006f + __powf(10.0f, 4.71609f - 10.0f + 0.06f*((float)age + t));
 }
 
 __device__ 
 static float GM02_DisabilityAnnuity(int age, float t) {
-  return GM(age,t);
+    return GM(age,t);
 }
 
 __device__ 
 static float GM12_DisabilityAnnuity(int age, float t) {
-  return GM(age,t);
+    return GM(age,t);
 }
 
 __device__ 
@@ -586,38 +634,38 @@ static float bj_00_DisabilityAnnuity(float t) {
 
 __device__ 
 static float bj_01_DisabilityAnnuity(float t) {
-  //int n = 35;
-  //int bdisabled = 1;
-  //return bdisabled * indicator(t > 0) * indicator(t < n);
-  return 0.0f;
+    //int n = 35;
+    //int bdisabled = 1;
+    //return bdisabled * indicator(t > 0) * indicator(t < n);
+    return 0.0f;
 }
 
 __device__ 
 static float bj_02_DisabilityAnnuity(float t) {
-  return 0.0f;
+    return 0.0f;
 }
 
 __device__ 
 static float bj_11_DisabilityAnnuity(float t) {
-  return 0.0f;
+    return 0.0f;
 }
 
 __device__ 
 static float bj_12_DisabilityAnnuity(float t) {
-  return 0.0f;
+    return 0.0f;
 }
 
 __device__ 
 void bj_ii_DisabilityAnnuity(float t, float* result) {
-  result[0] += bj_00_DisabilityAnnuity(t);
-  result[1] += bj_11_DisabilityAnnuity(t);
+    result[0] += bj_00_DisabilityAnnuity(t);
+    result[1] += bj_11_DisabilityAnnuity(t);
 }
 
-__device__ 
+    __device__ 
 void dy_DisabilityAnnuity(int age, float t, float* V,float* result)
 {
-  result[0] = r(t) * V[0] - b_0_DisabilityAnnuity(t) - mu_01_DisabilityAnnuity(age,t) * (V[1] - V[0] + bj_01_DisabilityAnnuity(t)) - mu_02_DisabilityAnnuity(age,t) * (0 - V[0] + bj_02_DisabilityAnnuity(t));
-  result[1] = r(t) * V[1] - b_1_DisabilityAnnuity(t) - mu_12_DisabilityAnnuity(age,t) * (0 - V[1] + bj_12_DisabilityAnnuity(t)); 
+    result[0] = r(t) * V[0] - b_0_DisabilityAnnuity(t) - mu_01_DisabilityAnnuity(age,t) * (V[1] - V[0] + bj_01_DisabilityAnnuity(t)) - mu_02_DisabilityAnnuity(age,t) * (0 - V[0] + bj_02_DisabilityAnnuity(t));
+    result[1] = r(t) * V[1] - b_1_DisabilityAnnuity(t) - mu_12_DisabilityAnnuity(age,t) * (0 - V[1] + bj_12_DisabilityAnnuity(t)); 
 }
 
 /**************** PRODUCT, DisabilityTermInsurance ***************************/
@@ -633,17 +681,17 @@ static float b_1_DisabilityTermInsurance(float t) {
 
 __device__ 
 static float GM01_DisabilityTermInsurance(int age, float t) {
-  return 0.0006f + __powf(10.0f, 4.71609f - 10.0f + 0.06f*((float)age + t));
+    return 0.0006f + __powf(10.0f, 4.71609f - 10.0f + 0.06f*((float)age + t));
 }
 
 __device__ 
 static float GM02_DisabilityTermInsurance(int age,float t) {
-  return GM(age,t);
+    return GM(age,t);
 }
 
 __device__ 
 static float GM12_DisabilityTermInsurance(int age, float t) {
-  return GM(age,t);
+    return GM(age,t);
 }
 
 __device__ 
@@ -668,88 +716,88 @@ static float bj_00_DisabilityTermInsurance(float t) {
 
 __device__ 
 static float bj_01_DisabilityTermInsurance(float t) {
-  int n = 35;
-  int bdisabled = 1;
-  return bdisabled * indicator(t > 0) * indicator(t < n);
+    int n = 35;
+    int bdisabled = 1;
+    return bdisabled * indicator(t > 0) * indicator(t < n);
 }
 
 __device__ 
 static float bj_02_DisabilityTermInsurance(float t) {
-  return 0.0f;
+    return 0.0f;
 }
 
 __device__ 
 static float bj_11_DisabilityTermInsurance(float t) {
-  return 0.0f;
+    return 0.0f;
 }
 
 __device__ 
 static float bj_12_DisabilityTermInsurance(float t) {
-  return 0.0f;
+    return 0.0f;
 }
 
 __device__ 
 void bj_ii_DisabilityTermInsurance(float t, float* result) {
-  result[0] += bj_00_DisabilityTermInsurance(t);
-  result[1] += bj_11_DisabilityTermInsurance(t);
+    result[0] += bj_00_DisabilityTermInsurance(t);
+    result[1] += bj_11_DisabilityTermInsurance(t);
 }
 
-__device__ 
+    __device__ 
 void dy_DisabilityTermInsurance(int age, float t, float* V,float* result)
 {
-  result[0] = r(t) * V[0] - b_0_DisabilityTermInsurance(t) - mu_01_DisabilityTermInsurance(age,t) * (V[1] - V[0] + bj_01_DisabilityTermInsurance(t)) - mu_02_DisabilityTermInsurance(age,t) * (0 - V[0] + bj_02_DisabilityTermInsurance(t));
-  result[1] = r(t) * V[1] - b_1_DisabilityTermInsurance(t) - mu_12_DisabilityTermInsurance(age,t) * (0 - V[1] + bj_12_DisabilityTermInsurance(t)); 
+    result[0] = r(t) * V[0] - b_0_DisabilityTermInsurance(t) - mu_01_DisabilityTermInsurance(age,t) * (V[1] - V[0] + bj_01_DisabilityTermInsurance(t)) - mu_02_DisabilityTermInsurance(age,t) * (0 - V[0] + bj_02_DisabilityTermInsurance(t));
+    result[1] = r(t) * V[1] - b_1_DisabilityTermInsurance(t) - mu_12_DisabilityTermInsurance(age,t) * (0 - V[1] + bj_12_DisabilityTermInsurance(t)); 
 }
 
 /**** Policy distributor ****/
 
 __device__ 
 void dy(int policy,int age, float t, float* V, float* result) {
-  switch(policy)
-  {
-    case 1:
-      dy_PureEndowment(age,t,V,result);
-    break;
-    case 2:
-      dy_DeferredTemporaryLifeAnnuity(age,t,V,result);
-    break;
-    case 3:
-      dy_TemporaryLifeAnnuityPremium(age,t,V,result);
-    break;
-    case 4:
-      dy_TermInsurance(age,t,V,result);
-    break;
-    case 5:
-      dy_DisabilityAnnuity(age,t,V,result);
-    break; 
-    case 6:
-      dy_DisabilityTermInsurance(age,t,V,result);
-    break; 
-  };
+    switch(policy)
+    {
+        case 1:
+            dy_PureEndowment(age,t,V,result);
+            break;
+        case 2:
+            dy_DeferredTemporaryLifeAnnuity(age,t,V,result);
+            break;
+        case 3:
+            dy_TemporaryLifeAnnuityPremium(age,t,V,result);
+            break;
+        case 4:
+            dy_TermInsurance(age,t,V,result);
+            break;
+        case 5:
+            dy_DisabilityAnnuity(age,t,V,result);
+            break; 
+        case 6:
+            dy_DisabilityTermInsurance(age,t,V,result);
+            break; 
+    };
 }
 
 __device__ 
 void bj_ii(int policy, float t, float* result) {
-  switch(policy)
-  {
-    case 1:
-      bj_ii_PureEndowment(t,result);
-    break;
-    case 2:
-      bj_ii_DeferredTemporaryLifeAnnuity(t,result);
-    break;
-    case 3:
-      bj_ii_TemporaryLifeAnnuityPremium(t,result);
-    break;
-    case 4:
-      bj_ii_TermInsurance(t,result);
-    break;
-    case 5:
-      bj_ii_DisabilityAnnuity(t,result);
-    break;
-    case 6:
-      bj_ii_DisabilityTermInsurance(t,result);
-    break;
+    switch(policy)
+    {
+        case 1:
+            bj_ii_PureEndowment(t,result);
+            break;
+        case 2:
+            bj_ii_DeferredTemporaryLifeAnnuity(t,result);
+            break;
+        case 3:
+            bj_ii_TemporaryLifeAnnuityPremium(t,result);
+            break;
+        case 4:
+            bj_ii_TermInsurance(t,result);
+            break;
+        case 5:
+            bj_ii_DisabilityAnnuity(t,result);
+            break;
+        case 6:
+            bj_ii_DisabilityTermInsurance(t,result);
+            break;
 
-  };
+    };
 }

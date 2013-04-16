@@ -43,7 +43,7 @@ int main(int argc, char const *argv[]) {
   int n_kernels = 1;
   int gridx = 50;
   int gridy = 50;
-  int max_policies = 2;
+  int max_policies = 1;
     
   if (argc>1) {
       n_kernels = atoi(argv[1]);
@@ -196,7 +196,7 @@ int main(int argc, char const *argv[]) {
 
   /********** 9. PRINT HOST RESULT  *********/
   for(int i = 0;i < id;i++)
-    printf("%i: %11.7f \n",i, collected_results[i],policy[i],age[i]);
+    printf("%i: %11.7f \n",i, collected_results[i]);
 
   /*
   for(int i = 0; i < 51; i++) {
