@@ -69,6 +69,15 @@ Staged concurrent copy and execute, look up, kunne være spændende.
 
 /************** QUESTIONS *************/
 VEJLEDER:
+
+Bedre testing? Forslag?
+
+Test af interest rates:
+A: 19749,19722
+B: 15877,15852
+C: 19289,19259
+
+
 y_diff (gammel yp) er previous_d_diff. Er det en fejl? Stemmer ikke overens.
 med udregninger.
 
@@ -83,6 +92,7 @@ Hypoteser:
   - 6. VENT | //stepsize scales ned ved years afslutninger
   - 7. VENT |  Betyder y_diff noget?
   
+
 
 /************** HACK SETUP **************/
 

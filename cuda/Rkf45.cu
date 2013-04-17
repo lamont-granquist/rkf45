@@ -9,7 +9,7 @@ const float relerr = 1e-7;
 __device__
 const float abserr = 1e-7;
 __device__
-const float FloatEpsilon = 0.00000011920928955078125000f; //TODO: Calculate this constant
+const float FloatEpsilon = 0.00000011920928955078125000f; 
 
 /********************* INIT *******************/
 
@@ -407,10 +407,10 @@ float rFsa(float t) {
     int last = yield_curve_size-1;
 
     if (t <= ts[0]) {
-        return log(1 + rs[0]/100);
+        return __logf(1.0f + rs[0]/100.0f);
     }
     else if (t >= ts[last]) {
-        return log(1 + rs[last]/100);
+        return __logf(1.0f + rs[last]/100.0f);
     }
     else {
         int a = 0, b = last;
@@ -426,9 +426,9 @@ float rFsa(float t) {
         // Now a+1>=b and ts[a] <= t < ts[b]; so a!=b and hence a+1 == b <= last
         int m = a;
         float tm = ts[m], tm1 = ts[m+1];
-        float rm = rs[m] / 100, rm1 = rs[m+1] / 100;
+        float rm = rs[m] / 100.0f, rm1 = rs[m+1f] / 100.0f;
         float Rt = (rm * (tm1 - t) + rm1 * (t - tm)) / (tm1 - tm);
-        return log(1 + Rt) + t / (tm1 - tm) * (rm1 - rm) / (1 + Rt);
+        return __logf(1.0f + Rt) + t / (tm1 - tm) * (rm1 - rm) / (1.0f + Rt);
     }
 }
 /**************** RK_LIBRARY *****************/

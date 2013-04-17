@@ -62,7 +62,7 @@ int main(int argc, char const *argv[]) {
   }
 
   /********** 0. SETUP **********/
-  dim3 block_dim(2,4,1); //Number of threads per block // 320 seems to be best
+  dim3 block_dim(8,8,5); //Number of threads per block // 320 seems to be best
   dim3 grid_dim(gridx,gridy,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
   //dim3 block_dim(2,2,1); //Number of threads per block
   //dim3 grid_dim(2,1,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
@@ -195,7 +195,7 @@ int main(int argc, char const *argv[]) {
     collected_results[cuses[i].id] += result[i];
 
   /********** 9. PRINT HOST RESULT  *********/
-  for(int i = 0;i < id;i++)
+  for(int i = id-5;i < id;i++)
     printf("%i: %11.7f \n",i, collected_results[i]);
 
   /*
