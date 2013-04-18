@@ -79,7 +79,7 @@ int main(int argc, char const *argv[]) {
   int i=0;
   int id=0;
   while(i < nsize) {
-      int age = 5 + rand()%30; //30
+      int age = 30;//5 + rand()%30; //30
       int end_year = 50;
       int start_year = 0;
       int c = min(i+max_policies,nsize);
@@ -195,7 +195,7 @@ int main(int argc, char const *argv[]) {
     collected_results[cuses[i].id] += result[i];
 
   /********** 9. PRINT HOST RESULT  *********/
-  for(int i = id-5;i < id;i++)
+  for(int i = id-12;i < id;i++)
     printf("%i: %11.7f \n",i, collected_results[i]);
 
   /*

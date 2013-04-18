@@ -383,9 +383,6 @@ void cpu_kernel(CUSTOMERS customers,float *result) {
 // Data from 2011-11-16 
 
 __device__
-const int yield_curve_size = 32;
-
-__device__
 const float ts[] = { 
     0.25f, 0.5f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 
     15.0f, 16.0f, 17.0f, 18.0f, 19.0f, 20.0f, 21.0f, 22.0f, 23.0f, 24.0f, 25.0f, 26.0f, 27.0f, 28.0f, 29.0f, 30.0f
@@ -402,35 +399,34 @@ const float rs[] = {
 };
 
 __device__
-float rFsa(float t) { 
-    // Requires ts non-empty and elements strictly increasing.
-    int last = yield_curve_size-1;
+float interpolate(float t,int m) {
+  float tm = ts[m], tm1 = ts[m+1];
+  float rm = rs[m] / 100.0f, rm1 = rs[m+1] / 100.0f;
+  float Rt = (rm * (tm1 - t) + rm1 * (t - tm)) / (tm1 - tm);
+  return __logf(1.0f + Rt) + t / (tm1 - tm) * (rm1 - rm) / (1.0f + Rt);
+}
 
-    if (t <= ts[0]) {
+__device__
+float rFsa(float t) { 
+    // Extrapolation:
+    if (t <= 0.25f) {
         return __logf(1.0f + rs[0]/100.0f);
     }
-    else if (t >= ts[last]) {
-        return __logf(1.0f + rs[last]/100.0f);
+    if (t >= 30.0f) {
+        return __logf(1.0f + rs[31]/100.0f);
     }
-    else {
-        int a = 0, b = last;
-        // Now a < b (bcs. ts must have more than 1 element) and ts[a] < t < ts[b]
-        while (a+1 < b) {
-            // Now a < b and ts[a] <= t < ts[b]
-            int i = (a+b)/2;
-            if (ts[i] <= t)
-                a = i;
-            else // t < ts[i]
-                b = i;
-        }
-        // Now a+1>=b and ts[a] <= t < ts[b]; so a!=b and hence a+1 == b <= last
-        int m = a;
-        float tm = ts[m], tm1 = ts[m+1];
-        float rm = rs[m] / 100.0f, rm1 = rs[m+1f] / 100.0f;
-        float Rt = (rm * (tm1 - t) + rm1 * (t - tm)) / (tm1 - tm);
-        return __logf(1.0f + Rt) + t / (tm1 - tm) * (rm1 - rm) / (1.0f + Rt);
+    int m = 1 + floor(t);
+    // Interpolation:
+    if (t >= 0.25f && t < 0.5f) {
+        m = 0;
     }
+    if (t >= 0.5f && t < 1.0f) {
+        m = 1;
+    }
+    //General case:
+    return 0.05;//interpolate(t,m);
 }
+
 /**************** RK_LIBRARY *****************/
 
 __device__ 
