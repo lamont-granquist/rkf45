@@ -67,8 +67,11 @@ Næste skridt:
 3)	Lav støj med Brown, og regn på mange rentekurver for hver customer
 
 todo:
-    Lav (mange) beregninger
+    Lav (mange) interest paths per kunde (i launcher)
+    brug ^ i device
 
+    Refactor
+    Implement doubles.
 
 Noter:
     Støjen giver ikke thread divergens

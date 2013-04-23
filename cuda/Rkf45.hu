@@ -4,6 +4,6 @@
 #include "Customers.hu"
 
 __global__
-void gpu_kernel(int offset, CUSTOMERS customers,float *result,float* dev_yieldCurves,int yc,int n_yc);
+void gpu_kernel(int offset, CUSTOMERS customers,float *result,float* dev_yieldCurves,int n_yc);
 
 #endif

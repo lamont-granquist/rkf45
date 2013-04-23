@@ -72,10 +72,12 @@ int main(int argc, char const *argv[]) {
 
 // Host code
 int main(int argc, char const *argv[]) {
+
   int n_kernels = 1;
   int gridx = 50;
   int gridy = 50;
   int max_policies = 1;
+  int n_yc = 3;
     
   if (argc>1) {
       n_kernels = atoi(argv[1]);
@@ -93,6 +95,10 @@ int main(int argc, char const *argv[]) {
       max_policies = atoi(argv[4]);
   }
 
+  if (argc>5) {
+      n_yc = atoi(argv[5]);
+  }
+
   /********** 0. SETUP **********/
   dim3 block_dim(8,8,5); //Number of threads per block // 320 seems to be best
   dim3 grid_dim(gridx,gridy,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
@@ -100,6 +106,7 @@ int main(int argc, char const *argv[]) {
   //dim3 grid_dim(2,1,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
   int kernel_size = get_n_host(block_dim,grid_dim);
   int nsize = kernel_size*n_kernels; 
+  int c = float(nsize/n_yc); // number of customers
 
   printf("%i kernels * %i calcs = %i customers\n",n_kernels,kernel_size,nsize);
 
@@ -110,12 +117,12 @@ int main(int argc, char const *argv[]) {
 
   int i=0;
   int id=0;
-  while(i < nsize) {
+  while(i < c) {
       int age = 30;//5 + rand()%30; //30
       int end_year = 50;
       int start_year = 0;
-      int c = min(i+max_policies,nsize);
-      for(int j=i;j<c;j++) {
+      int cj = min(i+max_policies,nsize);
+      for(int j=i;j<cj;j++) {
           cuses[j].id = id;
           cuses[j].age = age;
           cuses[j].end_year = end_year;
@@ -135,7 +142,6 @@ int main(int argc, char const *argv[]) {
 
   /****** GENERATE YIELD CURVES ******/
   float* dev_yieldCurves;
-  int n_yc = 3;
   generateIRPaths(n_yc,50,1, &dev_yieldCurves,19); //n_irPaths, years, steps per year, yieldcurve, seed
 
   /********* -1. SORT DATA *******/
@@ -144,20 +150,23 @@ int main(int argc, char const *argv[]) {
   /********** 1. MALLOC HOST  **********/
   // Data on the host and the device, respectively
   float* result = (float*) malloc(nsize*sizeof(float));
-  int* neqn = (int*) malloc(nsize*sizeof(int));
-  int* policy = (int*) malloc(nsize*sizeof(int));
-  int* age = (int*) malloc(nsize*sizeof(int));
-  int* end_year = (int*) malloc(nsize*sizeof(int));
-  int* start_year = (int*) malloc(nsize*sizeof(int));
+  int* neqn = (int*) malloc(c*sizeof(int));
+  int* policy = (int*) malloc(c*sizeof(int));
+  int* age = (int*) malloc(c*sizeof(int));
+  int* end_year = (int*) malloc(c*sizeof(int));
+  int* start_year = (int*) malloc(c*sizeof(int));
 
   //Pack
-  for(int i = 0;i < nsize;i++) {
-    result[i] = 0.0f;
+  for(int i = 0;i < c;i++) {
     policy[i] = cuses[i].policy;
     neqn[i] = cuses[i].neqn;
     age[i] = cuses[i].age;
     end_year[i] = cuses[i].end_year;
     start_year[i] = cuses[i].start_year;
+  }
+
+  for(int i = 0;i < nsize;i++) {
+    result[i] = 0.0f;
   }
 
   ///********** 2. MALLOC DEVICE  **********/
@@ -169,19 +178,19 @@ int main(int argc, char const *argv[]) {
   int *dev_end_year;
   int *dev_start_year;
   gpuErrchk( cudaMalloc((void**)&dev_result, sizeof(float) * nsize));
-  gpuErrchk( cudaMalloc((void**)&dev_neqn, sizeof(int) * nsize));
-  gpuErrchk( cudaMalloc((void**)&dev_policy, sizeof(int) * nsize));
-  gpuErrchk( cudaMalloc((void**)&dev_age, sizeof(int) * nsize));
-  gpuErrchk( cudaMalloc((void**)&dev_end_year, sizeof(int) * nsize));
-  gpuErrchk( cudaMalloc((void**)&dev_start_year, sizeof(int) * nsize));
+  gpuErrchk( cudaMalloc((void**)&dev_neqn, sizeof(int) * c));
+  gpuErrchk( cudaMalloc((void**)&dev_policy, sizeof(int) * c));
+  gpuErrchk( cudaMalloc((void**)&dev_age, sizeof(int) * c));
+  gpuErrchk( cudaMalloc((void**)&dev_end_year, sizeof(int) * c));
+  gpuErrchk( cudaMalloc((void**)&dev_start_year, sizeof(int) * c));
 
   /********** 3. COPY HOST TO DEVICE  **********/
   // Copy data to the device
-  gpuErrchk( cudaMemcpy(dev_neqn, neqn, sizeof(int) * nsize, cudaMemcpyHostToDevice));
-  gpuErrchk( cudaMemcpy(dev_policy, policy, sizeof(int) * nsize, cudaMemcpyHostToDevice));
-  gpuErrchk( cudaMemcpy(dev_age, age, sizeof(int) * nsize, cudaMemcpyHostToDevice));
-  gpuErrchk( cudaMemcpy(dev_end_year, end_year, sizeof(int) * nsize, cudaMemcpyHostToDevice));
-  gpuErrchk( cudaMemcpy(dev_start_year, start_year, sizeof(int) * nsize, cudaMemcpyHostToDevice));
+  gpuErrchk( cudaMemcpy(dev_neqn, neqn, sizeof(int) * c, cudaMemcpyHostToDevice));
+  gpuErrchk( cudaMemcpy(dev_policy, policy, sizeof(int) * c, cudaMemcpyHostToDevice));
+  gpuErrchk( cudaMemcpy(dev_age, age, sizeof(int) * c, cudaMemcpyHostToDevice));
+  gpuErrchk( cudaMemcpy(dev_end_year, end_year, sizeof(int) * c, cudaMemcpyHostToDevice));
+  gpuErrchk( cudaMemcpy(dev_start_year, start_year, sizeof(int) * c, cudaMemcpyHostToDevice));
 
   /********** 4. CUSTOMERS HOLDS POINTERS TO DEVICE **********/
   //Used to hold the pointers
@@ -228,18 +237,15 @@ int main(int argc, char const *argv[]) {
   float time = (float) (end - start) * 1000.0f / CLOCKS_PER_SEC;
 
   /*********** COLLECT RESULTS **********/
+  //for(int i = 0;i < c;i++)
+  //  collected_results[cuses[i].id] += result[i];
+
   for(int i = 0;i < nsize;i++)
-    collected_results[cuses[i].id] += result[i];
+    printf("%i: %11.7f \n",i, result[i]);
 
   /********** 9. PRINT HOST RESULT  *********/
-  for(int i = 0;i < id;i++)
-    printf("%i: %11.7f \n",i, collected_results[i]);
-
-  /*
-  for(int i = 0; i < 51; i++) {
-    printf("%i: %.7f\n",i, result_cpu[i]);
-  }
-  */
+  //for(int i = 0;i < id;i++)
+  //  printf("%i: %11.7f \n",i, collected_results[i]);
 
   printf("%i kernels * %i calcs = %i customers\n",n_kernels,kernel_size,nsize);
   printf("TIME: %f, CUDA_TIME: %f\n",time,cuda_time);
