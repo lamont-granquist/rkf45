@@ -302,13 +302,9 @@ __device__ int get_n_device(void) {
 }
 
 /***** DEVICE ******/
-__global__
-void test_kernel(float *result) {
-
-}
 
 __global__
-void gpu_kernel(int offset, CUSTOMERS customers,float *result) {
+void gpu_kernel(int offset, CUSTOMERS customers,float *result,float *dev_yieldCurves) {
 
   int id = get_id()+offset;
 
@@ -344,39 +340,6 @@ void gpu_kernel(int offset, CUSTOMERS customers,float *result) {
 
   result[id] = result0[0];
 
-}
-
-
-void cpu_kernel(CUSTOMERS customers,float *result) {
-  /*
-  int cpu_id = 0;
-  
-  float y[MAX_NEQN];
-  for(int i = 0;i<MAX_NEQN;i++)
-    y[i] = 0.0f;
-
-  float result0[51];
-  for(int i = 0;i<51;i++)
-    result0[i] = 0.0f;
-
-  float result1[51];
-  for(int i = 0;i<51;i++)
-    result1[i] = 0.0f;
-
-  estimate(
-           customers.policy[cpu_id],
-           customers.age[cpu_id],
-           customers.neqn[cpu_id],
-           customers.end_year[cpu_id],
-           customers.start_year[cpu_id],
-           y,
-           result0,
-           result1
-          );
-  
-  for(int i = 0;i<51;i++)
-    result[i] = result0[i];
-  */
 }
 
 // The Danish FSA yield curve (Finanstilsynets rentekurve).

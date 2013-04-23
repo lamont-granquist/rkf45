@@ -4,6 +4,8 @@
 #include "Customers.hu"
 #include <time.h>
 
+#include "clireSimulatedIRPaths.hu"
+
 /*** CUDA ERROR CHECK ***/
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, char *file, int line, bool abort=true)
@@ -37,6 +39,36 @@ void sort(CUS *c,int l) {
 int get_n_host(dim3 block_dim,dim3 grid_dim) {
   return grid_dim.x * grid_dim.y * grid_dim.z * block_dim.x * block_dim.y * block_dim.z; 
 }
+
+/* Test of yield curves */
+/* De ligger i raekkefolgen:
+ir 1 year 50
+ir 2 year 50
+ir 3 year 50
+..
+ir 200 year 50
+ir 1 year 49
+ir 2 year 49
+...
+ir 200 year 49
+ir 1 year 48
+*/
+
+/*
+int main(int argc, char const *argv[]) {
+
+    float* dev_yieldCurves;
+    float* yieldCurves = (float*)malloc(sizeof(yieldCurves)*50*3*1);
+
+    //n_irPaths, years, steps per year, yieldcurve, seed
+    generateIRPaths(3,50,1, &dev_yieldCurves,19);
+
+    gpuErrchk( cudaMemcpy(yieldCurves, dev_yieldCurves, sizeof(float) * 50*3*1, cudaMemcpyDeviceToHost));
+
+    for(int i = 0;i<50*3*1;i++)
+        printf("%f\n",yieldCurves[i]);
+}
+*/
 
 // Host code
 int main(int argc, char const *argv[]) {
@@ -100,6 +132,10 @@ int main(int argc, char const *argv[]) {
   }
 
   float* collected_results = (float*) malloc(id*sizeof(float));
+
+  /****** GENERATE YIELD CURVES ******/
+  float* dev_yieldCurves;
+  generateIRPaths(2,50,1, &dev_yieldCurves,19); //n_irPaths, years, steps per year, yieldcurve, seed
 
   /********* -1. SORT DATA *******/
   sort(cuses,nsize);// Out comment to take away sorting
@@ -169,7 +205,7 @@ int main(int argc, char const *argv[]) {
   int offset = 0;
   /********** 6. LAUNCH WITH CUSTOMERS AND RESULT *********/
   for(int i = 0; i < n_kernels; i++) {
-    gpu_kernel <<<grid_dim, block_dim>>>(offset,customers,dev_result); // GPU
+    gpu_kernel <<<grid_dim, block_dim>>>(offset,customers,dev_result,dev_yieldCurves); // GPU
     offset+=kernel_size;
   }
 
