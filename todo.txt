@@ -66,6 +66,16 @@ Næste skridt:
     
 3)	Lav støj med Brown, og regn på mange rentekurver for hver customer
 
+todo:
+    Lav (mange) beregninger
+
+
+Noter:
+    Støjen giver ikke thread divergens
+    Man sortere efter interest paths for at være sikker på at der kan regnes i
+    samme warp. (min 32 interest paths)
+    Derfor at der delt op i udsnit som beskrevet.
+
 Stop ved helår er godt for rentekurver. 
 
 /************** TODO NEXT *************/

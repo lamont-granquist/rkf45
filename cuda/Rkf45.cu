@@ -27,18 +27,18 @@ const float FloatEpsilon = 0.00000011920928955078125000f;
 #define sign(x)  ((x > 0) - ( x < 0))
 
 __device__ 
-void dy(int policy,int age,float* yield_curve,float t, float* V,float* result);
+void dy(int policy,int age,float* yield_curve,int yc,int n_yc,float t, float* V,float* result);
 __device__ 
 void bj_ii(int policy, float t, float* result);
 //Declare functions
 __device__ 
 static bool local_start_to_be_reached(float t,int local_start_year,float* stepsize);
 __device__ 
-static void calculate_solutions(int policy,int age,float* yield_curves, int neqn,float t,float stepsize,float* y, float *y_diff,float* y_plus_one, float* y_plus_one_alternative);
+static void calculate_solutions(int policy,int age,float* yield_curves,int yc, int n_yc, int neqn,float t,float stepsize,float* y, float *y_diff,float* y_plus_one, float* y_plus_one_alternative);
 __device__ 
 static float calculate_solution_error(int neqn,float stepsize,float* y,float* y_plus_one, float* y_plus_one_alternative);
 __device__ 
-static void local_estimate(int policy,int age, int neqn,int local_end_year,int local_start_year,float* stepsize,float* yield_curves,float* y,float* y_diff);
+static void local_estimate(int policy,int age, int neqn,int local_end_year,int local_start_year,float* stepsize,float* yield_curves,int yc, int n_yc,float* y,float* y_diff);
 __device__ 
 static float calculate_initial_stepsize(int neqn,int start_year,int end_year,float* y, float* y_diff);
 __device__ 
@@ -50,7 +50,7 @@ static float scale_from_error(float error,bool stepsize_decreased);
 /* Calculate the actual and the alternative solutions */
 //y_plus_one and y_plus_one_alternative will be set
 __device__ 
-static void calculate_solutions(int policy,int age,float* yield_curves, int neqn,float t,float h,float* y,float* y_diff,float* y_plus_one,float* y_plus_one_alternative) {
+static void calculate_solutions(int policy,int age,float* yield_curves,int yc, int n_yc, int neqn,float t,float h,float* y,float* y_diff,float* y_plus_one,float* y_plus_one_alternative) {
 
   float f1[MAX_NEQN];
   float f2[MAX_NEQN];
@@ -62,20 +62,20 @@ static void calculate_solutions(int policy,int age,float* yield_curves, int neqn
   //f1
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + h*(1.0f/4.0f)*y_diff[i];
-  dy (policy,age,yield_curves,t + (1.0f/4.0f)*h, f_swap, f1 );
+  dy (policy,age,yield_curves,yc,n_yc,t + (1.0f/4.0f)*h, f_swap, f1 );
 
   //f2
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + h*(3.0f/32.0f)*y_diff[i]
                      + h*(9.0f/32.0f)*f1[i];
-  dy (policy,age,yield_curves, t + (3.0f/8.0f)*h, f_swap, f2 );
+  dy (policy,age,yield_curves,yc,n_yc, t + (3.0f/8.0f)*h, f_swap, f2 );
 
   //f3
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + h*(1932.0f/2197.0f)* y_diff[i]
                      - h*(7200.0f/2197.0f)* f1[i]
                      + h*(7296.0f/2197.0f)* f2[i];
-  dy (policy,age,yield_curves, t + (12.0f/13.0f)* h, f_swap, f3 );
+  dy (policy,age,yield_curves,yc,n_yc, t + (12.0f/13.0f)* h, f_swap, f3 );
 
   //f4
   for (int i = 0; i < neqn; i++ )
@@ -83,7 +83,7 @@ static void calculate_solutions(int policy,int age,float* yield_curves, int neqn
                      - h*(8.0f/1.0f)     * f1[i]
                      + h*(3680.0f/513.0f)* f2[i]
                      - h*(845.0f/4104.0f)* f3[i];
-  dy (policy,age,yield_curves, t + h, f_swap, f4 );
+  dy (policy,age,yield_curves,yc,n_yc, t + h, f_swap, f4 );
 
   //f5
   for (int i = 0; i < neqn; i++ )
@@ -92,7 +92,7 @@ static void calculate_solutions(int policy,int age,float* yield_curves, int neqn
                      - h*(3544.0f/2565.0f) * f2[i]
                      + h*(1859.0f/4104.0f) * f3[i]
                      - h*(11.0f/40.0f) * f4[i];
-  dy (policy,age,yield_curves, t + h*(1.0f/2.0f), f_swap, f5 );
+  dy (policy,age,yield_curves,yc,n_yc, t + h*(1.0f/2.0f), f_swap, f5 );
 
   //Calculate solution
   for (int i = 0; i < neqn; i++ )
@@ -139,7 +139,7 @@ static float calculate_solution_error(int neqn,float stepsize,float* y,float* y_
 /* Move from current position to local_start_year, and update all values */
 // Updates y, h
 __device__ 
-static void local_estimate(int policy,int age, int neqn,int local_end_year,int local_start_year,float *yield_curves,float *stepsize,float* y,float* y_diff) {
+static void local_estimate(int policy,int age, int neqn,int local_end_year,int local_start_year, float *stepsize, float *yield_curves,int yc, int n_yc,float* y,float* y_diff) {
   float t = (float)local_end_year;
   
   //Step by step integration.
@@ -155,7 +155,7 @@ static void local_estimate(int policy,int age, int neqn,int local_end_year,int l
     float y_plus_one[MAX_NEQN];
     float y_plus_one_alternative[MAX_NEQN];
 
-    calculate_solutions(policy,age,yield_curves,neqn,t,*stepsize,y,y_diff,y_plus_one,y_plus_one_alternative);
+    calculate_solutions(policy,age,yield_curves,yc,n_yc, neqn,t,*stepsize,y,y_diff,y_plus_one,y_plus_one_alternative);
     float error = calculate_solution_error(neqn,*stepsize,y,y_plus_one,y_plus_one_alternative);
 
     //Integreate 1 step
@@ -169,7 +169,7 @@ static void local_estimate(int policy,int age, int neqn,int local_end_year,int l
       *stepsize = s * *stepsize;  
 
       //Try again.
-      calculate_solutions(policy,age,yield_curves,neqn,t,*stepsize,y,y_diff,y_plus_one,y_plus_one_alternative);
+      calculate_solutions(policy,age,yield_curves,yc,n_yc,neqn,t,*stepsize,y,y_diff,y_plus_one,y_plus_one_alternative);
       error = calculate_solution_error(neqn,*stepsize,y,y_plus_one,y_plus_one_alternative);
     }
 
@@ -181,7 +181,7 @@ static void local_estimate(int policy,int age, int neqn,int local_end_year,int l
       y[i] = y_plus_one[i];
 
     //Update y_diff
-    dy (policy,age,yield_curves, t, y, y_diff );
+    dy (policy,age,yield_curves,yc,n_yc, t, y, y_diff );
 
     //Apply scale to stepsize
     float scale = scale_from_error(error,stepsize_descresed);
@@ -252,10 +252,10 @@ static float scale_from_error(float error,bool stepsize_decreased) {
 
 /* Estimate range */
 __device__ 
-void estimate(int policy,int age, int neqn, int end_year, int start_year,float* yield_curves, float* y,float* result0, float* result1) {
+void estimate(int policy,int age, int neqn, int end_year, int start_year,float* yield_curves,int yc,int n_yc, float* y,float* result0, float* result1) {
 
   float y_diff[MAX_NEQN];
-  dy(policy,age,yield_curves, (float) end_year, y, y_diff);
+  dy(policy,age,yield_curves,yc,n_yc, (float) end_year, y, y_diff);
   float stepsize = calculate_initial_stepsize(neqn,start_year,end_year,y,y_diff); 
 
   //Solve for one year at a time
@@ -265,7 +265,7 @@ void estimate(int policy,int age, int neqn, int end_year, int start_year,float* 
     bj_ii(policy,year,y);
 
     // Integrate over [year,year-1]
-    local_estimate(policy,age,neqn,year,year-1,&stepsize,yield_curves,y,y_diff);
+    local_estimate(policy,age,neqn,year,year-1,&stepsize,yield_curves,yc,n_yc,y,y_diff);
 
     //Copy y to results
     result0[year-start_year-1] = y[0];
@@ -304,7 +304,7 @@ __device__ int get_n_device(void) {
 /***** DEVICE ******/
 
 __global__
-void gpu_kernel(int offset, CUSTOMERS customers,float *result,float *yield_curves) {
+void gpu_kernel(int offset, CUSTOMERS customers,float *result,float *yield_curves,int yc,int n_yc) {
 
   int id = get_id()+offset;
 
@@ -334,12 +334,14 @@ void gpu_kernel(int offset, CUSTOMERS customers,float *result,float *yield_curve
            c_end_year,
            c_start_year,
            yield_curves,
+           yc,
+           n_yc,
            y,
            result0,
            result1
           );
 
-  result[id] = yield_curves[id];
+  result[id] = yield_curves[n_yc*2+yc];
 
 }
 
@@ -400,9 +402,8 @@ float GM(int age, float t) {
 
 // Interest
 __device__ 
-float r(float t,float* yield_curves) {
-    return yield_curves
-    //return rFsa(t);
+float r(float t,float* yield_curves,int yc, int n_yc) {
+    return rFsa(t);
 }
 
 __device__ 
@@ -439,9 +440,9 @@ void bj_ii_PureEndowment(float t, float* result) {
 }
 
     __device__ 
-void dy_PureEndowment(int age,float* yield_curves, float t, float* V,float* result)
+void dy_PureEndowment(int age,float* yield_curves,int yc, int n_yc, float t, float* V,float* result)
 {
-    result[0] = r(t,yield_curves) * V[0] - b_0_PureEndowment(t) - mu_01_PureEndowment(age,t) * (0 - V[0] + bj_01_PureEndowment(t));
+    result[0] = r(t,yield_curves,yc,n_yc) * V[0] - b_0_PureEndowment(t) - mu_01_PureEndowment(age,t) * (0 - V[0] + bj_01_PureEndowment(t));
 }
 
 /**************** PRODUCT, DEFFEREDLIFEANNUITY ***************************/
@@ -474,9 +475,9 @@ void bj_ii_DeferredTemporaryLifeAnnuity(float t, float* result) {
 }
 
     __device__ 
-void dy_DeferredTemporaryLifeAnnuity(int age,float* yield_curves, float t, float* V,float* result)
+void dy_DeferredTemporaryLifeAnnuity(int age,float* yield_curves,int yc, int n_yc, float t, float* V,float* result)
 {
-    result[0] = r(t,yield_curves) * V[0] - b_0_DeferredTemporaryLifeAnnuity(t) - mu_01_DeferredTemporaryLifeAnnuity(age,t) * (0 - V[0] + bj_01_DeferredTemporaryLifeAnnuity(t));
+    result[0] = r(t,yield_curves,yc,n_yc) * V[0] - b_0_DeferredTemporaryLifeAnnuity(t) - mu_01_DeferredTemporaryLifeAnnuity(age,t) * (0 - V[0] + bj_01_DeferredTemporaryLifeAnnuity(t));
 }
 
 /**************** PRODUCT, TemporaryLifeAnnuityPremium ***************************/
@@ -508,9 +509,9 @@ void bj_ii_TemporaryLifeAnnuityPremium(float t, float* result) {
 }
 
     __device__ 
-void dy_TemporaryLifeAnnuityPremium(int age,float* yield_curves, float t, float* V,float* result)
+void dy_TemporaryLifeAnnuityPremium(int age,float* yield_curves,int yc, int n_yc, float t, float* V,float* result)
 {
-    result[0] = r(t,yield_curves) * V[0] - b_0_TemporaryLifeAnnuityPremium(t) - mu_01_TemporaryLifeAnnuityPremium(age,t) * (0 - V[0] + bj_01_TemporaryLifeAnnuityPremium(t));
+    result[0] = r(t,yield_curves,yc,n_yc) * V[0] - b_0_TemporaryLifeAnnuityPremium(t) - mu_01_TemporaryLifeAnnuityPremium(age,t) * (0 - V[0] + bj_01_TemporaryLifeAnnuityPremium(t));
 }
 
 /**************** PRODUCT, TermInsurance ***************************/
@@ -542,9 +543,9 @@ void bj_ii_TermInsurance(float t, float* result) {
 }
 
     __device__ 
-void dy_TermInsurance(int age,float* yield_curves, float t, float* V,float* result)
+void dy_TermInsurance(int age,float* yield_curves,int yc,int n_yc, float t, float* V,float* result)
 {
-    result[0] = r(t,yield_curves) * V[0] - b_0_TermInsurance(t) - mu_01_TermInsurance(age,t) * (0 - V[0] + bj_01_TermInsurance(t));
+    result[0] = r(t,yield_curves,yc,n_yc) * V[0] - b_0_TermInsurance(t) - mu_01_TermInsurance(age,t) * (0 - V[0] + bj_01_TermInsurance(t));
 }
 
 /**************** PRODUCT, DisabilityAnnuity ***************************/
@@ -626,10 +627,10 @@ void bj_ii_DisabilityAnnuity(float t, float* result) {
 }
 
     __device__ 
-void dy_DisabilityAnnuity(int age,float* yield_curves, float t, float* V,float* result)
+void dy_DisabilityAnnuity(int age,float* yield_curves,int yc,int n_yc, float t, float* V,float* result)
 {
-    result[0] = r(t,yield_curves) * V[0] - b_0_DisabilityAnnuity(t) - mu_01_DisabilityAnnuity(age,t) * (V[1] - V[0] + bj_01_DisabilityAnnuity(t)) - mu_02_DisabilityAnnuity(age,t) * (0 - V[0] + bj_02_DisabilityAnnuity(t));
-    result[1] = r(t,yield_curves) * V[1] - b_1_DisabilityAnnuity(t) - mu_12_DisabilityAnnuity(age,t) * (0 - V[1] + bj_12_DisabilityAnnuity(t)); 
+    result[0] = r(t,yield_curves,yc,n_yc) * V[0] - b_0_DisabilityAnnuity(t) - mu_01_DisabilityAnnuity(age,t) * (V[1] - V[0] + bj_01_DisabilityAnnuity(t)) - mu_02_DisabilityAnnuity(age,t) * (0 - V[0] + bj_02_DisabilityAnnuity(t));
+    result[1] = r(t,yield_curves,yc,n_yc) * V[1] - b_1_DisabilityAnnuity(t) - mu_12_DisabilityAnnuity(age,t) * (0 - V[1] + bj_12_DisabilityAnnuity(t)); 
 }
 
 /**************** PRODUCT, DisabilityTermInsurance ***************************/
@@ -707,35 +708,35 @@ void bj_ii_DisabilityTermInsurance(float t, float* result) {
 }
 
     __device__ 
-void dy_DisabilityTermInsurance(int age,float* yield_curves, float t, float* V,float* result)
+void dy_DisabilityTermInsurance(int age,float* yield_curves,int yc, int n_yc, float t, float* V,float* result)
 {
-    result[0] = r(t,yield_curves) * V[0] - b_0_DisabilityTermInsurance(t) - mu_01_DisabilityTermInsurance(age,t) * (V[1] - V[0] + bj_01_DisabilityTermInsurance(t)) - mu_02_DisabilityTermInsurance(age,t) * (0 - V[0] + bj_02_DisabilityTermInsurance(t));
-    result[1] = r(t,yield_curves) * V[1] - b_1_DisabilityTermInsurance(t) - mu_12_DisabilityTermInsurance(age,t) * (0 - V[1] + bj_12_DisabilityTermInsurance(t)); 
+    result[0] = r(t,yield_curves,yc,n_yc) * V[0] - b_0_DisabilityTermInsurance(t) - mu_01_DisabilityTermInsurance(age,t) * (V[1] - V[0] + bj_01_DisabilityTermInsurance(t)) - mu_02_DisabilityTermInsurance(age,t) * (0 - V[0] + bj_02_DisabilityTermInsurance(t));
+    result[1] = r(t,yield_curves,yc,n_yc) * V[1] - b_1_DisabilityTermInsurance(t) - mu_12_DisabilityTermInsurance(age,t) * (0 - V[1] + bj_12_DisabilityTermInsurance(t)); 
 }
 
 /**** Policy distributor ****/
 
 __device__ 
-void dy(int policy,int age, float* yield_curves, float t, float* V, float* result) {
+void dy(int policy,int age, float* yield_curves,int yc, int n_yc, float t, float* V, float* result) {
     switch(policy)
     {
         case 1:
-            dy_PureEndowment(age,yield_curves,t,V,result);
+            dy_PureEndowment(age,yield_curves,yc,n_yc,t,V,result);
             break;
         case 2:
-            dy_DeferredTemporaryLifeAnnuity(age,yield_curves,t,V,result);
+            dy_DeferredTemporaryLifeAnnuity(age,yield_curves,yc,n_yc,t,V,result);
             break;
         case 3:
-            dy_TemporaryLifeAnnuityPremium(age,yield_curves,t,V,result);
+            dy_TemporaryLifeAnnuityPremium(age,yield_curves,yc,n_yc,t,V,result);
             break;
         case 4:
-            dy_TermInsurance(age,yield_curves,t,V,result);
+            dy_TermInsurance(age,yield_curves,yc,n_yc,t,V,result);
             break;
         case 5:
-            dy_DisabilityAnnuity(age,yield_curves,t,V,result);
+            dy_DisabilityAnnuity(age,yield_curves,yc,n_yc,t,V,result);
             break; 
         case 6:
-            dy_DisabilityTermInsurance(age,yield_curves,t,V,result);
+            dy_DisabilityTermInsurance(age,yield_curves,yc,n_yc,t,V,result);
             break; 
     };
 }

@@ -135,7 +135,8 @@ int main(int argc, char const *argv[]) {
 
   /****** GENERATE YIELD CURVES ******/
   float* dev_yieldCurves;
-  generateIRPaths(320,50,1, &dev_yieldCurves,19); //n_irPaths, years, steps per year, yieldcurve, seed
+  int n_yc = 3;
+  generateIRPaths(n_yc,50,1, &dev_yieldCurves,19); //n_irPaths, years, steps per year, yieldcurve, seed
 
   /********* -1. SORT DATA *******/
   sort(cuses,nsize);// Out comment to take away sorting
@@ -205,7 +206,7 @@ int main(int argc, char const *argv[]) {
   int offset = 0;
   /********** 6. LAUNCH WITH CUSTOMERS AND RESULT *********/
   for(int i = 0; i < n_kernels; i++) {
-    gpu_kernel <<<grid_dim, block_dim>>>(offset,customers,dev_result,dev_yieldCurves); // GPU
+    gpu_kernel <<<grid_dim, block_dim>>>(offset,customers,dev_result,dev_yieldCurves,n_yc); // GPU
     offset+=kernel_size;
   }
 
@@ -231,7 +232,7 @@ int main(int argc, char const *argv[]) {
     collected_results[cuses[i].id] += result[i];
 
   /********** 9. PRINT HOST RESULT  *********/
-  for(int i = id-12;i < id;i++)
+  for(int i = 0;i < id;i++)
     printf("%i: %11.7f \n",i, collected_results[i]);
 
   /*
