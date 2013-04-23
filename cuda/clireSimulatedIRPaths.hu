@@ -1,0 +1,12 @@
+#pragma once
+
+#include <cuda.h>
+#include <curand_kernel.h>
+
+#define MIN(a, b) a<b?a:b
+#define MAX(a, b) a>b?a:b
+#define MAXZERO(x) MAX(x,0.0f)
+
+void generateIRPaths(const int numberOfPaths, const int years,
+                     const int stepsPerYear, float **dev_yieldCurves, 
+                     const long long int seed);

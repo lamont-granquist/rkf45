@@ -1,0 +1,7 @@
+#pragma once
+
+void distributeJobs(int jobs, int *blockResult, int *threadResult);
+void setupCuda(int device);
+void HandleError(cudaError_t err, const char *file, int line);
+
+#define HANDLE_ERROR(error) (HandleError(error, __FILE__, __LINE__))
