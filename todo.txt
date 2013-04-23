@@ -1,3 +1,20 @@
+Rentesats konservativ - overvurdering. 0 coupon obligationer.
+
+Arbejdsprocess = Analyse.. Valg der er truffet.
+
+Finanstilsyn kan godt lide linear interpolerition: Bestemt ved love.
+
+Rentekurver: Forsøg med 0.05% returneret.
+
+Rt: lineær interpolertion.
+Beregning: 
+yield_curve: Diskoterings satser.
+
+Instantanious forward rate.
+
+
+Doubles..?
+
 /************* MEETING *********/
 Programmering:
 	Sørg for at KPS reelt fungere.
@@ -46,6 +63,7 @@ Næste skridt:
 
     a.	Optimer søgning i rentekurve interpolation
     b.	Eventuelt udnytte cuda textures ved interpolation?
+    
 3)	Lav støj med Brown, og regn på mange rentekurver for hver customer
 
 Stop ved helår er godt for rentekurver. 
