@@ -1,7 +1,0 @@
-#ifndef linktest_h
-#define linktest_h
-
-__device__
-int linktester();
-
-#endif

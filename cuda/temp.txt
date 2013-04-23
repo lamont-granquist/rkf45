@@ -1,7 +1,0 @@
-
-  float* result = (float*) malloc(nsize*sizeof(float));
-  int* neqn = (int*) malloc(nsize*sizeof(int));
-  int* policy = (int*) malloc(nsize*sizeof(int));
-  int* age = (int*) malloc(nsize*sizeof(int));
-  int* end_year = (int*) malloc(nsize*sizeof(int));
-  int* start_year = (int*) malloc(nsize*sizeof(int));
