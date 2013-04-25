@@ -8,7 +8,7 @@ __device__
 const double relerr = 1e-11;
 __device__
 const double abserr = 1e-11;
-//__device__
+__device__
 const double DoubleEpsilon = 0.00000011920928955078125000; 
 
 /********************* INIT *******************/
@@ -165,7 +165,7 @@ static void local_estimate(int policy,int age, int neqn,int local_end_year,int l
       local_start_reached = false;
 
       //Scale down.
-      double s = max(0.1,0.9 / __pow( error, 0.2 ));
+      double s = max(0.1,0.9 / pow( error, 0.2 ));
       *stepsize = s * *stepsize;  
 
       //Try again.
@@ -217,7 +217,7 @@ __device__
 static double calculate_initial_stepsize(int neqn,int start_year,int end_year,double* y,double *y_diff)
 {
   //Calculate the start value of stepsize
-  double s = fabs( start_year - end_year );
+  double s = fabs((double)(start_year - end_year));
 
 
   for (int k = 0; k < neqn; k++ )
@@ -226,21 +226,21 @@ static double calculate_initial_stepsize(int neqn,int start_year,int end_year,do
     if ( 0.0 < tol )
     {
       double ypk = fabs( y_diff[k] );
-      if ( tol < ypk * __pow( s, 5.0 ) )
+      if ( tol < ypk * pow( s, 5.0 ) )
       {
-        s = __pow( ( tol / ypk ), 0.2 );
+        s = pow( ( tol / ypk ), 0.2 );
         //printf("this should not happen.\n");
       }
     }
   }
 
-  return  max( s, 26.0 * DoubleEpsilon * max( fabs( end_year ), fabs( start_year - end_year ) ) );
+  return  max( s, 26.0 * DoubleEpsilon * max( fabs((double)end_year ), fabs((double)start_year - end_year ) ) );
 }
 
 /* Scale from error calculations */
 __device__ 
 static double scale_from_error(double error,bool stepsize_decreased) {
-  double scale = min(5.0,0.9 / __pow( error, 0.2 ));
+  double scale = min(5.0,0.9 / pow( error, 0.2 ));
 
   if (stepsize_decreased)
     scale = min( scale, 1.0 );
@@ -302,7 +302,6 @@ __device__ int get_n_device(void) {
 }
 
 /***** DEVICE ******/
-
 __global__
 void gpu_kernel(int offset, CUSTOMERS customers,double *result,double *dev_yieldCurves) {
 
@@ -341,7 +340,6 @@ void gpu_kernel(int offset, CUSTOMERS customers,double *result,double *dev_yield
   result[id] = result0[0];
 
 }
-
 // The Danish FSA yield curve (Finanstilsynets rentekurve).
 // Data from 2011-11-16 
 
@@ -394,7 +392,7 @@ double rFsa(double t) {
 
 __device__ 
 double GM(int age, double t) {
-    return 0.0005 + __pow(10.0, 5.728 - 10.0 + 0.038*((double)age + t));
+    return 0.0005 + pow(10.0, 5.728 - 10.0 + 0.038*((double)age + t));
 }
 
 // Interest
@@ -561,7 +559,7 @@ static double b_1_DisabilityAnnuity(double t) {
 
 __device__ 
 static double GM01_DisabilityAnnuity(int age, double t) {
-    return 0.0006 + __pow(10.0, 4.71609 - 10.0 + 0.06*((double)age + t));
+    return 0.0006 + pow(10.0, 4.71609 - 10.0 + 0.06*((double)age + t));
 }
 
 __device__ 
@@ -643,7 +641,7 @@ static double b_1_DisabilityTermInsurance(double t) {
 
 __device__ 
 static double GM01_DisabilityTermInsurance(int age, double t) {
-    return 0.0006 + __pow(10.0, 4.71609 - 10.0 + 0.06*((double)age + t));
+    return 0.0006 + pow(10.0, 4.71609 - 10.0 + 0.06*((double)age + t));
 }
 
 __device__ 

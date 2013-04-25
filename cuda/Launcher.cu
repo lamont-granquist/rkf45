@@ -134,7 +134,7 @@ int main(int argc, char const *argv[]) {
 
   /****** GENERATE YIELD CURVES ******/
   double* dev_yieldCurves;
-  generateIRPaths(2,50,1, &dev_yieldCurves,19); //n_irPaths, years, steps per year, yieldcurve, seed
+  //generateIRPaths(2,50,1, &dev_yieldCurves,19); //n_irPaths, years, steps per year, yieldcurve, seed
 
   /********* -1. SORT DATA *******/
   sort(cuses,nsize);// Out comment to take away sorting
@@ -231,7 +231,7 @@ int main(int argc, char const *argv[]) {
 
   /********** 9. PRINT HOST RESULT  *********/
   for(int i = 0;i < id;i++)
-    printf("%i: %11.7f \n",i, result[i]);
+    printf("%i: %11.11f \n",i, result[i]);
 
   //for(int i = id-20;i < id;i++)
   //  printf("%i: %11.7f \n",i, collected_results[i]);
