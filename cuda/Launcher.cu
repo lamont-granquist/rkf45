@@ -231,8 +231,11 @@ int main(int argc, char const *argv[]) {
     collected_results[cuses[i].id] += result[i];
 
   /********** 9. PRINT HOST RESULT  *********/
-  for(int i = id-12;i < id;i++)
-    printf("%i: %11.7f \n",i, collected_results[i]);
+  for(int i = 0;i < id;i++)
+    printf("%i: %11.7f \n",i, result[i]);
+
+  //for(int i = id-20;i < id;i++)
+  //  printf("%i: %11.7f \n",i, collected_results[i]);
 
   /*
   for(int i = 0; i < 51; i++) {

@@ -373,10 +373,10 @@ __device__
 float rFsa(float t) { 
     // Extrapolation:
     if (t <= 0.25f) {
-        return __logf(1.0f + rs[0]/100.0f);
+        //return __logf(1.0f + rs[0]/100.0f);
     }
     if (t >= 30.0f) {
-        return __logf(1.0f + rs[31]/100.0f);
+        //return __logf(1.0f + rs[31]/100.0f);
     }
     int m = 1 + floor(t);
     // Interpolation:
@@ -387,7 +387,7 @@ float rFsa(float t) {
         m = 1;
     }
     //General case:
-    return 0.05;//interpolate(t,m);
+    return 0.05f;//interpolate(t,m);
 }
 
 /**************** RK_LIBRARY *****************/
