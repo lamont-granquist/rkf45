@@ -1,3 +1,10 @@
+// Konklusion: Det skal nævnes at man bør teste på mere advancerede beregninger. Den adaptive algortime har jo netop let ved de simple beregninger.
+Der skal gives et overblik over hvornår der foretages mange, kontra få
+beregninger. (Skal måles for hvert produkt)
+
+
+Ekspoleritoin: inden år nul : Kontrakt..
+
 Rentesats konservativ - overvurdering. 0 coupon obligationer.
 
 Arbejdsprocess = Analyse.. Valg der er truffet.
