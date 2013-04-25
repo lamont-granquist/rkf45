@@ -9,7 +9,7 @@ const double relerr = 1e-11;
 __device__
 const double abserr = 1e-11;
 __device__
-const double DoubleEpsilon = 0.00000011920928955078125000; 
+const double DoubleEpsilon = 2.22044604925031e-16;
 
 /********************* INIT *******************/
 
