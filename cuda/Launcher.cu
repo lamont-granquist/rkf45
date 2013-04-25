@@ -17,7 +17,6 @@ inline void gpuAssert(cudaError_t code, char *file, int line, bool abort=true)
    }
 }
 
-
 /**************************** HOST ******************************/
 
 //Sorting
@@ -57,13 +56,13 @@ ir 1 year 48
 /*
 int main(int argc, char const *argv[]) {
 
-    float* dev_yieldCurves;
-    float* yieldCurves = (float*)malloc(sizeof(yieldCurves)*50*3*1);
+    double* dev_yieldCurves;
+    double* yieldCurves = (double*)malloc(sizeof(yieldCurves)*50*3*1);
 
     //n_irPaths, years, steps per year, yieldcurve, seed
     generateIRPaths(3,50,1, &dev_yieldCurves,19);
 
-    gpuErrchk( cudaMemcpy(yieldCurves, dev_yieldCurves, sizeof(float) * 50*3*1, cudaMemcpyDeviceToHost));
+    gpuErrchk( cudaMemcpy(yieldCurves, dev_yieldCurves, sizeof(double) * 50*3*1, cudaMemcpyDeviceToHost));
 
     for(int i = 0;i<50*3*1;i++)
         printf("%f\n",yieldCurves[i]);
@@ -131,10 +130,10 @@ int main(int argc, char const *argv[]) {
       id++;
   }
 
-  float* collected_results = (float*) malloc(id*sizeof(float));
+  double* collected_results = (double*) malloc(id*sizeof(double));
 
   /****** GENERATE YIELD CURVES ******/
-  float* dev_yieldCurves;
+  double* dev_yieldCurves;
   generateIRPaths(2,50,1, &dev_yieldCurves,19); //n_irPaths, years, steps per year, yieldcurve, seed
 
   /********* -1. SORT DATA *******/
@@ -142,7 +141,7 @@ int main(int argc, char const *argv[]) {
 
   /********** 1. MALLOC HOST  **********/
   // Data on the host and the device, respectively
-  float* result = (float*) malloc(nsize*sizeof(float));
+  double* result = (double*) malloc(nsize*sizeof(double));
   int* neqn = (int*) malloc(nsize*sizeof(int));
   int* policy = (int*) malloc(nsize*sizeof(int));
   int* age = (int*) malloc(nsize*sizeof(int));
@@ -151,7 +150,7 @@ int main(int argc, char const *argv[]) {
 
   //Pack
   for(int i = 0;i < nsize;i++) {
-    result[i] = 0.0f;
+    result[i] = 0.0;
     policy[i] = cuses[i].policy;
     neqn[i] = cuses[i].neqn;
     age[i] = cuses[i].age;
@@ -161,13 +160,13 @@ int main(int argc, char const *argv[]) {
 
   ///********** 2. MALLOC DEVICE  **********/
 
-  float *dev_result;
+  double *dev_result;
   int *dev_neqn;
   int *dev_policy;
   int *dev_age;
   int *dev_end_year;
   int *dev_start_year;
-  gpuErrchk( cudaMalloc((void**)&dev_result, sizeof(float) * nsize));
+  gpuErrchk( cudaMalloc((void**)&dev_result, sizeof(double) * nsize));
   gpuErrchk( cudaMalloc((void**)&dev_neqn, sizeof(int) * nsize));
   gpuErrchk( cudaMalloc((void**)&dev_policy, sizeof(int) * nsize));
   gpuErrchk( cudaMalloc((void**)&dev_age, sizeof(int) * nsize));
@@ -219,7 +218,7 @@ int main(int argc, char const *argv[]) {
   
   /********** 8. COPY RESULT FROM DEVICE TO HOST *********/
   // Copy the result back from the device
-  gpuErrchk( cudaMemcpy(result, dev_result, sizeof(float) * nsize, cudaMemcpyDeviceToHost));
+  gpuErrchk( cudaMemcpy(result, dev_result, sizeof(double) * nsize, cudaMemcpyDeviceToHost));
 
   /********** 8,5. EXTRA TIMING *********/
   //Normal timing

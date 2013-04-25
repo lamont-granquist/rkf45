@@ -1,3 +1,11 @@
+// BACK to doubles.
+
+float = double
+f
+FloatEpsilon...
+
+//
+
 Rentesats konservativ - overvurdering. 0 coupon obligationer.
 
 Arbejdsprocess = Analyse.. Valg der er truffet.
