@@ -75,6 +75,7 @@ int main(int argc, char const *argv[]) {
   int gridx = 50;
   int gridy = 50;
   int max_policies = 1;
+  int po;
     
   if (argc>1) {
       n_kernels = atoi(argv[1]);
@@ -92,8 +93,12 @@ int main(int argc, char const *argv[]) {
       max_policies = atoi(argv[4]);
   }
 
+  if (argc>5) {
+      po = atoi(argv[5]);
+  }
+
   /********** 0. SETUP **********/
-  dim3 block_dim(8,8,5); //Number of threads per block // 320 seems to be best
+  dim3 block_dim(1,1,1); //Number of threads per block // 320 seems to be best
   dim3 grid_dim(gridx,gridy,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
   //dim3 block_dim(2,2,1); //Number of threads per block
   //dim3 grid_dim(2,1,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
@@ -120,7 +125,7 @@ int main(int argc, char const *argv[]) {
           cuses[j].end_year = end_year;
           cuses[j].start_year = start_year;
 
-          cuses[j].policy = 1+rand()%6;
+          cuses[j].policy = po; //1+i%6;//1+rand()%6;
           cuses[j].neqn = 1;
           if (cuses[j].policy >= 5) {
             cuses[j].neqn = 2;

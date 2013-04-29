@@ -142,10 +142,13 @@ __device__
 static void local_estimate(int policy,int age, int neqn,int local_end_year,int local_start_year,double *stepsize,double* y,double* y_diff) {
   double t = (double)local_end_year;
   
+  int steps_taken = 0;
+  int calcs_done = 0;
   //Step by step integration.
   bool local_start_reached = false;
   while (!local_start_reached)
   {
+    steps_taken+=1;
     //Variables used in calculations
     bool stepsize_descresed = false;
     double hmin = 26.0 * DoubleEpsilon * fabs( t );
@@ -157,6 +160,7 @@ static void local_estimate(int policy,int age, int neqn,int local_end_year,int l
 
     calculate_solutions(policy,age,neqn,t,*stepsize,y,y_diff,y_plus_one,y_plus_one_alternative);
     double error = calculate_solution_error(neqn,*stepsize,y,y_plus_one,y_plus_one_alternative);
+    calcs_done += 1;
 
     //Integreate 1 step
     while(error > 1.0)
@@ -171,6 +175,7 @@ static void local_estimate(int policy,int age, int neqn,int local_end_year,int l
       //Try again.
       calculate_solutions(policy,age,neqn,t,*stepsize,y,y_diff,y_plus_one,y_plus_one_alternative);
       error = calculate_solution_error(neqn,*stepsize,y,y_plus_one,y_plus_one_alternative);
+      calcs_done += 1;
     }
 
     //Advance in time
@@ -187,6 +192,8 @@ static void local_estimate(int policy,int age, int neqn,int local_end_year,int l
     double scale = scale_from_error(error,stepsize_descresed);
     *stepsize = sign ( *stepsize ) * max ( scale * fabs( *stepsize ), hmin );
   }
+  
+  printf("%i , %i , %i , %f \n",local_end_year,steps_taken,calcs_done,y[0]);
 }
 
 /**************** Local estimation help functions ****************/
