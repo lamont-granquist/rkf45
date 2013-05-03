@@ -98,7 +98,7 @@ int main(int argc, char const *argv[]) {
   }
 
   /********** 0. SETUP **********/
-  dim3 block_dim(8,8,5); //Number of threads per block // 320 seems to be best
+  dim3 block_dim(4,1,1); //Number of threads per block // 320 seems to be best
   dim3 grid_dim(gridx,gridy,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
   //dim3 block_dim(2,2,1); //Number of threads per block
   //dim3 grid_dim(2,1,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
@@ -106,12 +106,12 @@ int main(int argc, char const *argv[]) {
   int nsize = kernel_size*n_kernels; 
   int c = float(nsize/n_yc); // number of customers
 
-  printf("%i kernels * %i calcs = %i customers\n",n_kernels,kernel_size,nsize);
+  printf("%i kernels * %i calcs / %i ir_paths= %i customers\n",n_kernels,kernel_size,n_yc,c);
 
   /********* -2. GENERATE DATA ***/
   srand(19); //seed
 
-  CUS* cuses = (CUS*)malloc(sizeof(CUS)*nsize);
+  CUS* cuses = (CUS*)malloc(sizeof(CUS)*c);
 
   int i=0;
   int id=0;
@@ -119,7 +119,7 @@ int main(int argc, char const *argv[]) {
       int age = 30;//5 + rand()%30; //30
       int end_year = 50;
       int start_year = 0;
-      int cj = min(i+max_policies,nsize);
+      int cj = min(i+max_policies,c);
       for(int j=i;j<cj;j++) {
           cuses[j].id = id;
           cuses[j].age = age;
@@ -136,15 +136,14 @@ int main(int argc, char const *argv[]) {
       id++;
   }
 
-  float* collected_results = (float*) malloc(id*sizeof(float));
+  //float* collected_results = (float*) malloc(id*sizeof(float));
 
   /****** GENERATE YIELD CURVES ******/
-  float* yieldCurves = (float*)malloc(sizeof(yieldCurves)*10*3*1);
   float* dev_yieldCurves;
-  generateIRPaths(n_yc,10,1, &dev_yieldCurves,119); //n_irPaths, years, steps per year, yieldcurve, seed
+  generateIRPaths(n_yc,50,1, &dev_yieldCurves,119); //n_irPaths, years, steps per year, yieldcurve, seed
 
   /********* -1. SORT DATA *******/
-  sort(cuses,nsize);// Out comment to take away sorting
+  sort(cuses,c);// Out comment to take away sorting
 
   /********** 1. MALLOC HOST  **********/
   // Data on the host and the device, respectively

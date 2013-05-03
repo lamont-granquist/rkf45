@@ -322,6 +322,7 @@ void gpu_kernel(int offset, CUSTOMERS customers,float *result,float *yield_curve
 
   int c = float(id/n_yc);
   int yc = id%n_yc;
+
   //To make sure of loading time of variables.
   int c_policy = customers.policy[c];
   int c_age = customers.age[c];
@@ -343,7 +344,7 @@ void gpu_kernel(int offset, CUSTOMERS customers,float *result,float *yield_curve
            result1
           );
 
-  result[id] = yield_curves[id%10];//result0[0];
+  result[id] = result0[0];
 
 }
 
@@ -405,7 +406,9 @@ float GM(int age, float t) {
 // Interest
 __device__ 
 float r(float t,float* yield_curves,int yc, int n_yc) {
-    return rFsa(t);
+    int year = float(t);
+    return yield_curves[yc+n_yc*(50-year)];
+    //return rFsa(t);
 }
 
 __device__ 
