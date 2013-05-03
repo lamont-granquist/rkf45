@@ -193,7 +193,7 @@ static void local_estimate(int policy,int age, int neqn,int local_end_year,int l
     *stepsize = sign ( *stepsize ) * max ( scale * fabs( *stepsize ), hmin );
   }
   
-  printf("%i , %i , %i , %f \n",local_end_year,steps_taken,calcs_done,y[0]);
+  //printf("%i , %i , %i , %f \n",local_end_year,steps_taken,calcs_done,y[0]);
 }
 
 /**************** Local estimation help functions ****************/

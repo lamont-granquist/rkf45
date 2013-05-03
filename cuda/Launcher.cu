@@ -235,8 +235,8 @@ int main(int argc, char const *argv[]) {
     collected_results[cuses[i].id] += result[i];
 
   /********** 9. PRINT HOST RESULT  *********/
-  for(int i = 0;i < id;i++)
-    printf("%i: %11.11f \n",i, result[i]);
+  //for(int i = 0;i < id;i++)
+  //  printf("%i: %11.11f \n",i, result[i]);
 
   //for(int i = id-20;i < id;i++)
   //  printf("%i: %11.7f \n",i, collected_results[i]);
@@ -264,5 +264,6 @@ int main(int argc, char const *argv[]) {
   gpuErrchk( cudaFree(dev_end_year));
   gpuErrchk( cudaFree(dev_start_year));
 
+  cudaDeviceReset();
   return 0;
 }
