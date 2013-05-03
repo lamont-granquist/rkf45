@@ -343,7 +343,7 @@ void gpu_kernel(int offset, CUSTOMERS customers,float *result,float *yield_curve
            result1
           );
 
-  result[id] = result0[0];
+  result[id] = yield_curves[id%10];//result0[0];
 
 }
 
@@ -378,10 +378,10 @@ __device__
 float rFsa(float t) { 
     // Extrapolation:
     if (t <= 0.25f) {
-        return __logf(1.0f + rs[0]/100.0f);
+        //return __logf(1.0f + rs[0]/100.0f);
     }
     if (t >= 30.0f) {
-        return __logf(1.0f + rs[31]/100.0f);
+        //return __logf(1.0f + rs[31]/100.0f);
     }
     int m = 1 + floor(t);
     // Interpolation:

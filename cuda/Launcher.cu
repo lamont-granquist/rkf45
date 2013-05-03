@@ -54,21 +54,19 @@ ir 200 year 49
 ir 1 year 48
 */
 
-/*
-int main(int argc, char const *argv[]) {
+/*int main(int argc, char const *argv[]) {
 
     float* dev_yieldCurves;
-    float* yieldCurves = (float*)malloc(sizeof(yieldCurves)*50*3*1);
+    float* yieldCurves = (float*)malloc(sizeof(yieldCurves)*10*3*1);
 
     //n_irPaths, years, steps per year, yieldcurve, seed
-    generateIRPaths(3,50,1, &dev_yieldCurves,19);
+    generateIRPaths(3,10,1, &dev_yieldCurves,119);
 
-    gpuErrchk( cudaMemcpy(yieldCurves, dev_yieldCurves, sizeof(float) * 50*3*1, cudaMemcpyDeviceToHost));
+    gpuErrchk( cudaMemcpy(yieldCurves, dev_yieldCurves, sizeof(float) * 10*3*1, cudaMemcpyDeviceToHost));
 
-    for(int i = 0;i<50*3*1;i++)
+    for(int i = 0;i<10*3*1;i++)
         printf("%f\n",yieldCurves[i]);
-}
-*/
+}*/
 
 // Host code
 int main(int argc, char const *argv[]) {
@@ -141,8 +139,9 @@ int main(int argc, char const *argv[]) {
   float* collected_results = (float*) malloc(id*sizeof(float));
 
   /****** GENERATE YIELD CURVES ******/
+  float* yieldCurves = (float*)malloc(sizeof(yieldCurves)*10*3*1);
   float* dev_yieldCurves;
-  generateIRPaths(n_yc,50,1, &dev_yieldCurves,19); //n_irPaths, years, steps per year, yieldcurve, seed
+  generateIRPaths(n_yc,10,1, &dev_yieldCurves,119); //n_irPaths, years, steps per year, yieldcurve, seed
 
   /********* -1. SORT DATA *******/
   sort(cuses,nsize);// Out comment to take away sorting
