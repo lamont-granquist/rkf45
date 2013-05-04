@@ -369,10 +369,18 @@ const float rs[] = {
 
 __device__
 float interpolate(float t,int m) {
-  float tm = ts[m], tm1 = ts[m+1];
-  float rm = rs[m] / 100.0f, rm1 = rs[m+1] / 100.0f;
-  float Rt = (rm * (tm1 - t) + rm1 * (t - tm)) / (tm1 - tm);
-  return __logf(1.0f + Rt) + t / (tm1 - tm) * (rm1 - rm) / (1.0f + Rt);
+  float x1 = ts[m], x2 = ts[m+1];
+  float y1 = rs[m] / 100.0f, y2 = rs[m+1] / 100.0f;
+  float Rt = (y1 * (x2 - t) + y2 * (t - x1)) / (x2 - x1);
+  return __logf(1.0f + Rt) + t / (x2 - x1) * (y2 - y1) / (1.0f + Rt);
+}
+
+__device__
+float interpolate2(float t,float x1, float x2, float y1,float y2) {
+  y1 = y1 / 100.0f,
+  y2 = y2 / 100.0f;
+  float Rt = (y1 * (x2 - t) + y2 * (t - x1)) / (x2 - x1);
+  return __logf(1.0f + Rt) + t / (x2 - x1) * (y2 - y1) / (1.0f + Rt);
 }
 
 __device__
@@ -406,8 +414,11 @@ float GM(int age, float t) {
 // Interest
 __device__ 
 float r(float t,float* yield_curves,int yc, int n_yc) {
-    int year = float(t);
-    return yield_curves[yc+n_yc*(50-year)];
+    int x1 = 50-(floor(t)+1);
+    int x2 = 50-floor(t);
+    float y1 = yield_curves[yc+n_yc*x1]; 
+    float y2 = yield_curves[yc+n_yc*x2]; 
+    return interpolate2(t,(float)x1,(float)x2,y1,y2);
     //return rFsa(t);
 }
 
