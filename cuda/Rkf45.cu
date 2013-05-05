@@ -320,7 +320,7 @@ void gpu_kernel(int offset, CUSTOMERS customers,float *result,float *yield_curve
   for(int i = 0;i<51;i++)
     result1[i] = 0.0f;
 
-  int c = float(id/n_yc);
+  int c = floorf(id/n_yc);
   int yc = id%n_yc;
 
   //To make sure of loading time of variables.
@@ -414,14 +414,12 @@ float GM(int age, float t) {
 // Interest
 __device__ 
 float r(float t,float* yield_curves,int yc, int n_yc) {
-    /*
+    if (t==50) {t = 50-0.001;};
     int x1 = 50-(floor(t)+1);
     int x2 = 50-floor(t);
     float y1 = yield_curves[yc+n_yc*x1]; 
     float y2 = yield_curves[yc+n_yc*x2]; 
-    */
-    //return interpolate2(t,(float)x1,(float)x2,y1,y2);
-    return rFsa(t);
+    return interpolate2(t,(float)x1,(float)x2,y1,y2);
 }
 
 __device__ 
