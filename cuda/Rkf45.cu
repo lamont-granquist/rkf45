@@ -417,8 +417,9 @@ float r(float t,float* yield_curves,int yc, int n_yc) {
     if (t==50) {t = 50-0.001;};
     int x1 = 50-(floor(t)+1);
     int x2 = 50-floor(t);
-    float y1 = yield_curves[yc+n_yc*x1]; 
-    float y2 = yield_curves[yc+n_yc*x2]; 
+
+    float y1 = yield_curves[x1*2*n_yc + yc*2]; 
+    float y2 = yield_curves[x1*2*n_yc + yc*2+1]; 
     return interpolate2(t,(float)x1,(float)x2,y1,y2);
 }
 
