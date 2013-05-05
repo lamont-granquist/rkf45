@@ -140,7 +140,7 @@ int main(int argc, char const *argv[]) {
 
   /****** GENERATE YIELD CURVES ******/
   float* dev_yieldCurves;
-  generateIRPaths(n_yc,50,1, &dev_yieldCurves,119); //n_irPaths, years, steps per year, yieldcurve, seed
+  generateIRPaths(n_yc,50, &dev_yieldCurves,119); //n_irPaths, years, steps per year, yieldcurve, seed
 
   /********* -1. SORT DATA *******/
   sort(cuses,c);// Out comment to take away sorting

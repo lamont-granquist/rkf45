@@ -8,5 +8,5 @@
 #define MAXZERO(x) MAX(x,0.0f)
 
 void generateIRPaths(const int numberOfPaths, const int years,
-                     float **dev_yieldCurves, 
+                     const int stepsPerYear, float **dev_yieldCurves, 
                      const long long int seed);
