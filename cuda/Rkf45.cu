@@ -414,12 +414,14 @@ float GM(int age, float t) {
 // Interest
 __device__ 
 float r(float t,float* yield_curves,int yc, int n_yc) {
+    /*
     int x1 = 50-(floor(t)+1);
     int x2 = 50-floor(t);
     float y1 = yield_curves[yc+n_yc*x1]; 
     float y2 = yield_curves[yc+n_yc*x2]; 
-    return interpolate2(t,(float)x1,(float)x2,y1,y2);
-    //return rFsa(t);
+    */
+    //return interpolate2(t,(float)x1,(float)x2,y1,y2);
+    return rFsa(t);
 }
 
 __device__ 

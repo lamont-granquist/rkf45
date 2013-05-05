@@ -72,10 +72,10 @@ ir 1 year 48
 int main(int argc, char const *argv[]) {
 
   int n_kernels = 1;
-  int gridx = 50;
-  int gridy = 50;
+  int gridx = 1;
+  int gridy = 1;
   int max_policies = 1;
-  int n_yc = 3;
+  int n_yc = 1;
     
   if (argc>1) {
       n_kernels = atoi(argv[1]);
@@ -98,7 +98,7 @@ int main(int argc, char const *argv[]) {
   }
 
   /********** 0. SETUP **********/
-  dim3 block_dim(4,1,1); //Number of threads per block // 320 seems to be best
+  dim3 block_dim(1,1,1); //Number of threads per block // 320 seems to be best
   dim3 grid_dim(gridx,gridy,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
   //dim3 block_dim(2,2,1); //Number of threads per block
   //dim3 grid_dim(2,1,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
