@@ -415,11 +415,18 @@ float GM(int age, float t) {
 __device__ 
 float r(float t,float* yield_curves,int yc, int n_yc) {
     if (t==50) {t = 50-0.001;};
-    int x1 = 50-(floor(t)+1);
-    int x2 = 50-floor(t);
+    int x1 = 50-(floor(t)+1); //0-49
+    int x2 = 50-floor(t); //1-50
 
-    float y1 = yield_curves[x1*2*n_yc + yc*2]; 
-    float y2 = yield_curves[x1*2*n_yc + yc*2+1]; 
+    //float y1 = yield_curves[x1*n_yc+yc];                     //<- standard
+    //float y2 = yield_curves[x2*n_yc+yc];                     //<- standard
+
+    //float y1 = yield_curves[x1*2*n_yc + yc*2];             //<-- formula A
+    //float y2 = yield_curves[x1*2*n_yc + yc*2+1]; 
+
+    float y1 = yield_curves[x1 + yc*(50+1)];                           //<- formula B
+    float y2 = yield_curves[x2 + yc*(50+1)];                           //<- formula B
+
     return interpolate2(t,(float)x1,(float)x2,y1,y2);
 }
 

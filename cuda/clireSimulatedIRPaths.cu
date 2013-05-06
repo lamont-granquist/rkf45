@@ -17,10 +17,10 @@ __device__ void interestPath(const float r0, const int years,
   for (int y = 0; y <= years; y++) {
     //dev_yieldCurves[(years-y)*n_yc + yc] = r;                           //<- standard
 
-    if (y!=0) { dev_yieldCurves[(years-y)*2*n_yc + yc*2] = r; }          //<- formula A
-    if (y!=years) { dev_yieldCurves[(years-y-1)*2*n_yc + yc*2+1] = r;}
+    //if (y!=0) { dev_yieldCurves[(years-y)*2*n_yc + yc*2] = r; }          //<- formula A
+    //if (y!=years) { dev_yieldCurves[(years-y-1)*2*n_yc + yc*2+1] = r;}
 
-    //dev_yieldCurves[(years-y) + yc*(years+1)] = r;                           //<- standard
+    dev_yieldCurves[(years-y) + yc*(years+1)] = r;                           //<- formula B
 
     r += MAXZERO(kappa * (theta - r) * dt + sigma * sqrtf(r * dt) * curand_normal(localState));
   }
