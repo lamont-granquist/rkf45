@@ -304,7 +304,7 @@ __device__ int get_n_device(void) {
 /***** DEVICE ******/
 
 __global__
-void gpu_kernel(int offset, CUSTOMERS customers,float *result,float *yield_curves,int n_yc) {
+void gpu_kernel(int offset, CUSTOMERS customers,float *result,float *yield_curves,int n_yc,int n_c) {
 
   int id = get_id()+offset;
 
@@ -320,8 +320,13 @@ void gpu_kernel(int offset, CUSTOMERS customers,float *result,float *yield_curve
   for(int i = 0;i<51;i++)
     result1[i] = 0.0f;
 
-  int c = floorf(id/n_yc);
-  int yc = id%n_yc;
+  // Formula A
+  //int c = floorf(id/n_yc);
+  //int yc = id%n_yc;
+
+  // Formula B
+  int c = id%n_c;
+  int yc = floorf(id/n_c);
 
   //To make sure of loading time of variables.
   int c_policy = customers.policy[c];

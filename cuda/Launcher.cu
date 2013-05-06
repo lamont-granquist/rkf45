@@ -213,7 +213,7 @@ int main(int argc, char const *argv[]) {
   int offset = 0;
   /********** 6. LAUNCH WITH CUSTOMERS AND RESULT *********/
   for(int i = 0; i < n_kernels; i++) {
-    gpu_kernel <<<grid_dim, block_dim>>>(offset,customers,dev_result,dev_yieldCurves,n_yc); // GPU
+    gpu_kernel <<<grid_dim, block_dim>>>(offset,customers,dev_result,dev_yieldCurves,n_yc,c); // GPU
     offset+=kernel_size;
   }
 
@@ -237,9 +237,9 @@ int main(int argc, char const *argv[]) {
   /*********** COLLECT RESULTS **********/
   //for(int i = 0;i < c;i++)
   //  collected_results[cuses[i].id] += result[i];
-
+  
   for(int i = 0;i < nsize;i++)
-    printf("%i: %11.7f \n",i, result[i]);
+    printf("%i: %11.7f \n",i,result[i]);
 
   /********** 9. PRINT HOST RESULT  *********/
   //for(int i = 0;i < id;i++)
