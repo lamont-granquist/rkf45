@@ -238,7 +238,7 @@ int main(int argc, char const *argv[]) {
   //for(int i = 0;i < c;i++)
   //  collected_results[cuses[i].id] += result[i];
   
-  for(int i = 0;i < nsize;i++)
+  for(int i = nsize-10;i < nsize;i++)
     printf("%i: %11.7f \n",i,result[i]);
 
   /********** 9. PRINT HOST RESULT  *********/
