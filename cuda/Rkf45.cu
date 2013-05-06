@@ -321,12 +321,12 @@ void gpu_kernel(int offset, CUSTOMERS customers,float *result,float *yield_curve
     result1[i] = 0.0f;
 
   // Formula A
-  //int c = floorf(id/n_yc);
-  //int yc = id%n_yc;
+  int c = floorf(id/n_yc);
+  int yc = id%n_yc;
 
   // Formula B
-  int c = id%n_c;
-  int yc = floorf(id/n_c);
+  //int c = id%n_c;
+  //int yc = floorf(id/n_c);
 
   //To make sure of loading time of variables.
   int c_policy = customers.policy[c];
@@ -423,14 +423,14 @@ float r(float t,float* yield_curves,int yc, int n_yc) {
     int x1 = 50-(floor(t)+1); //0-49
     int x2 = 50-floor(t); //1-50
 
-    //float y1 = yield_curves[x1*n_yc+yc];                     //<- standard
-    //float y2 = yield_curves[x2*n_yc+yc];                     //<- standard
+    //float y1 = yield_curves[x1*n_yc+yc];              //<- standard
+    //float y2 = yield_curves[x2*n_yc+yc];              //<- standard
 
-    //float y1 = yield_curves[x1*2*n_yc + yc*2];             //<-- formula A
-    //float y2 = yield_curves[x1*2*n_yc + yc*2+1]; 
+    float y1 = yield_curves[x1*2*n_yc + yc*2];          //<-- formula A
+    float y2 = yield_curves[x1*2*n_yc + yc*2+1]; 
 
-    float y1 = yield_curves[x1 + yc*(50+1)];                           //<- formula B
-    float y2 = yield_curves[x2 + yc*(50+1)];                           //<- formula B
+    //float y1 = yield_curves[x1 + yc*(50+1)];          //<- formula B
+    //float y2 = yield_curves[x2 + yc*(50+1)];          
 
     return interpolate2(t,(float)x1,(float)x2,y1,y2);
 }
