@@ -17,7 +17,6 @@ inline void gpuAssert(cudaError_t code, char *file, int line, bool abort=true)
    }
 }
 
-
 /**************************** HOST ******************************/
 
 //Sorting
@@ -53,20 +52,6 @@ ir 2 year 49
 ir 200 year 49
 ir 1 year 48
 */
-
-/*int main(int argc, char const *argv[]) {
-
-    float* dev_yieldCurves;
-    float* yieldCurves = (float*)malloc(sizeof(yieldCurves)*10*3*1);
-
-    //n_irPaths, years, steps per year, yieldcurve, seed
-    generateIRPaths(3,10,1, &dev_yieldCurves,119);
-
-    gpuErrchk( cudaMemcpy(yieldCurves, dev_yieldCurves, sizeof(float) * 10*3*1, cudaMemcpyDeviceToHost));
-
-    for(int i = 0;i<10*3*1;i++)
-        printf("%f\n",yieldCurves[i]);
-}*/
 
 // Host code
 int main(int argc, char const *argv[]) {
@@ -126,7 +111,7 @@ int main(int argc, char const *argv[]) {
           cuses[j].end_year = end_year;
           cuses[j].start_year = start_year;
 
-          cuses[j].policy = 1+rand()%6;
+          cuses[j].policy = 1+i%6;//1+rand()%6;
           cuses[j].neqn = 1;
           if (cuses[j].policy >= 5) {
             cuses[j].neqn = 2;
@@ -136,18 +121,20 @@ int main(int argc, char const *argv[]) {
       id++;
   }
 
-  //float* collected_results = (float*) malloc(id*sizeof(float));
+  //double* collected_results = (float*) malloc(id*sizeof(float));
 
   /****** GENERATE YIELD CURVES ******/
   float* dev_yieldCurves;
   generateIRPaths(n_yc,50, &dev_yieldCurves,119); //n_irPaths, years, steps per year, yieldcurve, seed
+  double* collected_results = (double*) malloc(id*sizeof(double));
+
 
   /********* -1. SORT DATA *******/
   sort(cuses,c);// Out comment to take away sorting
 
   /********** 1. MALLOC HOST  **********/
   // Data on the host and the device, respectively
-  float* result = (float*) malloc(nsize*sizeof(float));
+  double* result = (double*) malloc(nsize*sizeof(double));
   int* neqn = (int*) malloc(c*sizeof(int));
   int* policy = (int*) malloc(c*sizeof(int));
   int* age = (int*) malloc(c*sizeof(int));
@@ -168,14 +155,15 @@ int main(int argc, char const *argv[]) {
   }
 
   ///********** 2. MALLOC DEVICE  **********/
+  clock_t start1 = clock();
 
-  float *dev_result;
+  double *dev_result;
   int *dev_neqn;
   int *dev_policy;
   int *dev_age;
   int *dev_end_year;
   int *dev_start_year;
-  gpuErrchk( cudaMalloc((void**)&dev_result, sizeof(float) * nsize));
+  gpuErrchk( cudaMalloc((void**)&dev_result, sizeof(double) * nsize));
   gpuErrchk( cudaMalloc((void**)&dev_neqn, sizeof(int) * c));
   gpuErrchk( cudaMalloc((void**)&dev_policy, sizeof(int) * c));
   gpuErrchk( cudaMalloc((void**)&dev_age, sizeof(int) * c));
@@ -201,7 +189,7 @@ int main(int argc, char const *argv[]) {
 
   //********* 5. TIMING START ************/
   //Normal timing
-  clock_t start = clock();
+  clock_t start2 = clock();
 
   //Cuda timing
   cudaEvent_t cuda_start, cuda_stop;
@@ -226,13 +214,12 @@ int main(int argc, char const *argv[]) {
   cudaEventDestroy( cuda_stop );
   
   /********** 8. COPY RESULT FROM DEVICE TO HOST *********/
+  clock_t start3 = clock();
   // Copy the result back from the device
-  gpuErrchk( cudaMemcpy(result, dev_result, sizeof(float) * nsize, cudaMemcpyDeviceToHost));
+  gpuErrchk( cudaMemcpy(result, dev_result, sizeof(double) * nsize, cudaMemcpyDeviceToHost));
 
   /********** 8,5. EXTRA TIMING *********/
   //Normal timing
-  clock_t end = clock();
-  float time = (float) (end - start) * 1000.0f / CLOCKS_PER_SEC;
 
   /*********** COLLECT RESULTS **********/
   //for(int i = 0;i < c;i++)
@@ -241,12 +228,28 @@ int main(int argc, char const *argv[]) {
   for(int i = nsize-10;i < nsize;i++)
     printf("%i: %11.7f \n",i,result[i]);
 
+  clock_t end = clock();
+  float time1 = (float) (end - start1) * 1000.0f / CLOCKS_PER_SEC;
+  float time2 = (float) (end - start2) * 1000.0f / CLOCKS_PER_SEC;
+  float time3 = (float) (end - start3) * 1000.0f / CLOCKS_PER_SEC;
   /********** 9. PRINT HOST RESULT  *********/
   //for(int i = 0;i < id;i++)
+  //  printf("%i: %11.11f \n",i, result[i]);
+
+  //for(int i = id-20;i < id;i++)
   //  printf("%i: %11.7f \n",i, collected_results[i]);
 
+  /*
+  for(int i = 0; i < 51; i++) {
+    printf("%i: %.7f\n",i, result_cpu[i]);
+  }
+  */
+
   printf("%i kernels * %i calcs = %i customers\n",n_kernels,kernel_size,nsize);
-  printf("TIME: %f, CUDA_TIME: %f\n",time,cuda_time);
+  //printf("TIME: %f, CUDA_TIME: %f\n",time,cuda_time);
+  printf("TIME1: %f\n",time1);
+  printf("TIME2: %f\n",time2);
+  printf("TIME3: %f\n",time3);
 
   /********** 10. FREE MEMORY   *********/
   free(result);
@@ -262,5 +265,6 @@ int main(int argc, char const *argv[]) {
   gpuErrchk( cudaFree(dev_end_year));
   gpuErrchk( cudaFree(dev_start_year));
 
+  cudaDeviceReset();
   return 0;
 }

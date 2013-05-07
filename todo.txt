@@ -3,7 +3,16 @@ Der skal gives et overblik over hvornår der foretages mange, kontra få
 beregninger. (Skal måles for hvert produkt)
 
 
-Ekspoleritoin: inden år nul : Kontrakt..
+Extrapolering: inden år nul : Kontrakt.
+x// BACK to doubles.
+k
+
+float = double
+f
+FloatEpsilon...
+__powf
+
+//
 
 Rentesats konservativ - overvurdering. 0 coupon obligationer.
 
@@ -116,6 +125,11 @@ A: 19749,19722
 B: 15877,15852
 C: 19289,19259
 
+Struktur af 5-1,5-2,5-3.
+Særligt 5-2, flere hypoteser?
+
+
+////////////////////////////////////////
 
 y_diff (gammel yp) er previous_d_diff. Er det en fejl? Stemmer ikke overens.
 med udregninger.

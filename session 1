@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<session version="1" name="session 1" hscale="9.719664314312358E-8">
+<executable file="X:\a.exe" cwd="X:\" args="1 200 200 1 1" profileonstart="true" concurrentkernels="true"><envs></envs></executable>
+<expert><columnprops><column kind="BLOCK_SIZE" width="102"/><column kind="GRID_SIZE" width="104"/><column kind="DURATION" width="110"/></columnprops>
+<columnorder><column kind="NAME"/><column kind="START_TIME"/><column kind="DURATION"/><column kind="AVG_DURATION"/><column kind="GRID_SIZE"/><column kind="BLOCK_SIZE"/><column kind="REGS_PER_THREAD"/><column kind="STAT_SHARED_MEM"/><column kind="DYNA_SHARED_MEM"/><column kind="AVG_DYNA_SHARED_MEM"/><column kind="BYTE_SIZE"/><column kind="THROUGHPUT"/><column kind="METRIC" label="dram_write_throughput"/><column kind="METRIC" label="dram_read_throughput"/><column kind="METRIC" label="inst_replay_overhead"/><column kind="METRIC" label="global_cache_replay_overhead"/><column kind="METRIC" label="local_memory_overhead"/><column kind="METRIC" label="shared_replay_overhead"/><column kind="METRIC" label="gst_efficiency"/><column kind="METRIC" label="local_replay_overhead"/><column kind="METRIC" label="warp_execution_efficiency"/><column kind="METRIC" label="achieved_occupancy"/><column kind="METRIC" label="gld_efficiency"/><column kind="EVENT" label="inst_issued"/></columnorder>
+</expert>
+<analysis activescope="APPLICATION"><visitedstages><stage name="TIMELINE"/><stage name="KERNEL_MEMORY"/><stage name="KERNEL_INSTRUCTION"/><stage name="MULTIPROCESSOR"/></visitedstages></analysis>
+<vruler width="200"/>
+<hruler>
+</hruler>
+<timelinestate>
+<timeline pathname="1584" kind="PROCESS" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="1584/3488" kind="THREAD" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="1584/3488/Runtime API" kind="RUNTIME" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="1584/3488/Driver API" kind="DRIVER" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="1584/Profiling Overhead" kind="OVERHEADS" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="Tesla C2075" kind="DEVICE" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="Tesla C2075/1" kind="CONTEXT" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="Tesla C2075/1/MemCpy (HtoD)" kind="MEMCPY_HTOD" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="Tesla C2075/1/MemCpy (DtoH)" kind="MEMCPY_DTOH" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="Tesla C2075/1/Compute" kind="KERNELS" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="Tesla C2075/1/Compute/gpu_kernel(int, CUSTOMERS, double*, double*)" kind="KERNEL" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="Tesla C2075/1/Streams" kind="STREAMS" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="Tesla C2075/1/Streams/2" kind="STREAM" containerstate="OPEN_ALL" filtered="false"/>
+</timelinestate>
+<pdm>
+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</pdm>
+</session>
