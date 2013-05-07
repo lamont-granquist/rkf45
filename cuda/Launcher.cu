@@ -229,15 +229,15 @@ int main(int argc, char const *argv[]) {
 
   /********** 8,5. EXTRA TIMING *********/
   //Normal timing
-  clock_t end = clock();
-  float time1 = (float) (end - start1) * 1000.0f / CLOCKS_PER_SEC;
-  float time2 = (float) (end - start2) * 1000.0f / CLOCKS_PER_SEC;
-  float time3 = (float) (end - start3) * 1000.0f / CLOCKS_PER_SEC;
 
   /*********** COLLECT RESULTS **********/
   for(int i = 0;i < nsize;i++)
     collected_results[cuses[i].id] += result[i];
 
+  clock_t end = clock();
+  float time1 = (float) (end - start1) * 1000.0f / CLOCKS_PER_SEC;
+  float time2 = (float) (end - start2) * 1000.0f / CLOCKS_PER_SEC;
+  float time3 = (float) (end - start3) * 1000.0f / CLOCKS_PER_SEC;
   /********** 9. PRINT HOST RESULT  *********/
   //for(int i = 0;i < id;i++)
   //  printf("%i: %11.11f \n",i, result[i]);
