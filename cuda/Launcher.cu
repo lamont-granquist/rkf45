@@ -98,7 +98,7 @@ int main(int argc, char const *argv[]) {
   }
 
   /********** 0. SETUP **********/
-  dim3 block_dim(1,1,1); //Number of threads per block // 320 seems to be best
+  dim3 block_dim(8,8,5); //Number of threads per block // 320 seems to be best
   dim3 grid_dim(gridx,gridy,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
   //dim3 block_dim(2,2,1); //Number of threads per block
   //dim3 grid_dim(2,1,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
@@ -125,7 +125,7 @@ int main(int argc, char const *argv[]) {
           cuses[j].end_year = end_year;
           cuses[j].start_year = start_year;
 
-          cuses[j].policy = po; //1+i%6;//1+rand()%6;
+          cuses[j].policy = 1+i%6;//1+rand()%6;
           cuses[j].neqn = 1;
           if (cuses[j].policy >= 5) {
             cuses[j].neqn = 2;
@@ -164,6 +164,7 @@ int main(int argc, char const *argv[]) {
   }
 
   ///********** 2. MALLOC DEVICE  **********/
+  clock_t start1 = clock();
 
   double *dev_result;
   int *dev_neqn;
@@ -197,7 +198,7 @@ int main(int argc, char const *argv[]) {
 
   //********* 5. TIMING START ************/
   //Normal timing
-  clock_t start = clock();
+  clock_t start2 = clock();
 
   //Cuda timing
   cudaEvent_t cuda_start, cuda_stop;
@@ -222,13 +223,16 @@ int main(int argc, char const *argv[]) {
   cudaEventDestroy( cuda_stop );
   
   /********** 8. COPY RESULT FROM DEVICE TO HOST *********/
+  clock_t start3 = clock();
   // Copy the result back from the device
   gpuErrchk( cudaMemcpy(result, dev_result, sizeof(double) * nsize, cudaMemcpyDeviceToHost));
 
   /********** 8,5. EXTRA TIMING *********/
   //Normal timing
   clock_t end = clock();
-  float time = (float) (end - start) * 1000.0f / CLOCKS_PER_SEC;
+  float time1 = (float) (end - start1) * 1000.0f / CLOCKS_PER_SEC;
+  float time2 = (float) (end - start2) * 1000.0f / CLOCKS_PER_SEC;
+  float time3 = (float) (end - start3) * 1000.0f / CLOCKS_PER_SEC;
 
   /*********** COLLECT RESULTS **********/
   for(int i = 0;i < nsize;i++)
@@ -248,7 +252,10 @@ int main(int argc, char const *argv[]) {
   */
 
   printf("%i kernels * %i calcs = %i customers\n",n_kernels,kernel_size,nsize);
-  printf("TIME: %f, CUDA_TIME: %f\n",time,cuda_time);
+  //printf("TIME: %f, CUDA_TIME: %f\n",time,cuda_time);
+  printf("TIME1: %f\n",time1);
+  printf("TIME2: %f\n",time2);
+  printf("TIME3: %f\n",time3);
 
   /********** 10. FREE MEMORY   *********/
   free(result);
