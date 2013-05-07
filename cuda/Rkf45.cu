@@ -62,20 +62,20 @@ static void calculate_solutions(int policy,int age,double* yield_curves,int yc, 
   //f1
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + h*(1.0/4.0)*y_diff[i];
-  dy (policy,age,yield_curves,yc,n_yc,t + (1.0/4.0)*h, f_swap, f1 );
+  dy(policy,age,yield_curves,yc,n_yc,t + (1.0/4.0)*h, f_swap, f1 );
 
   //f2
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + h*(3.0/32.0)*y_diff[i]
                      + h*(9.0/32.0)*f1[i];
-  dy (policy,age,yield_curves,yc,n_yc, t + (3.0/8.0)*h, f_swap, f2 );
+  dy(policy,age,yield_curves,yc,n_yc, t + (3.0/8.0)*h, f_swap, f2 );
 
   //f3
   for (int i = 0; i < neqn; i++ )
     f_swap[i] = y[i] + h*(1932.0/2197.0)* y_diff[i]
                      - h*(7200.0/2197.0)* f1[i]
                      + h*(7296.0/2197.0)* f2[i];
-  dy (policy,age,yield_curves,yc,n_yc, t + (12.0/13.0)* h, f_swap, f3 );
+  dy(policy,age,yield_curves,yc,n_yc, t + (12.0/13.0)* h, f_swap, f3 );
 
   //f4
   for (int i = 0; i < neqn; i++ )
@@ -83,7 +83,7 @@ static void calculate_solutions(int policy,int age,double* yield_curves,int yc, 
                      - h*(8.0/1.0)     * f1[i]
                      + h*(3680.0/513.0)* f2[i]
                      - h*(845.0/4104.0)* f3[i];
-  dy (policy,age,yield_curves,yc,n_yc, t + h, f_swap, f4 );
+  dy(policy,age,yield_curves,yc,n_yc, t + h, f_swap, f4 );
 
   //f5
   for (int i = 0; i < neqn; i++ )
@@ -92,7 +92,7 @@ static void calculate_solutions(int policy,int age,double* yield_curves,int yc, 
                      - h*(3544.0/2565.0) * f2[i]
                      + h*(1859.0/4104.0) * f3[i]
                      - h*(11.0/40.0) * f4[i];
-  dy (policy,age,yield_curves,yc,n_yc, t + h*(1.0/2.0), f_swap, f5 );
+  dy(policy,age,yield_curves,yc,n_yc, t + h*(1.0/2.0), f_swap, f5 );
 
   //Calculate solution
   for (int i = 0; i < neqn; i++ )
@@ -435,6 +435,7 @@ double r(double t,double* yield_curves,int yc, int n_yc) {
     //double y2 = yield_curves[x2 + yc*(50+1)];          
 
     return interpolate2(t,(double)x1,(double)x2,y1,y2);
+    //return 0.05;
 }
 
 __device__ 

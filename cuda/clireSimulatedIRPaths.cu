@@ -4,15 +4,15 @@
 #include "clireSimulatedIRPaths.hu"
 #include "clireDevice.hu"
 
-__device__ float kappa = 1.155618f, theta = 0.02384924f, sigma = 0.08425505f;
+__device__ double kappa = 1.155618, theta = 0.02384924, sigma = 0.08425505;
 
 // Simulates an interest rate path with start rate r0.
 // CIR model
-__device__ void interestPath(const float r0, const int years, 
+__device__ void interestPath(const double r0, const int years, 
                              curandState *localState, 
-                             float *dev_yieldCurves, const int n_yc,int yc) {    
-  float dt = 1.0f;
-  float r = r0;
+                             double *dev_yieldCurves, const int n_yc,int yc) {    
+  double dt = 1.0f;
+  double r = r0;
   
   for (int y = 0; y <= years; y++) {
     //dev_yieldCurves[(years-y)*n_yc + yc] = r;                           //<- standard
@@ -47,7 +47,7 @@ __global__ void randSetupKernel(curandState *state, const int n_yc,
 // the last year, while the last position holds the value for time 0.
 __global__ void irPathsKernel(const int n_yc, const int years, 
                               curandState *curandStates, 
-                              float *dev_yieldCurves) {
+                              double *dev_yieldCurves) {
   unsigned int tid = threadIdx.x + blockIdx.x * blockDim.x;
   
   while(tid < n_yc) {
@@ -68,7 +68,7 @@ __global__ void irPathsKernel(const int n_yc, const int years,
 
 // Sets up the generation of irPaths and writes to the pointer dev_yieldCurves
 void generateIRPaths(const int n_yc, const int years, 
-                     float **dev_yieldCurves, 
+                     double **dev_yieldCurves, 
                      const long long int seed) {
 
   curandState *dev_curandStates;
@@ -85,8 +85,8 @@ void generateIRPaths(const int n_yc, const int years,
   randSetupKernel<<<blocks, threads>>>(dev_curandStates, n_yc, seed);
   HANDLE_ERROR(cudaGetLastError());
     
-  HANDLE_ERROR(cudaMalloc((void**)dev_yieldCurves, 2*n_yc * (1+years) * sizeof(float)));
-  HANDLE_ERROR(cudaMemset(*dev_yieldCurves, 0.0f,  2*n_yc * (1+years) * sizeof(float)));
+  HANDLE_ERROR(cudaMalloc((void**)dev_yieldCurves, n_yc * (1+years) * sizeof(double) * 2));
+  HANDLE_ERROR(cudaMemset(*dev_yieldCurves, 0.0f,  n_yc * (1+years) * sizeof(double) * 2));
   
   // Call the kernel
   irPathsKernel<<<blocks, threads>>>(n_yc, years, 

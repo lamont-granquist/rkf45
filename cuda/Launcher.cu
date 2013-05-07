@@ -83,7 +83,7 @@ int main(int argc, char const *argv[]) {
   }
 
   /********** 0. SETUP **********/
-  dim3 block_dim(1,1,1); //Number of threads per block // 320 seems to be best
+  dim3 block_dim(8,8,5); //Number of threads per block // 320 seems to be best
   dim3 grid_dim(gridx,gridy,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
   //dim3 block_dim(2,2,1); //Number of threads per block
   //dim3 grid_dim(2,1,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
@@ -124,7 +124,7 @@ int main(int argc, char const *argv[]) {
   //double* collected_results = (float*) malloc(id*sizeof(float));
 
   /****** GENERATE YIELD CURVES ******/
-  float* dev_yieldCurves;
+  double* dev_yieldCurves;
   generateIRPaths(n_yc,50, &dev_yieldCurves,119); //n_irPaths, years, steps per year, yieldcurve, seed
   double* collected_results = (double*) malloc(id*sizeof(double));
 
