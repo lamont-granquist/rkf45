@@ -256,7 +256,7 @@ static double scale_from_error(double error,bool stepsize_decreased) {
 
 /* Estimate range */
 __device__ 
-void estimate(int policy,int age, int neqn, int end_year, int start_year,double* yield_curves,int yc,int n_yc, double* y,double* result0, double* result1) {
+void estimate(int policy,int age, int neqn, int end_year, int start_year,double* yield_curves,int yc,int n_yc, double* y,double* res) {
 
   double y_diff[MAX_NEQN];
   dy(policy,age,yield_curves,yc,n_yc, (double) end_year, y, y_diff);
@@ -264,17 +264,13 @@ void estimate(int policy,int age, int neqn, int end_year, int start_year,double*
 
   //Solve for one year at a time
   for (int year=end_year; year>start_year; year--) {
-
     //Add this years benefit to y
     bj_ii(policy,year,y);
 
     // Integrate over [year,year-1]
     local_estimate(policy,age,neqn,year,year-1,&stepsize,yield_curves,yc,n_yc,y,y_diff);
-
-    //Copy y to results
-    result0[year-start_year-1] = y[0];
-    result1[year-start_year-1] = y[1];
   }
+  *res = y[0];
 }
 
 /*************************** Auxiliaries ****************************/
@@ -315,13 +311,7 @@ void gpu_kernel(int offset, CUSTOMERS customers,double *result,double *yield_cur
   for(int i = 0;i<MAX_NEQN;i++)
     y[i] = 0.0;
 
-  double result0[51];
-  for(int i = 0;i<51;i++)
-    result0[i] = 0.0;
-
-  double result1[51];
-  for(int i = 0;i<51;i++)
-    result1[i] = 0.0;
+  double res = 0;
 
   // Formula A
   //int c = floorf(id/n_yc);
@@ -348,11 +338,10 @@ void gpu_kernel(int offset, CUSTOMERS customers,double *result,double *yield_cur
            yc,
            n_yc,
            y,
-           result0,
-           result1
+           &res
           );
 
-  result[id] = result0[0];
+  result[id] = res;
 
 }
 // The Danish FSA yield curve (Finanstilsynets rentekurve).
