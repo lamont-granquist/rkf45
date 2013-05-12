@@ -134,22 +134,9 @@ int main(int argc, char const *argv[]) {
 
   /********** 1. MALLOC HOST  **********/
   // Data on the host and the device, respectively
-  double* result = (double*) malloc(nsize*sizeof(double));
-  int* neqn = (int*) malloc(c*sizeof(int));
-  int* policy = (int*) malloc(c*sizeof(int));
-  int* age = (int*) malloc(c*sizeof(int));
-  int* end_year = (int*) malloc(c*sizeof(int));
-  int* start_year = (int*) malloc(c*sizeof(int));
+  float* result = (float*) malloc(nsize*sizeof(float));
 
   //Pack
-  for(int i = 0;i < c;i++) {
-    policy[i] = cuses[i].policy;
-    neqn[i] = cuses[i].neqn;
-    age[i] = cuses[i].age;
-    end_year[i] = cuses[i].end_year;
-    start_year[i] = cuses[i].start_year;
-  }
-
   for(int i = 0;i < nsize;i++) {
     result[i] = 0.0f;
   }
@@ -157,35 +144,18 @@ int main(int argc, char const *argv[]) {
   ///********** 2. MALLOC DEVICE  **********/
   clock_t start1 = clock();
 
-  double *dev_result;
-  int *dev_neqn;
-  int *dev_policy;
-  int *dev_age;
-  int *dev_end_year;
-  int *dev_start_year;
-  gpuErrchk( cudaMalloc((void**)&dev_result, sizeof(double) * nsize));
-  gpuErrchk( cudaMalloc((void**)&dev_neqn, sizeof(int) * c));
-  gpuErrchk( cudaMalloc((void**)&dev_policy, sizeof(int) * c));
-  gpuErrchk( cudaMalloc((void**)&dev_age, sizeof(int) * c));
-  gpuErrchk( cudaMalloc((void**)&dev_end_year, sizeof(int) * c));
-  gpuErrchk( cudaMalloc((void**)&dev_start_year, sizeof(int) * c));
+  float *dev_result;
+  CUS *dev_cuses;
+  
+  gpuErrchk( cudaMalloc((void**)&dev_result, sizeof(float) * nsize));
+  gpuErrchk( cudaMalloc((void**)&dev_cuses, sizeof(CUS) * nsize));
 
   /********** 3. COPY HOST TO DEVICE  **********/
   // Copy data to the device
-  gpuErrchk( cudaMemcpy(dev_neqn, neqn, sizeof(int) * c, cudaMemcpyHostToDevice));
-  gpuErrchk( cudaMemcpy(dev_policy, policy, sizeof(int) * c, cudaMemcpyHostToDevice));
-  gpuErrchk( cudaMemcpy(dev_age, age, sizeof(int) * c, cudaMemcpyHostToDevice));
-  gpuErrchk( cudaMemcpy(dev_end_year, end_year, sizeof(int) * c, cudaMemcpyHostToDevice));
-  gpuErrchk( cudaMemcpy(dev_start_year, start_year, sizeof(int) * c, cudaMemcpyHostToDevice));
+  gpuErrchk( cudaMemcpy(dev_cuses, cuses, sizeof(CUS) * nsize, cudaMemcpyHostToDevice));
 
   /********** 4. CUSTOMERS HOLDS POINTERS TO DEVICE **********/
   //Used to hold the pointers
-  CUSTOMERS customers;
-  customers.neqn = dev_neqn;
-  customers.policy = dev_policy;
-  customers.age = dev_age;
-  customers.end_year = dev_end_year;
-  customers.start_year = dev_start_year;
 
   //********* 5. TIMING START ************/
   //Normal timing
@@ -201,7 +171,7 @@ int main(int argc, char const *argv[]) {
   int offset = 0;
   /********** 6. LAUNCH WITH CUSTOMERS AND RESULT *********/
   for(int i = 0; i < n_kernels; i++) {
-    gpu_kernel <<<grid_dim, block_dim>>>(offset,customers,dev_result,dev_yieldCurves,n_yc,c); // GPU
+    gpu_kernel <<<grid_dim, block_dim>>>(offset,dev_cuses,dev_result); // GPU
     offset+=kernel_size;
   }
 
@@ -233,17 +203,14 @@ int main(int argc, char const *argv[]) {
   float time2 = (float) (end - start2) * 1000.0f / CLOCKS_PER_SEC;
   float time3 = (float) (end - start3) * 1000.0f / CLOCKS_PER_SEC;
   /********** 9. PRINT HOST RESULT  *********/
-  //for(int i = 0;i < id;i++)
-  //  printf("%i: %11.11f \n",i, result[i]);
-
-  //for(int i = id-20;i < id;i++)
-  //  printf("%i: %11.7f \n",i, collected_results[i]);
-
-  /*
-  for(int i = 0; i < 51; i++) {
-    printf("%i: %.7f\n",i, result_cpu[i]);
+  // Print the result
+  int pa=0;
+  for(int i = 0; i < nsize; i++) {
+    if (cuses[i].age != pa) {
+      printf("%i: %11.7f, policy: %i, age: %i \n",i, result[i],cuses[i].policy,cuses[i].age);
+      pa = cuses[i].age;
+    }
   }
-  */
 
   printf("%i kernels * %i calcs = %i customers\n",n_kernels,kernel_size,nsize);
   //printf("TIME: %f, CUDA_TIME: %f\n",time,cuda_time);
@@ -253,17 +220,9 @@ int main(int argc, char const *argv[]) {
 
   /********** 10. FREE MEMORY   *********/
   free(result);
-  free(policy);
-  free(neqn);
-  free(age);
-  free(end_year);
-  free(start_year);
+  free(cuses);
   gpuErrchk( cudaFree(dev_result));
-  gpuErrchk( cudaFree(dev_policy));
-  gpuErrchk( cudaFree(dev_neqn));
-  gpuErrchk( cudaFree(dev_age));
-  gpuErrchk( cudaFree(dev_end_year));
-  gpuErrchk( cudaFree(dev_start_year));
+  gpuErrchk( cudaFree(dev_cuses));
 
   cudaDeviceReset();
   return 0;

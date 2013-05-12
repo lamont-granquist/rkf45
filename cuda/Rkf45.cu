@@ -302,8 +302,9 @@ __device__ int get_n_device(void) {
 }
 
 /***** DEVICE ******/
+
 __global__
-void gpu_kernel(int offset, CUSTOMERS customers,double *result,double *yield_curves,int n_yc,int n_c) {
+void gpu_kernel(int offset,CUS* cuses,float *result) {
 
   int id = get_id()+offset;
 
@@ -313,20 +314,25 @@ void gpu_kernel(int offset, CUSTOMERS customers,double *result,double *yield_cur
 
   double res = 0;
 
+
+  double* yield_curves;
+  int yc;
+  int n_yc;
+
   // Formula A
   //int c = floorf(id/n_yc);
   //int yc = id%n_yc;
 
   // Formula B
-  int c = id%n_c;
-  int yc = floorf(id/n_c);
+  //int c = id%n_c;
+  //int yc = floorf(id/n_c);
 
   //To make sure of loading time of variables.
-  int c_policy = customers.policy[c];
-  int c_age = customers.age[c];
-  int c_neqn = customers.neqn[c];
-  int c_end_year = customers.end_year[c];
-  int c_start_year = customers.start_year[c];
+  int c_policy = cuses[id].policy;
+  int c_age = cuses[id].age;
+  int c_neqn = cuses[id].neqn;
+  int c_end_year = cuses[id].end_year;
+  int c_start_year = cuses[id].start_year;
 
   estimate(
            c_policy,
