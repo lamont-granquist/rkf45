@@ -134,7 +134,6 @@ int main(int argc, char const *argv[]) {
 
   /********** 1. MALLOC HOST  **********/
   // Data on the host and the device, respectively
-  /*
   double* result = (double*) malloc(nsize*sizeof(double));
   int* neqn = (int*) malloc(c*sizeof(int));
   int* policy = (int*) malloc(c*sizeof(int));
@@ -154,7 +153,6 @@ int main(int argc, char const *argv[]) {
   for(int i = 0;i < nsize;i++) {
     result[i] = 0.0f;
   }
-  */
 
   ///********** 2. MALLOC DEVICE  **********/
   clock_t start1 = clock();
