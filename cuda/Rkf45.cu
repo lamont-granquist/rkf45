@@ -410,6 +410,7 @@ double GM(int age, double t) {
 // Interest
 __device__ 
 double r(double t,double* yield_curves,int yc, int n_yc) {
+    /*
     if (t==50) {t = 50-0.001;};
     int x1 = 50-(floor(t)+1); //0-49
     int x2 = 50-floor(t); //1-50
@@ -424,7 +425,8 @@ double r(double t,double* yield_curves,int yc, int n_yc) {
     double y2 = yield_curves[x2 + yc*(50+1)];          
 
     return interpolate2(t,(double)x1,(double)x2,y1,y2);
-    //return 0.05;
+    */
+    return 0.05;
 }
 
 __device__ 

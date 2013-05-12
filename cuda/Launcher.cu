@@ -125,15 +125,16 @@ int main(int argc, char const *argv[]) {
 
   /****** GENERATE YIELD CURVES ******/
   double* dev_yieldCurves;
-  generateIRPaths(n_yc,50, &dev_yieldCurves,119); //n_irPaths, years, steps per year, yieldcurve, seed
+  //generateIRPaths(n_yc,50, &dev_yieldCurves,119); //n_irPaths, years, steps per year, yieldcurve, seed
   double* collected_results = (double*) malloc(id*sizeof(double));
 
 
   /********* -1. SORT DATA *******/
-  sort(cuses,c);// Out comment to take away sorting
+  //sort(cuses,c);// sorting
 
   /********** 1. MALLOC HOST  **********/
   // Data on the host and the device, respectively
+  /*
   double* result = (double*) malloc(nsize*sizeof(double));
   int* neqn = (int*) malloc(c*sizeof(int));
   int* policy = (int*) malloc(c*sizeof(int));
@@ -153,6 +154,7 @@ int main(int argc, char const *argv[]) {
   for(int i = 0;i < nsize;i++) {
     result[i] = 0.0f;
   }
+  */
 
   ///********** 2. MALLOC DEVICE  **********/
   clock_t start1 = clock();
