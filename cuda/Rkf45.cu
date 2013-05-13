@@ -318,8 +318,10 @@ void gpu_kernel(int offset, CUSTOMERS customers,double *result,double *yield_cur
   //int yc = id%n_yc;
 
   // Formula B
-  int c = id%n_c;
-  int yc = floorf(id/n_c);
+  //int c = id%n_c;
+  //int yc = floorf(id/n_c);
+  int yc = 0;
+  int c = id;
 
   //To make sure of loading time of variables.
   int c_policy = customers.policy[c];
@@ -396,8 +398,9 @@ double rFsa(double t) {
     if (t >= 0.5 && t < 1.0) {
         m = 1;
     }
-    //General case:
-    return 0.05;//interpolate(t,m);
+    double ip = interpolate(t,m);
+    return 0.05;
+    //return ip;
 }
 
 /**************** RK_LIBRARY *****************/
@@ -426,7 +429,8 @@ double r(double t,double* yield_curves,int yc, int n_yc) {
 
     return interpolate2(t,(double)x1,(double)x2,y1,y2);
     */
-    return 0.05;
+    //return 0.05;
+    return rFsa(t);
 }
 
 __device__ 

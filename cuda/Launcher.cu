@@ -83,13 +83,13 @@ int main(int argc, char const *argv[]) {
   }
 
   /********** 0. SETUP **********/
-  dim3 block_dim(8,8,5); //Number of threads per block // 320 seems to be best
+  dim3 block_dim(1,1,1); //Number of threads per block // 320 seems to be best
   dim3 grid_dim(gridx,gridy,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
   //dim3 block_dim(2,2,1); //Number of threads per block
   //dim3 grid_dim(2,1,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
   int kernel_size = get_n_host(block_dim,grid_dim);
   int nsize = kernel_size*n_kernels; 
-  int c = float(nsize/n_yc); // number of customers
+  int c = nsize/n_yc; // number of customers
 
   printf("%i kernels * %i calcs / %i ir_paths= %i customers\n",n_kernels,kernel_size,n_yc,c);
 
