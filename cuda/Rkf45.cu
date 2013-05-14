@@ -143,10 +143,12 @@ static void local_estimate(int policy,int age, int neqn,int local_end_year,int l
   double t = (double)local_end_year;
   
   int steps_taken = 0;
+  int calcs_done = 0;
   //Step by step integration.
   bool local_start_reached = false;
   while (!local_start_reached)
   {
+    calcs_done+=1;
     steps_taken+=1;
     //Variables used in calculations
     bool stepsize_descresed = false;
@@ -163,6 +165,7 @@ static void local_estimate(int policy,int age, int neqn,int local_end_year,int l
     //Integreate 1 step
     while(error > 1.0)
     {
+      calcs_done+=1;
       stepsize_descresed = true;
       local_start_reached = false;
 
@@ -190,7 +193,7 @@ static void local_estimate(int policy,int age, int neqn,int local_end_year,int l
     *stepsize = sign ( *stepsize ) * max ( scale * fabs( *stepsize ), hmin );
   }
   
-  //printf("%i , %i , %i , %f \n",local_end_year,steps_taken,calcs_done,y[0]);
+  printf("year: %2i ,steps:  %4i ,calcs: %5i ,y: %10f \n",local_end_year,steps_taken,calcs_done,y[0]);
 }
 
 /**************** Local estimation help functions ****************/
@@ -314,14 +317,12 @@ void gpu_kernel(int offset, CUSTOMERS customers,double *result,double *yield_cur
   double res = 0;
 
   // Formula A
-  //int c = floorf(id/n_yc);
-  //int yc = id%n_yc;
+  int c = floorf(id/n_yc);
+  int yc = id%n_yc;
 
   // Formula B
   //int c = id%n_c;
   //int yc = floorf(id/n_c);
-  int yc = 0;
-  int c = id;
 
   //To make sure of loading time of variables.
   int c_policy = customers.policy[c];
@@ -385,10 +386,10 @@ __device__
 double rFsa(double t) { 
     // Extrapolation:
     if (t <= 0.25) {
-        //return __logf(1.0f + rs[0]/100.0f);
+        return __logf(1.0f + rs[0]/100.0f);
     }
     if (t >= 30.0) {
-        //return __logf(1.0f + rs[31]/100.0f);
+        return __logf(1.0f + rs[31]/100.0f);
     }
     int m = 1 + floor(t);
     // Interpolation:
@@ -413,24 +414,22 @@ double GM(int age, double t) {
 // Interest
 __device__ 
 double r(double t,double* yield_curves,int yc, int n_yc) {
-    /*
+
     if (t==50) {t = 50-0.001;};
     int x1 = 50-(floor(t)+1); //0-49
     int x2 = 50-floor(t); //1-50
 
-    //double y1 = yield_curves[x1*n_yc+yc];              //<- standard
-    //double y2 = yield_curves[x2*n_yc+yc];              //<- standard
 
-    //double y1 = yield_curves[x1*2*n_yc + yc*2];          //<-- formula A
-    //double y2 = yield_curves[x1*2*n_yc + yc*2+1]; 
+    double y1 = yield_curves[x1*2*n_yc + yc*2];          //<-- formula A
+    double y2 = yield_curves[x1*2*n_yc + yc*2+1]; 
 
-    double y1 = yield_curves[x1 + yc*(50+1)];          //<- formula B
-    double y2 = yield_curves[x2 + yc*(50+1)];          
+    //double y1 = yield_curves[x1 + yc*(50+1)];          //<- formula B
+    //double y2 = yield_curves[x2 + yc*(50+1)];          
 
     return interpolate2(t,(double)x1,(double)x2,y1,y2);
-    */
+
     //return 0.05;
-    return rFsa(t);
+    //return rFsa(t);
 }
 
 __device__ 

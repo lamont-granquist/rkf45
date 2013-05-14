@@ -39,20 +39,6 @@ int get_n_host(dim3 block_dim,dim3 grid_dim) {
   return grid_dim.x * grid_dim.y * grid_dim.z * block_dim.x * block_dim.y * block_dim.z; 
 }
 
-/* Test of yield curves */
-/* De ligger i raekkefolgen:
-ir 1 year 50
-ir 2 year 50
-ir 3 year 50
-..
-ir 200 year 50
-ir 1 year 49
-ir 2 year 49
-...
-ir 200 year 49
-ir 1 year 48
-*/
-
 // Host code
 int main(int argc, char const *argv[]) {
 
@@ -61,6 +47,7 @@ int main(int argc, char const *argv[]) {
   int gridy = 1;
   int max_policies = 1;
   int n_yc = 1;
+  int pop = 1;
     
   if (argc>1) {
       n_kernels = atoi(argv[1]);
@@ -82,11 +69,13 @@ int main(int argc, char const *argv[]) {
       n_yc = atoi(argv[5]);
   }
 
+  if (argc>6) {
+      pop = atoi(argv[6]);
+  }
+
   /********** 0. SETUP **********/
   dim3 block_dim(1,1,1); //Number of threads per block // 320 seems to be best
   dim3 grid_dim(gridx,gridy,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
-  //dim3 block_dim(2,2,1); //Number of threads per block
-  //dim3 grid_dim(2,1,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
   int kernel_size = get_n_host(block_dim,grid_dim);
   int nsize = kernel_size*n_kernels; 
   int c = nsize/n_yc; // number of customers
@@ -111,7 +100,7 @@ int main(int argc, char const *argv[]) {
           cuses[j].end_year = end_year;
           cuses[j].start_year = start_year;
 
-          cuses[j].policy = 1+i%6;//1+rand()%6;
+          cuses[j].policy = pop;//5;//1+i%6;//1+rand()%6;
           cuses[j].neqn = 1;
           if (cuses[j].policy >= 5) {
             cuses[j].neqn = 2;
@@ -125,12 +114,12 @@ int main(int argc, char const *argv[]) {
 
   /****** GENERATE YIELD CURVES ******/
   double* dev_yieldCurves;
-  //generateIRPaths(n_yc,50, &dev_yieldCurves,119); //n_irPaths, years, steps per year, yieldcurve, seed
+  generateIRPaths(n_yc,50, &dev_yieldCurves,rand()%300); //n_irPaths, years, steps per year, yieldcurve, seed
   double* collected_results = (double*) malloc(id*sizeof(double));
 
 
   /********* -1. SORT DATA *******/
-  //sort(cuses,c);// sorting
+  sort(cuses,c);// sorting
 
   /********** 1. MALLOC HOST  **********/
   // Data on the host and the device, respectively

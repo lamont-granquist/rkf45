@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<session version="1" name="imp_b" hscale="1.3369688621140695E-7">
+<executable file="Z:\imp_b.exe" args="1 100 1 1 32" profileonstart="true" concurrentkernels="true"><envs></envs></executable>
+<expert><device name="Tesla C2075"><enabledmetrics><metric id="102"/><metric id="218"/><metric id="104"/><metric id="210"/></enabledmetrics></device><columnprops></columnprops>
+</expert>
+<analysis activescope="APPLICATION"><visitedstages><stage name="TIMELINE"/></visitedstages></analysis>
+<vruler width="200"/>
+<hruler>
+</hruler>
+<timelinestate>
+<timeline pathname="3340" kind="PROCESS" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="3340/2140" kind="THREAD" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="3340/2140/Runtime API" kind="RUNTIME" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="3340/2140/Driver API" kind="DRIVER" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="3340/Profiling Overhead" kind="OVERHEADS" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="Tesla C2075" kind="DEVICE" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="Tesla C2075/1" kind="CONTEXT" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="Tesla C2075/1/MemCpy (HtoD)" kind="MEMCPY_HTOD" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="Tesla C2075/1/MemCpy (DtoH)" kind="MEMCPY_DTOH" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="Tesla C2075/1/Compute" kind="KERNELS" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="Tesla C2075/1/Compute/gpu_kernel(int, CUSTOMERS, double*, double*, int, int)" kind="KERNEL" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="Tesla C2075/1/Compute/randSetupKernel(curandStateXORWOW*, int, __int64)" kind="KERNEL" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="Tesla C2075/1/Compute/irPathsKernel(int, int, curandStateXORWOW*, double*)" kind="KERNEL" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="Tesla C2075/1/Compute/memset (0)" kind="KERNEL" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="Tesla C2075/1/Streams" kind="STREAMS" containerstate="OPEN_ALL" filtered="false"/>
+<timeline pathname="Tesla C2075/1/Streams/2" kind="STREAM" containerstate="OPEN_ALL" filtered="false"/>
+</timelinestate>
+<pdm>
+H4sIAAAAAAAAAJ3Ye1jNdxzA8e+5dD0VXZRSnNJNQuVUbEjCXJ+TQuYpNGVOLkMl2zyPsJhNWMb2tCJ6cmsli4ZDGNpJWC71zDaZZWwuzW1MqP1+5/M9+n0+x7M/1vN8nY736/s7p9/vW+f3+zElYwrGmEx4lAmPKmFMTE2fm6yOCQuJDJcLT9XCmD41NOTdBZnT56Qump86VzcwZlL8RO34EXHxsSnxIdN1OnETvcCFL0qenxKfmpG5YKwRx4ZGzsw0/l9GckbqFG1cgjZBt0TZMaG/blFscsbsdOA63esmxKYIllkIw0UYX60Tv2MsO7AqUny0s2cs0Rp+AJMLFd0Q6N512MklzlEYCVeg597CTiFx4hs+cBv6wpxvkVNKnPCU7dwI/fbX2FlInI0w6vdDX3sIO0vi1Hroo6uxsyLu6jHo+aews5Y44b/Y5Frow12OIGcjcbbCeN8H+nY/7GwlTjweZwKhJ1UcRU5FjkdOJfS8VuzsyP7Tv4TezKqRsyc/b5YcepEFdg7EaaygG6yx60TcfRX0aCfsOhPX4Aw9rQt2jmQ/53WFXjYOOyeynxu00HUTsHOWOFdhqKZBV4w6jZwLOR76FoOx/5Z1BrkuxG1ZCv3e7TrkXIlzbYH+a7ezyLkRl+EF/d5w7LoSt3wk9NZ52LkTt/496OmbsPOQuB7CGFwCfcpT7LoRl90K3cfvHHKexFX5Qz+pxc6LuLtx0FM/wK47cc8+hL6oGLseEpcjvr9y6IMuYKcmrv4i9AM/YectcauF0XQVev197HwkTvx9e/YIuvdT7HpKnLjuR7dCb3qOnS9xlu3Q89l55PyI6yuHfscSO3/inG2h71JhF0DcIHvo9Q7YBRL3jyP0XGfsekmc+Pt7wBX6wgTsgsh+zp8KPSUNu94St0Z83TnQvWYkPpRJXLDEfSqMzTro8lXY9ZG4j4URtAa6ZwF2fYnbVwh9cwl2/SROXIs3S6GvqpqGXIjEiX8bXo6YYewFhneQCyXuVB30dNlM5MKIs1JA7xKMXX/idveB3joBOw1x6+Khj1mMXThxTVnQ1c9SkIvgTsk6PtvFr9/5By493xCNeK6wl79ATCR2cokTX/voUO72YqeQbk/YeHslPA9wlCGnlDhxPce6QF/ihp0FcXbu0Ld5YGdJXLgn9Fov7KyIS+oB/YEaO2viVvlA9/DFzoa4cj/o5cuwsyWucQX0thzsVMRtXA09YA12dsTpP4GuXYudPXHNuXw/r8fOgTi7z6AX5WHXiTjN59ANm7DrTFzSF3w/f4mdI3E5+dDdC7BzIq6sEPqwrdg5E9dYBD1tO3YuxLUV8+NRjF0X4vJK+PHYiZ0rcfpd/Hjswc6NuOZS6Fll2HUlzm4vPx4V2LkTp/mGH49K7DyIe1DFj0cVdt2IyznIj8dh7DyJK9Pz43EUOy/iGqv58TiOXXfi2k5AzzuJXQ/iAk5D19dgpyZOa4DeXIudN3FZdbyfw86HuKLz0DX12PUkznABeuIl7HyJe3AZek4jdn7Euf8IvewKdv7ERf8MvfEX7AKIS2vi6/4adoHE5V2H7t+MXS/i9Df4ur+JXRBxzbf4uv8Tu97Eqe7wdX8Xu2DiNC183f+FXR/iEh9Av/8Qu77E5Tzm6/4Jdv2IK3sKPfoZdiHENbTydf8Cu1Di2l7ydd+OXRhx/jL4RD4slyPXnzitEnqzBXYa4rKsoKtssAsnbqstdI0ddhHEGeyhJ3bCLpK4+52hf+SE3QDi3F2gRxUqkBtI3Owi6C+2YfcGcRuKofuWYPcmcYd2QB+/C7tBxF3fDT2zFLvBxNmUQd9Sjt0Q4sIqoNfswy6KuKmV0Fv2YzeUuJVV0N0OYhctfN8ufJlc6SHoUXrshpHtXToCfXY1djHEvTgGfcMJ7IYT53sS+sFT2I0gbnwN9OvfYzeSuMxa6DZ12L1FXOFZ6GHnsRtFXM0P0KdewG40cS0Xoa+4jN0Y4twaoRfEWSA3lrhTk6BPScBuHHdw/qRgpnN/01dwgIfxBSLkXooOJzdzYd+pjX2swfs/3Y4lo4wfWaojb/v+l1ONtDb+is86ZxvZ4WRmLvPGXONf4BrrecZHa8avRR7+zU+9n2tlfK54tqsW/l2S7Wi8DnFgcD0SwuexbGEcZx0XO0pY/+3tHcN0/WLaog3ruPaRmYZMwYr4CW7GE7jPonlxNlI6T9zOMgbnSXTOI37P5VLQObM54lv0fM2cSn7/JX2y+ZzlDM6f6Jy8pfxeTLb5nBUMzqXM5uwAG7fHfM5KBudVxufiRdsfsDa9BiQZj43+WtJDGZmTy/e/8bpGFsXqJsN9gQiHRDObItnH1nyYrus6vs7biPchgvgc2K6anbCE+7KHu50we9+v9ieD8z3T93S7GQyOt+LVdgNYVghsz6vs5P/ebhaD6xIlk6wvfiG6oQbus1c0VJltfwF/fDVnFjy4BMB7etzH/GddzOCaT/hTvexfudTxJfEYAAA=</pdm>
+</session>
