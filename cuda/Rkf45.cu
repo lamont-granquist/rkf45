@@ -1,5 +1,5 @@
 /*
- * C implementation of the Rkf45 algoritm.
+ * CUDA C implementation of the Rkf45 algoritm.
  */
 
 __device__
@@ -21,16 +21,13 @@ const double DoubleEpsilon = 2.22044604925031e-16;
 #include "Customers.hu"
 #include "Rkf45.hu"
 
-//Max,min,sign functions
-/*#define max(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b);_a > _b ? _a : _b; })
-#define min(a,b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b);_a < _b ? _a : _b; })*/
+//sign function
 #define sign(x)  ((x > 0) - ( x < 0))
 
 __device__ 
 void dy(int policy,int age,double* yield_curve,int yc,int n_yc,double t, double* V,double* result);
 __device__ 
 void bj_ii(int policy, double t, double* result);
-//Declare functions
 __device__ 
 static bool local_start_to_be_reached(double t,int local_start_year,double* stepsize);
 __device__ 
@@ -43,8 +40,6 @@ __device__
 static double calculate_initial_stepsize(int neqn,int start_year,int end_year,double* y, double* y_diff);
 __device__ 
 static double scale_from_error(double error,bool stepsize_decreased);
-//static double FindDoubleEpsilon();
-
 /********************** Solve *********************/
 
 /* Calculate the actual and the alternative solutions */
@@ -193,7 +188,8 @@ static void local_estimate(int policy,int age, int neqn,int local_end_year,int l
     *stepsize = sign ( *stepsize ) * max ( scale * fabs( *stepsize ), hmin );
   }
   
-  printf("year: %2i ,steps:  %4i ,calcs: %5i ,y: %10f \n",local_end_year,steps_taken,calcs_done,y[0]);
+  //Use this to print information
+  //printf("year: %2i ,steps:  %4i ,calcs: %5i ,y: %10f \n",local_end_year,steps_taken,calcs_done,y[0]);
 }
 
 /**************** Local estimation help functions ****************/
@@ -236,7 +232,6 @@ static double calculate_initial_stepsize(int neqn,int start_year,int end_year,do
       if ( tol < ypk * pow( s, 5.0 ) )
       {
         s = pow( ( tol / ypk ), 0.2 );
-        //printf("this should not happen.\n");
       }
     }
   }
@@ -278,6 +273,7 @@ void estimate(int policy,int age, int neqn, int end_year, int start_year,double*
 
 /*************************** Auxiliaries ****************************/
 
+//Used to find Maskine_Epsilon
 /* Find double epsilon */
 /*static double FindDoubleEpsilon() {
   double r = 1.0;
@@ -316,11 +312,11 @@ void gpu_kernel(int offset, CUSTOMERS customers,double *result,double *yield_cur
 
   double res = 0;
 
-  // Formula A
+  // Strategi A
   int c = floorf(id/n_yc);
   int yc = id%n_yc;
 
-  // Formula B
+  // Strategi B
   //int c = id%n_c;
   //int yc = floorf(id/n_c);
 
@@ -375,7 +371,7 @@ double interpolate(double t,int m) {
 }
 
 __device__
-double interpolate2(double t,double x1, double x2, double y1,double y2) {
+double kalibrate(double t,double x1, double x2, double y1,double y2) {
   y1 = y1 / 100.0,
   y2 = y2 / 100.0;
   double Rt = (y1 * (x2 - t) + y2 * (t - x1)) / (x2 - x1);
@@ -400,8 +396,11 @@ double rFsa(double t) {
         m = 1;
     }
     double ip = interpolate(t,m);
-    return 0.05;
-    //return ip;
+    //5%:
+    //return 0.05;
+
+    //Calculated values:
+    return ip;
 }
 
 /**************** RK_LIBRARY *****************/
@@ -419,17 +418,16 @@ double r(double t,double* yield_curves,int yc, int n_yc) {
     int x1 = 50-(floor(t)+1); //0-49
     int x2 = 50-floor(t); //1-50
 
-
-    double y1 = yield_curves[x1*2*n_yc + yc*2];          //<-- formula A
+    double y1 = yield_curves[x1*2*n_yc + yc*2];          //Strategi A
     double y2 = yield_curves[x1*2*n_yc + yc*2+1]; 
 
-    //double y1 = yield_curves[x1 + yc*(50+1)];          //<- formula B
+    //double y1 = yield_curves[x1 + yc*(50+1)];          //Strategi B
     //double y2 = yield_curves[x2 + yc*(50+1)];          
 
-    return interpolate2(t,(double)x1,(double)x2,y1,y2);
+    return kalibrate(t,(double)x1,(double)x2,y1,y2);
 
-    //return 0.05;
-    //return rFsa(t);
+    //return 0.05;     //5% statisk rente
+    //return rFsa(t);  //Finanstilsynets rentekurve
 }
 
 __device__ 
@@ -584,7 +582,6 @@ __device__
 static double b_1_DisabilityAnnuity(double t) {
     int n = 35;
     int bdisabled = 1;
-    //return 0.0;
     return bdisabled * indicator(t > 0) * indicator(t < n);
 }
 

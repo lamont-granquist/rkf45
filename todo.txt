@@ -1,153 +1,9 @@
-// Konklusion: Det skal nævnes at man bør teste på mere advancerede beregninger. Den adaptive algortime har jo netop let ved de simple beregninger.
-Der skal gives et overblik over hvornår der foretages mange, kontra få
-beregninger. (Skal måles for hvert produkt)
-
-
-Extrapolering: inden år nul : Kontrakt.
-x// BACK to doubles.
-k
-
-float = double
-f
-FloatEpsilon...
-__powf
-
-//
-
-Rentesats konservativ - overvurdering. 0 coupon obligationer.
-
-Arbejdsprocess = Analyse.. Valg der er truffet.
-
-Finanstilsyn kan godt lide linear interpolerition: Bestemt ved love.
-
-Rentekurver: Forsøg med 0.05% returneret.
-
-Rt: lineær interpolertion.
-Beregning: 
-yield_curve: Diskoterings satser.
-
-Instantanious forward rate.
-
-
-Doubles..?
-
-/************* MEETING *********/
-Programmering:
-	Sørg for at KPS reelt fungere.
-
-	Tests af præcision.
-	Der står rigtige resultater i FORTRAN koderne.
-
-Noter til rapport:
-
-Man må gerne overvurdere forsikringsselskabets forpligtelser.
-En ulempe ved RKF45 er at man ikke kan forinterpolere.
-
-Arbejdet med RKF45 er en puzzlebrik i Actulus projektet.
-
-P(A-V)<=0.5%
-
-V: Finanstilsynets rentekurver + Brown’s støj
-
-De nuværende forsikringsselskabers beregninger:
-- Regner på ikke numeriske-løsninger	
-- tager ikke højde for, at man kan gå fra INVALID til ALIVE (Cyclisk beregning)
-- Regner med at kundernes policies er uafhængige. -> Det giver dem større krav.
-
-Næste skridt:
-0)  Brug RIGTIGE tal fra fortran implementation, og sikre sig at koden virker
-    rigtigt
-
-    PureEndowment                   0.14379469738
-    DeferredTemporaryLifeAnnuity    1.0265607675
-    TemporaryLifeAnnuityPremium     -15.971767666
-    TermInsurance                   0.057616919318
-    DisabilityAnnuity               0.55552610797, 15.971767666
-    DisabilityTermInsurance         0.071418699003, 0.000000000
-
-1)	Customers skal kunne have flere policies
-    sol1: split multi-customer in more customers
-    sol2: solve customers in seq (bad for sorting)
-2)	Rentekurver på kunder
-
-0.3016580290818680
-2.3671638801343900
--21.1577071399369000
-0.0883805171364136
-0.9311483673443270
-0.1164113969853670
-
-    a.	Optimer søgning i rentekurve interpolation
-    b.	Eventuelt udnytte cuda textures ved interpolation?
-    
-3)	Lav støj med Brown, og regn på mange rentekurver for hver customer
-
-todo:
-    Lav (mange) interest paths per kunde (i launcher)
-    brug ^ i device
-
-    Refactor
-    Implement doubles.
-
-Noter:
-    Støjen giver ikke thread divergens
-    Man sortere efter interest paths for at være sikker på at der kan regnes i
-    samme warp. (min 32 interest paths)
-    Derfor at der delt op i udsnit som beskrevet.
-    Skal værdierne efterbehandles? Lige som dem i irpaths?
-
-Stop ved helår er godt for rentekurver. 
-
-/************** TODO NEXT *************/
-
-  NOTES:
-  - 124 registers per thread.
-
-Staged concurrent copy and execute, look up, kunne være spændende.
-
-/************* Møde ******************/
-
-  rel og abs error vigtigt at forstå godt.
-
-  RAPPORT: Arbejdsprocess: Cuda, process, hvorfor fejl?
-  float.
-  Vigtige pointer.
-
-  Processafsnit.
-
-/************** QUESTIONS *************/
-VEJLEDER:
-
-Bedre testing? Forslag?
-
-Test af interest rates:
-A: 19749,19722
-B: 15877,15852
-C: 19289,19259
-
-Struktur af 5-1,5-2,5-3.
-Særligt 5-2, flere hypoteser?
-
-
-////////////////////////////////////////
-
-y_diff (gammel yp) er previous_d_diff. Er det en fejl? Stemmer ikke overens.
-med udregninger.
-
-Hypoteser:
-  - 0       | Large numbers problem? Find by unittesting.z
-  - 1. NEJ  | KLS: memory access. GLOBAL MEMORY!
-  - 2. JA: 2500/1000   | Det vigtigt at søge for at ting der ligger sammen. Sortering?
-  - 3. NEJ  | Sorter efter sammme alder inden for hvert produkt.
-  - 4. NEJ  | Lowest common demonimator betyder noget.
-  - 5. JA  1000/500 | __powf vs powf __ = fast math
-
-  - 6. VENT | //stepsize scales ned ved years afslutninger
-  - 7. VENT |  Betyder y_diff noget?
-  
-
-
-/************** HACK SETUP **************/
+PureEndowment                   0.14379469738
+DeferredTemporaryLifeAnnuity    1.0265607675
+TemporaryLifeAnnuityPremium     -15.971767666
+TermInsurance                   0.057616919318
+DisabilityAnnuity               0.55552610797, 15.971767666
+DisabilityTermInsurance         0.071418699003, 0.000000000
 
 /*********** FLOAT CONVERTION **********/
 
@@ -160,20 +16,7 @@ Math.Log -> (float) Math.Log
 pow -> powf
 fabs -> fabsf
 
-/************** WORKFLOW ***************/
-Workflow:
-Start of the day:
-  Check todo file.
-  
-Regularly:
-  git status
-  git add .
-  git commit -m DESCRIPTION
-
-End of the day:
-  Write down the next moves, and status in the todo file.
-
-/************** GIT COMMANDS ***********/
+/**GIT**/
 Undo working changes:
   git stash save --keep-index
 
@@ -188,13 +31,3 @@ Git add all:
 
 Undo commit (no files or index changes)
 git reset --soft HEAD~1
-/************ FOR THE REPORT ***********/
-
-     * y er startværdi(erne)
-     * y_diff er k1, og f1..5 er det samme som k2..5, dog uden at have ganget med stepsize
-     * Altså:
-     * k1 = y_diff * stepsize
-     * k2..6 = f1..5 * stepsize
-     *
-     * Da funktionerne skal bruge k2..5, ganger vi med stepsize. (i praksis lcd_stepsize)
-     * lcd_stepsize is the lowest diffential of stepsize. Det er praktisk at man ikke skal gange med så store tal.

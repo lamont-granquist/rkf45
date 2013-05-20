@@ -47,7 +47,6 @@ int main(int argc, char const *argv[]) {
   int gridy = 1;
   int max_policies = 1;
   int n_yc = 1;
-  int pop = 1;
     
   if (argc>1) {
       n_kernels = atoi(argv[1]);
@@ -69,12 +68,8 @@ int main(int argc, char const *argv[]) {
       n_yc = atoi(argv[5]);
   }
 
-  if (argc>6) {
-      pop = atoi(argv[6]);
-  }
-
   /********** 0. SETUP **********/
-  dim3 block_dim(1,1,1); //Number of threads per block // 320 seems to be best
+  dim3 block_dim(8,8,5); //Number of threads per block // 320 seems to be best
   dim3 grid_dim(gridx,gridy,1);  //Number of blocks per grid (cc. 1.2 only supports 2d)
   int kernel_size = get_n_host(block_dim,grid_dim);
   int nsize = kernel_size*n_kernels; 
@@ -90,7 +85,7 @@ int main(int argc, char const *argv[]) {
   int i=0;
   int id=0;
   while(i < c) {
-      int age = 30;//5 + rand()%30; //30
+      int age = 5 + rand()%30;
       int end_year = 50;
       int start_year = 0;
       int cj = min(i+max_policies,c);
@@ -99,8 +94,7 @@ int main(int argc, char const *argv[]) {
           cuses[j].age = age;
           cuses[j].end_year = end_year;
           cuses[j].start_year = start_year;
-
-          cuses[j].policy = pop;//5;//1+i%6;//1+rand()%6;
+          cuses[j].policy = 1+rand()%6;
           cuses[j].neqn = 1;
           if (cuses[j].policy >= 5) {
             cuses[j].neqn = 2;
@@ -114,9 +108,8 @@ int main(int argc, char const *argv[]) {
 
   /****** GENERATE YIELD CURVES ******/
   double* dev_yieldCurves;
-  generateIRPaths(n_yc,50, &dev_yieldCurves,rand()%300); //n_irPaths, years, steps per year, yieldcurve, seed
+  generateIRPaths(n_yc,50, &dev_yieldCurves,rand()%300);
   double* collected_results = (double*) malloc(id*sizeof(double));
-
 
   /********* -1. SORT DATA *******/
   sort(cuses,c);// sorting
@@ -143,8 +136,16 @@ int main(int argc, char const *argv[]) {
     result[i] = 0.0f;
   }
 
+  //********* TIMING START ************/
+
+  //Cuda timing
+  cudaEvent_t cuda_start, cuda_stop;
+  float cuda_time;
+  cudaEventCreate(&cuda_start);
+  cudaEventCreate(&cuda_stop);
+  cudaEventRecord( cuda_start, 0 );
+
   ///********** 2. MALLOC DEVICE  **********/
-  clock_t start1 = clock();
 
   double *dev_result;
   int *dev_neqn;
@@ -176,23 +177,16 @@ int main(int argc, char const *argv[]) {
   customers.end_year = dev_end_year;
   customers.start_year = dev_start_year;
 
-  //********* 5. TIMING START ************/
-  //Normal timing
-  clock_t start2 = clock();
-
-  //Cuda timing
-  cudaEvent_t cuda_start, cuda_stop;
-  float cuda_time;
-  cudaEventCreate(&cuda_start);
-  cudaEventCreate(&cuda_stop);
-  cudaEventRecord( cuda_start, 0 );
-
   int offset = 0;
   /********** 6. LAUNCH WITH CUSTOMERS AND RESULT *********/
   for(int i = 0; i < n_kernels; i++) {
     gpu_kernel <<<grid_dim, block_dim>>>(offset,customers,dev_result,dev_yieldCurves,n_yc,c); // GPU
     offset+=kernel_size;
   }
+
+  /********** 8. COPY RESULT FROM DEVICE TO HOST *********/
+  // Copy the result back from the device
+  gpuErrchk( cudaMemcpy(result, dev_result, sizeof(double) * nsize, cudaMemcpyDeviceToHost));
 
   /********** 7. TIMING ENDS *********/
   //Cuda timing
@@ -201,44 +195,20 @@ int main(int argc, char const *argv[]) {
   cudaEventElapsedTime( &cuda_time, cuda_start, cuda_stop );
   cudaEventDestroy( cuda_start );
   cudaEventDestroy( cuda_stop );
-  
-  /********** 8. COPY RESULT FROM DEVICE TO HOST *********/
-  clock_t start3 = clock();
-  // Copy the result back from the device
-  gpuErrchk( cudaMemcpy(result, dev_result, sizeof(double) * nsize, cudaMemcpyDeviceToHost));
-
-  /********** 8,5. EXTRA TIMING *********/
-  //Normal timing
 
   /*********** COLLECT RESULTS **********/
-  //for(int i = 0;i < c;i++)
-  //  collected_results[cuses[i].id] += result[i];
+  for(int i = 0;i < c;i++)
+    collected_results[cuses[i].id] += result[i];
   
+  //Nice for testing
   for(int i = nsize-10;i < nsize;i++)
     printf("%i: %11.7f \n",i,result[i]);
 
-  clock_t end = clock();
-  float time1 = (float) (end - start1) * 1000.0f / CLOCKS_PER_SEC;
-  float time2 = (float) (end - start2) * 1000.0f / CLOCKS_PER_SEC;
-  float time3 = (float) (end - start3) * 1000.0f / CLOCKS_PER_SEC;
-  /********** 9. PRINT HOST RESULT  *********/
-  //for(int i = 0;i < id;i++)
-  //  printf("%i: %11.11f \n",i, result[i]);
+  //Real output
+  // for(int i = 0;i < nsize;i++)
+  //   printf("%i: %11.7f \n",i,collected_result[i]);
 
-  //for(int i = id-20;i < id;i++)
-  //  printf("%i: %11.7f \n",i, collected_results[i]);
-
-  /*
-  for(int i = 0; i < 51; i++) {
-    printf("%i: %.7f\n",i, result_cpu[i]);
-  }
-  */
-
-  printf("%i kernels * %i calcs = %i customers\n",n_kernels,kernel_size,nsize);
-  //printf("TIME: %f, CUDA_TIME: %f\n",time,cuda_time);
-  printf("TIME1: %f\n",time1);
-  printf("TIME2: %f\n",time2);
-  printf("TIME3: %f\n",time3);
+  printf("CUDA_TIME: %f\n",cuda_time);
 
   /********** 10. FREE MEMORY   *********/
   free(result);
